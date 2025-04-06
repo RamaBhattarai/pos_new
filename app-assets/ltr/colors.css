@@ -515,7 +515,7 @@ input:focus ~ .bg-primary {
   color: #00A5A8 !important; }
 
 .bg-primary.bg-darken-2 {
-  background-color: #00A5A8 !important; }
+  background-color: #1A237E  !important; }
 
 .btn-primary.btn-darken-2 {
   border-color: #00A5A8 !important;
@@ -1777,8 +1777,8 @@ input:focus ~ .bg-info {
         }
       } */
 .btn-info {
-  border-color: #22C2DC !important;
-  background-color: #2DCEE3 !important;
+  border-color: #1A237E !important;
+  background-color: #1A237E !important;
   color: #FFFFFF; }
   .btn-info:hover {
     border-color: #28C9E0 !important;
@@ -2546,7 +2546,7 @@ input:focus ~ .bg-warning {
   color: #FF976A !important; }
 
 .bg-warning.bg-darken-2 {
-  background-color: #FF976A !important; }
+  background-color: #001f3f !important; }
 
 .btn-warning.btn-darken-2 {
   border-color: #FF976A !important;

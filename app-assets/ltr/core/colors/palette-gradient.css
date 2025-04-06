@@ -4,12 +4,14 @@
 .bg-gradient-x-black .card-header, .bg-gradient-x-black .card-footer, .bg-gradient-y-black .card-header, .bg-gradient-y-black .card-footer, .bg-gradient-directional-black .card-header, .bg-gradient-directional-black .card-footer, .bg-gradient-radial-black .card-header, .bg-gradient-radial-black .card-footer, .bg-gradient-striped-black .card-header, .bg-gradient-striped-black .card-footer, .bg-gradient-x2-black .card-header, .bg-gradient-x2-black .card-footer, .bg-gradient-y2-black .card-header, .bg-gradient-y2-black .card-footer {
   background-color: transparent; }
 
+ 
+
 .bg-gradient-x-primary {
   background-image: -webkit-gradient(linear, left top, right top, from(#00A5A8), to(#4DCBCD));
   background-image: -webkit-linear-gradient(left, #00A5A8 0%, #4DCBCD 100%);
   background-image: -moz-linear-gradient(left, #00A5A8 0%, #4DCBCD 100%);
   background-image: -o-linear-gradient(left, #00A5A8 0%, #4DCBCD 100%);
-  background-image: linear-gradient(to right, #00A5A8 0%, #4DCBCD 100%);
+  background-image: linear-gradient(to right, #1A237E 0%, #0D47A1 100%);
   background-repeat: repeat-x; }
 
 .bg-gradient-y-primary {
@@ -174,7 +176,7 @@
   background-image: -webkit-linear-gradient(left, #FF976A 0%, #FFC2A4 100%);
   background-image: -moz-linear-gradient(left, #FF976A 0%, #FFC2A4 100%);
   background-image: -o-linear-gradient(left, #FF976A 0%, #FFC2A4 100%);
-  background-image: linear-gradient(to right, #FF976A 0%, #FFC2A4 100%);
+  background-image: linear-gradient(to right, #001f3f 0%, #001f3f 100%);
   background-repeat: repeat-x; }
 
 .bg-gradient-y-warning {
@@ -229,7 +231,7 @@
   background-image: -webkit-linear-gradient(left, #FF6275 0%, #FF9EAC 100%);
   background-image: -moz-linear-gradient(left, #FF6275 0%, #FF9EAC 100%);
   background-image: -o-linear-gradient(left, #FF6275 0%, #FF9EAC 100%);
-  background-image: linear-gradient(to right, #FF6275 0%, #FF9EAC 100%);
+  background-image: linear-gradient(to right, #FF6275 0%, #FF6275 100%);
   background-repeat: repeat-x; }
 
 .bg-gradient-y-danger {
