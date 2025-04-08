@@ -112,7 +112,7 @@
                                 <div class="card-body">
                                     <div class="media">
                                         <div class="media-body text-left w-100">
-                                            <h3 class="primary"><?= amountExchange($todayinexp['credit'], 0, $this->aauth->get_user()->loc) ?></h3>
+                                            <h3 class="primary" style="color: #0D47A1"><?= amountExchange($todayinexp['credit'], 0, $this->aauth->get_user()->loc) ?></h3>
                                             <span><?php echo $this->lang->line('today_income') ?></span>
                                         </div>
 

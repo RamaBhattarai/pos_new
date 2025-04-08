@@ -294,7 +294,7 @@ footer.footer-dark {
           background-color: transparent; }
   .main-menu.menu-dark {
     color: #dcdcdc;
-    background: #404E67; }
+    background: #02225b; }
     .main-menu.menu-dark .main-menu-header {
       padding: 20px; }
       .main-menu.menu-dark .main-menu-header .menu-search {
@@ -304,7 +304,7 @@ footer.footer-dark {
         .main-menu.menu-dark .main-menu-header .menu-search:focus {
           border-color: #232a38; }
     .main-menu.menu-dark .navigation {
-      background: #404E67; }
+      background: #02225b; }
       .main-menu.menu-dark .navigation .navigation-header {
         color: #dcdcdc;
         padding: 24px 20px 8px 20px; }

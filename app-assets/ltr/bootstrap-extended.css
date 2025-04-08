@@ -888,7 +888,7 @@ button, html [type='button'], [type='reset'], [type='submit'] {
 .navbar-semi-dark {
   background: #FFFFFF; }
   .navbar-semi-dark .navbar-header {
-    background: #404E67; }
+    background: #02225b; }
     .navbar-semi-dark .navbar-header .brand-text {
       color: #FFFFFF; }
   .navbar-semi-dark .navbar-nav li {
@@ -1416,7 +1416,7 @@ button, html [type='button'], [type='reset'], [type='submit'] {
     background-color: #11a578; }
 
 .badge-info {
-  background-color: #2DCEE3; }
+  background-color: #1A237E; }
   .badge-info.badge-glow {
     -webkit-box-shadow: 0px 0px 10px #2DCEE3;
     box-shadow: 0px 0px 10px #2DCEE3; }
@@ -1424,7 +1424,7 @@ button, html [type='button'], [type='reset'], [type='submit'] {
     background-color: #1ab0c3; }
 
 .badge-warning {
-  background-color: #FFA87D; }
+  background-color: #001f3f; }
   .badge-warning.badge-glow {
     -webkit-box-shadow: 0px 0px 10px #FFA87D;
     box-shadow: 0px 0px 10px #FFA87D; }
