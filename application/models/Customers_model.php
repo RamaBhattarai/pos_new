@@ -30,11 +30,11 @@ class Customers_model extends CI_Model
     var $inv_column_search = array('tid', 'name', 'invoicedate', 'total');
     var $order = array('id' => 'desc');
     var $inv_order = array('pos_invoices.tid' => 'desc');
-    var $qto_order = array('geopos_quotes.tid' => 'desc');
+    var $qto_order = array('pos_quotes.tid' => 'desc');
     var $notecolumn_order = array(null, 'title', 'cdate', null);
     var $notecolumn_search = array('id', 'title', 'cdate');
-    var $pcolumn_order = array('geopos_projects.status', 'geopos_projects.name', 'geopos_projects.edate', 'geopos_projects.worth', null);
-    var $pcolumn_search = array('geopos_projects.name', 'geopos_projects.edate', 'geopos_projects.status');
+    var $pcolumn_order = array('pos_projects.status', 'pos_projects.name', 'pos_projects.edate', 'pos_projects.worth', null);
+    var $pcolumn_search = array('pos_projects.name', 'pos_projects.edate', 'pos_projects.status');
     var $ptcolumn_order = array('status', 'name', 'duedate', 'start', null, null);
     var $ptcolumn_search = array('name', 'edate', 'status');
     var $porder = array('id' => 'desc');
@@ -593,15 +593,15 @@ class Customers_model extends CI_Model
 
     private function _qto_datatables_query($id, $tyd = 0)
     {
-        $this->db->select('geopos_quotes.*');
-        $this->db->from('geopos_quotes');
-        $this->db->where('geopos_quotes.csd', $id);
+        $this->db->select('pos_quotes.*');
+        $this->db->from('pos_quotes');
+        $this->db->where('pos_quotes.csd', $id);
         if ($this->aauth->get_user()->loc) {
-            $this->db->where('geopos_quotes.loc', $this->aauth->get_user()->loc);
+            $this->db->where('pos_quotes.loc', $this->aauth->get_user()->loc);
         } elseif (!BDATA) {
-            $this->db->where('geopos_quotes.loc', 0);
+            $this->db->where('pos_quotes.loc', 0);
         }
-        $this->db->join('pos_customers', 'geopos_quotes.csd=pos_customers.id', 'left');
+        $this->db->join('pos_customers', 'pos_quotes.csd=pos_customers.id', 'left');
 
         $i = 0;
 
@@ -651,7 +651,7 @@ class Customers_model extends CI_Model
 
     public function qto_count_all($id)
     {
-        $this->db->from('geopos_quotes');
+        $this->db->from('pos_quotes');
         $this->db->where('csd', $id);
         return $this->db->count_all_results();
     }
@@ -702,12 +702,12 @@ class Customers_model extends CI_Model
 
     private function _project_datatables_query($cday = '')
     {
-        $this->db->select("geopos_projects.*,pos_customers.name AS customer");
-        $this->db->from('geopos_projects');
-        $this->db->join('pos_customers', 'geopos_projects.cid = pos_customers.id', 'left');
+        $this->db->select("pos_projects.*,pos_customers.name AS customer");
+        $this->db->from('pos_projects');
+        $this->db->join('pos_customers', 'pos_projects.cid = pos_customers.id', 'left');
 
 
-        $this->db->where('geopos_projects.cid=', $cday);
+        $this->db->where('pos_projects.cid=', $cday);
 
 
         $i = 0;

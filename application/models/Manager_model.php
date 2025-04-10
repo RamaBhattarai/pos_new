@@ -29,8 +29,8 @@ class Manager_model extends CI_Model
     var $tcolumn_search = array('name', 'edate', 'status');
     var $order = array('id' => 'asc');
 
-    var $pcolumn_order = array('geopos_projects.status', 'geopos_projects.name', 'geopos_projects.edate', 'geopos_projects.worth', null);
-    var $pcolumn_search = array('geopos_projects.name', 'geopos_projects.edate', 'geopos_projects.status');
+    var $pcolumn_order = array('pos_projects.status', 'pos_projects.name', 'pos_projects.edate', 'pos_projects.worth', null);
+    var $pcolumn_search = array('pos_projects.name', 'pos_projects.edate', 'pos_projects.status');
 
     private function _task_datatables_query($cday = '')
     {
