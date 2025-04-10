@@ -24,7 +24,7 @@ class Units_model extends CI_Model
 
     public function units_list()
     {
-        $query = $this->db->query("SELECT * FROM geopos_units WHERE type=0 ORDER BY id DESC");
+        $query = $this->db->query("SELECT * FROM pos_units WHERE type=0 ORDER BY id DESC");
         return $query->result_array();
     }
 
@@ -32,7 +32,7 @@ class Units_model extends CI_Model
     public function view($id)
     {
 
-        $this->db->from('geopos_units');
+        $this->db->from('pos_units');
         $this->db->where('id', $id);
 
         $query = $this->db->get();
@@ -49,7 +49,7 @@ class Units_model extends CI_Model
             'code' => $code
         );
 
-        if ($this->db->insert('geopos_units', $data)) {
+        if ($this->db->insert('pos_units', $data)) {
             echo json_encode(array('status' => 'Success', 'message' =>
                 $this->lang->line('ADDED')));
         } else {
@@ -69,7 +69,7 @@ class Units_model extends CI_Model
         $this->db->set($data);
         $this->db->where('id', $id);
 
-        if ($this->db->update('geopos_units')) {
+        if ($this->db->update('pos_units')) {
             echo json_encode(array('status' => 'Success', 'message' =>
                 $this->lang->line('UPDATED')));
         } else {
@@ -81,7 +81,7 @@ class Units_model extends CI_Model
 
     public function variations_list()
     {
-        $query = $this->db->query("SELECT * FROM geopos_units WHERE type=1 ORDER BY id DESC");
+        $query = $this->db->query("SELECT * FROM pos_units WHERE type=1 ORDER BY id DESC");
         return $query->result_array();
     }
 
@@ -92,7 +92,7 @@ class Units_model extends CI_Model
             'type' => $type
         );
 
-        if ($this->db->insert('geopos_units', $data)) {
+        if ($this->db->insert('pos_units', $data)) {
             echo json_encode(array('status' => 'Success', 'message' =>
                 $this->lang->line('ADDED')));
         } else {
@@ -111,7 +111,7 @@ class Units_model extends CI_Model
         $this->db->set($data);
         $this->db->where('id', $id);
 
-        if ($this->db->update('geopos_units')) {
+        if ($this->db->update('pos_units')) {
             echo json_encode(array('status' => 'Success', 'message' =>
                 $this->lang->line('UPDATED')));
         } else {
@@ -123,13 +123,13 @@ class Units_model extends CI_Model
 
     public function variables_list()
     {
-        //   $query = $this->db->query("SELECT * FROM geopos_units WHERE type=2 ORDER BY id DESC");
+        //   $query = $this->db->query("SELECT * FROM pos_units WHERE type=2 ORDER BY id DESC");
         //    return $query->result_array();
         $this->db->select('u.id,u.name,u2.name AS variation');
-        $this->db->join('geopos_units u2', 'u.rid = u2.id', 'left');
+        $this->db->join('pos_units u2', 'u.rid = u2.id', 'left');
         $this->db->where('u.type', 2);
         $this->db->order_by('u.name', 'asc');
-        $query = $this->db->get('geopos_units u');
+        $query = $this->db->get('pos_units u');
         return $query->result_array();
     }
 
@@ -141,7 +141,7 @@ class Units_model extends CI_Model
             'rid' => $var_id
         );
 
-        if ($this->db->insert('geopos_units', $data)) {
+        if ($this->db->insert('pos_units', $data)) {
             echo json_encode(array('status' => 'Success', 'message' =>
                 $this->lang->line('ADDED')));
         } else {
@@ -161,7 +161,7 @@ class Units_model extends CI_Model
         $this->db->set($data);
         $this->db->where('id', $id);
 
-        if ($this->db->update('geopos_units')) {
+        if ($this->db->update('pos_units')) {
             echo json_encode(array('status' => 'Success', 'message' =>
                 $this->lang->line('UPDATED')));
         } else {

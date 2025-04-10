@@ -178,7 +178,7 @@ class Invoices extends CI_Controller
         $bill_due_date = datefordatabase($invocieduedate);
 
         $this->db->select('tid');
-        $this->db->from('geopos_invoices');
+        $this->db->from('pos_invoices');
         $this->db->order_by('id', 'DESC');
         $this->db->limit(1);
         $this->db->where('tid', $invocieno);
@@ -186,7 +186,7 @@ class Invoices extends CI_Controller
         $query = $this->db->get();
         if(@$query->row()->tid){
             $this->db->select('tid');
-            $this->db->from('geopos_invoices');
+            $this->db->from('pos_invoices');
             $this->db->order_by('id', 'DESC');
             $this->db->limit(1);
             $this->db->where('i_class', 0);
@@ -197,7 +197,7 @@ class Invoices extends CI_Controller
         $data = array('tid' => $invocieno, 'invoicedate' => $bill_date, 'invoiceduedate' => $bill_due_date, 'subtotal' => $subtotal, 'shipping' => $shipping, 'ship_tax' => $shipping_tax, 'ship_tax_type' => $ship_taxtype, 'discount_rate' => $disc_val, 'total' => $total, 'notes' => $notes, 'csd' => $customer_id, 'eid' => $emp, 'taxstatus' => $tax, 'discstatus' => $discstatus, 'format_discount' => $discountFormat, 'refer' => $refer, 'term' => $pterms, 'multi' => $currency, 'loc' => $this->aauth->get_user()->loc);
         $invocieno2 = $invocieno;
 		//$data['status']='due';
-        if ($this->db->insert('geopos_invoices', $data)) {
+        if ($this->db->insert('pos_invoices', $data)) {
             $invocieno = $this->db->insert_id();
             //products
             $pid = $this->input->post('pid');
@@ -245,7 +245,7 @@ class Invoices extends CI_Controller
                 if ($product_id[$key] > 0) {
                     $this->db->set('qty', "qty-$amt", FALSE);
                     $this->db->where('pid', $product_id[$key]);
-                    $this->db->update('geopos_products');
+                    $this->db->update('pos_products');
                     if ((numberClean($product_alert[$key]) - $amt) < 0 and $st_c == 0 and $this->common->zero_stock()) {
                         echo json_encode(array('status' => 'Error', 'message' => 'Product - <strong>' . $product_name1[$key] . "</strong> - Low quantity. Available stock is  " . $product_alert[$key]));
                         $transok = false;
@@ -257,13 +257,13 @@ class Invoices extends CI_Controller
             if (count($product_serial) > 0) {
                 $this->db->set('status', 1);
                 $this->db->where_in('serial', $product_serial);
-                $this->db->update('geopos_product_serials');
+                $this->db->update('pos_product_serials');
             }
             if ($prodindex > 0) {
-                $this->db->insert_batch('geopos_invoice_items', $productlist);
+                $this->db->insert_batch('pos_invoice_items', $productlist);
                 $this->db->set(array('discount' => rev_amountExchange_s(amountFormat_general($total_discount), $currency, $this->aauth->get_user()->loc), 'tax' => rev_amountExchange_s(amountFormat_general($total_tax), $currency, $this->aauth->get_user()->loc), 'items' => $itc));
                 $this->db->where('id', $invocieno);
-                $this->db->update('geopos_invoices');
+                $this->db->update('pos_invoices');
             } else {
                 echo json_encode(array('status' => 'Error', 'message' =>
                     "Please choose product from product list. Go to Item manager section if you have not added the products."));
@@ -285,7 +285,7 @@ class Invoices extends CI_Controller
 
             $dual = $this->custom->api_config(65);
             $this->db->select('holder');
-            $this->db->from('geopos_accounts');
+            $this->db->from('pos_accounts');
             $this->db->where('id', $dual['key2']);
             $query = $this->db->get();
             $account_d = $query->row_array();
@@ -296,11 +296,11 @@ class Invoices extends CI_Controller
             $t_data['account'] = $account_d['holder'];
             $t_data['note'] = 'Debit ' . $tnote;
 
-            $this->db->insert('geopos_transactions', $t_data);
+            $this->db->insert('pos_transactions', $t_data);
             //account update
             $this->db->set('lastbal', "lastbal-$total", FALSE);
             $this->db->where('id', $dual['key2']);
-            $this->db->update('geopos_accounts');
+            $this->db->update('pos_accounts');
 
         }
             if ($transok) {
@@ -317,7 +317,7 @@ class Invoices extends CI_Controller
         if ($transok) {
             if ($this->aauth->premission(4) and $project > 0) {
                 $data = array('pid' => $project, 'meta_key' => 11, 'meta_data' => $invocieno, 'value' => '0');
-                $this->db->insert('geopos_project_meta', $data);
+                $this->db->insert('pos_project_meta', $data);
             }
             $this->db->trans_complete();
         } else {
@@ -330,7 +330,7 @@ class Invoices extends CI_Controller
             $auto = $query->row_array();
             if ($auto['key1'] == 1) {
                 $this->db->select('name,email');
-                $this->db->from('geopos_customers');
+                $this->db->from('pos_customers');
                 $this->db->where('id', $customer_id);
                 $query = $this->db->get();
                 $customer = $query->row_array();
@@ -342,7 +342,7 @@ class Invoices extends CI_Controller
             }
             if ($auto['key2'] == 1) {
                 $this->db->select('name,phone');
-                $this->db->from('geopos_customers');
+                $this->db->from('pos_customers');
                 $this->db->where('id', $customer_id);
                 $query = $this->db->get();
                 $customer = $query->row_array();
@@ -357,10 +357,10 @@ class Invoices extends CI_Controller
 
             //profit calculation
             $t_profit = 0;
-            $this->db->select('geopos_invoice_items.pid, geopos_invoice_items.price, geopos_invoice_items.qty, geopos_products.fproduct_price');
-            $this->db->from('geopos_invoice_items');
-            $this->db->join('geopos_products', 'geopos_products.pid = geopos_invoice_items.pid', 'left');
-            $this->db->where('geopos_invoice_items.tid', $invocieno);
+            $this->db->select('pos_invoice_items.pid, pos_invoice_items.price, pos_invoice_items.qty, pos_products.fproduct_price');
+            $this->db->from('pos_invoice_items');
+            $this->db->join('pos_products', 'pos_products.pid = pos_invoice_items.pid', 'left');
+            $this->db->where('pos_invoice_items.tid', $invocieno);
             $query = $this->db->get();
             $pids = $query->result_array();
             foreach ($pids as $profit) {
@@ -370,7 +370,7 @@ class Invoices extends CI_Controller
             }
             $data = array('type' => 9, 'rid' => $invocieno, 'col1' => $t_profit, 'd_date' => $bill_date);
 
-            $this->db->insert('geopos_metadata', $data);
+            $this->db->insert('pos_metadata', $data);
 
             $this->custom->save_fields_data($invocieno, 2);
 
@@ -542,13 +542,13 @@ class Invoices extends CI_Controller
         $this->db->where('id', $iid);
 
 
-        if ($this->db->update('geopos_invoices', $data)) {
+        if ($this->db->update('pos_invoices', $data)) {
             //Product Data
             $pid = $this->input->post('pid');
             $productlist = array();
             $prodindex = 0;
             $itc = 0;
-            $this->db->delete('geopos_invoice_items', array('tid' => $iid));
+            $this->db->delete('pos_invoice_items', array('tid' => $iid));
             $product_id = $this->input->post('pid');
             $product_name1 = $this->input->post('product_name', true);
             $product_qty = $this->input->post('product_qty');
@@ -594,7 +594,7 @@ class Invoices extends CI_Controller
                 if ($product_id[$key] > 0 and $amt) {
                     $this->db->set('qty', "qty-$amt", FALSE);
                     $this->db->where('pid', $product_id[$key]);
-                    $this->db->update('geopos_products');
+                    $this->db->update('pos_products');
 
                                         if (isset($product_alert[$key]) AND (numberClean($product_alert[$key]) - $amt) < 0 and $st_c == 0 and $this->common->zero_stock()) {
                         echo json_encode(array('status' => 'Error', 'message' => 'Product - <strong>' . $product_name1[$key] . "</strong> - Low quantity. Available stock is  " . $product_alert[$key]));
@@ -606,15 +606,15 @@ class Invoices extends CI_Controller
             }
 
             if ($prodindex > 0) {
-                $this->db->insert_batch('geopos_invoice_items', $productlist);
+                $this->db->insert_batch('pos_invoice_items', $productlist);
                 if (count($product_serial) > 0) {
                     $this->db->set('status', 1);
                     $this->db->where_in('serial', $product_serial);
-                    $this->db->update('geopos_product_serials');
+                    $this->db->update('pos_product_serials');
                 }
                 $this->db->set(array('discount' => rev_amountExchange_s(amountFormat_general($total_discount), $currency, $this->aauth->get_user()->loc), 'tax' => rev_amountExchange_s(amountFormat_general($total_tax), $currency, $this->aauth->get_user()->loc), 'items' => $itc));
                 $this->db->where('id', $iid);
-                $this->db->update('geopos_invoices');
+                $this->db->update('pos_invoices');
          if($transok)    echo json_encode(array('status' => 'Success', 'message' => $this->lang->line('Invoice has  been updated') . " <a href='view?id=$iid' class='btn btn-info btn-lg'><span class='fa fa-eye' aria-hidden='true'></span> " . $this->lang->line('View') . " </a> "));
             } else {
                 echo json_encode(array('status' => 'Error', 'message' =>
@@ -630,7 +630,7 @@ class Invoices extends CI_Controller
                     if ($prid > 0) {
                         $this->db->set('qty', "qty+$dqty", FALSE);
                         $this->db->where('pid', $prid);
-                        $this->db->update('geopos_products');
+                        $this->db->update('pos_products');
                     }
                 }
             }
@@ -651,10 +651,10 @@ class Invoices extends CI_Controller
 
         //profit calculation
         $t_profit = 0;
-        $this->db->select('geopos_invoice_items.pid, geopos_invoice_items.price, geopos_invoice_items.qty, geopos_products.fproduct_price');
-        $this->db->from('geopos_invoice_items');
-        $this->db->join('geopos_products', 'geopos_products.pid = geopos_invoice_items.pid', 'left');
-        $this->db->where('geopos_invoice_items.tid', $iid);
+        $this->db->select('pos_invoice_items.pid, pos_invoice_items.price, pos_invoice_items.qty, pos_products.fproduct_price');
+        $this->db->from('pos_invoice_items');
+        $this->db->join('pos_products', 'pos_products.pid = pos_invoice_items.pid', 'left');
+        $this->db->where('pos_invoice_items.tid', $iid);
         $query = $this->db->get();
         $pids = $query->result_array();
         foreach ($pids as $profit) {
@@ -667,7 +667,7 @@ class Invoices extends CI_Controller
         $this->db->set('col1', $t_profit);
         $this->db->where('type', 9);
         $this->db->where('rid', $iid);
-        $this->db->update('geopos_metadata');
+        $this->db->update('pos_metadata');
         $this->db->trans_complete();
     }
 
@@ -677,7 +677,7 @@ class Invoices extends CI_Controller
         $status = $this->input->post('status');
         $this->db->set('status', $status);
         $this->db->where('id', $tid);
-        $this->db->update('geopos_invoices');
+        $this->db->update('pos_invoices');
 
         echo json_encode(array('status' => 'Success', 'message' =>
             $this->lang->line('UPDATED'), 'pstatus' => $status));

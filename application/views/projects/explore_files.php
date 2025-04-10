@@ -108,7 +108,7 @@
                                 </li>
 
                                 <li class="nav-item">
-                                    <a class="nav-link" id="geopos_milestones-tab" data-toggle="tab" href="#milestones"
+                                    <a class="nav-link" id="pos_milestones-tab" data-toggle="tab" href="#milestones"
                                        aria-controls="milestones">Milestones</a>
                                 </li>
                                 <li class="nav-item">

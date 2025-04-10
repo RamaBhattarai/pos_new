@@ -949,7 +949,7 @@ class Aauth
         if($role=='r_-1') $role='r_6';
         $this->aauth_db->select($role);
         $this->aauth_db->where('id', $module_id);
-        $query = $this->aauth_db->get('geopos_premissions');
+        $query = $this->aauth_db->get('pos_premissions');
         $out=$query->row_array();
         return $out[$role];
     }
@@ -2091,19 +2091,19 @@ class Aauth
      */
     public function list_pms($limit = 5, $offset = 0, $receiver_id = NULL, $sender_id = NULL)
     {
-        $this->aauth_db->select('geopos_pms.*,geopos_pms.id AS pid,geopos_employees.*');
-        $this->aauth_db->from('geopos_pms');
+        $this->aauth_db->select('pos_pms.*,pos_pms.id AS pid,pos_employees.*');
+        $this->aauth_db->from('pos_pms');
         if (is_numeric($receiver_id)) {
-            $query = $this->aauth_db->where('geopos_pms.receiver_id', $receiver_id);
-            $query = $this->aauth_db->where('geopos_pms.pm_deleted_receiver', 0);
+            $query = $this->aauth_db->where('pos_pms.receiver_id', $receiver_id);
+            $query = $this->aauth_db->where('pos_pms.pm_deleted_receiver', 0);
         }
         if (is_numeric($sender_id)) {
-            $query = $this->aauth_db->where('geopos_pms.sender_id', $sender_id);
-            $query = $this->aauth_db->where('geopos_pms.pm_deleted_sender', 0);
+            $query = $this->aauth_db->where('pos_pms.sender_id', $sender_id);
+            $query = $this->aauth_db->where('pos_pms.pm_deleted_sender', 0);
         }
 
-        $this->aauth_db->order_by('geopos_pms.id', 'DESC');
-        $this->aauth_db->join('geopos_employees', 'geopos_employees.id = geopos_pms.sender_id', 'left');
+        $this->aauth_db->order_by('pos_pms.id', 'DESC');
+        $this->aauth_db->join('pos_employees', 'pos_employees.id = pos_pms.sender_id', 'left');
         $this->aauth_db->limit($limit, $offset);
         //	$query = $this->aauth_db->get( $this->config_vars['pms'], $limit, $offset);
         $query = $this->aauth_db->get();
@@ -2584,7 +2584,7 @@ class Aauth
 
     function applog($input1, $input2='')
     {
-         $this->aauth_db->insert('geopos_log', array('note'=>$input1,'user'=>$input2,'created'=>date('Y-m-d H:i:s')));
+         $this->aauth_db->insert('pos_log', array('note'=>$input1,'user'=>$input2,'created'=>date('Y-m-d H:i:s')));
     }
 
      public function clock()
@@ -2592,7 +2592,7 @@ class Aauth
 
          $this->aauth_db->select('clock');
          $this->aauth_db->where('id', $this->CI->session->userdata('id'));
-         $this->aauth_db->from('geopos_employees');
+         $this->aauth_db->from('pos_employees');
          $query = $this->aauth_db->get();
          $emp = $query->row_array();
          return $emp['clock'] ?? 0;

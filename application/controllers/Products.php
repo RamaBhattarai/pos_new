@@ -159,12 +159,12 @@ class Products extends CI_Controller
         if ($this->aauth->premission(11)) {
             $id = $this->input->post('deleteid');
             if ($id) {
-                $this->db->delete('geopos_products', array('pid' => $id));
-                $this->db->delete('geopos_products', array('sub' => $id, 'merge' => 1));
-                $this->db->delete('geopos_movers', array('d_type' => 1, 'rid1' => $id));
+                $this->db->delete('pos_products', array('pid' => $id));
+                $this->db->delete('pos_products', array('sub' => $id, 'merge' => 1));
+                $this->db->delete('pos_movers', array('d_type' => 1, 'rid1' => $id));
                 $this->db->set('merge', 0);
                 $this->db->where('sub', $id);
-                $this->db->update('geopos_products');
+                $this->db->update('pos_products');
                 echo json_encode(array('status' => 'Success', 'message' => $this->lang->line('DELETED')));
             } else {
                 echo json_encode(array('status' => 'Error', 'message' => $this->lang->line('ERROR')));
@@ -182,19 +182,19 @@ class Products extends CI_Controller
         }
         $pid = $this->input->get('id');
         $this->db->select('*');
-        $this->db->from('geopos_products');
+        $this->db->from('pos_products');
         $this->db->where('pid', $pid);
         $query = $this->db->get();
         $data['product'] = $query->row_array();
         if ($data['product']['merge'] > 0) {
             $this->db->select('*');
-            $this->db->from('geopos_products');
+            $this->db->from('pos_products');
             $this->db->where('merge', 1);
             $this->db->where('sub', $pid);
             $query = $this->db->get();
             $data['product_var'] = $query->result_array();
             $this->db->select('*');
-            $this->db->from('geopos_products');
+            $this->db->from('pos_products');
             $this->db->where('merge', 2);
             $this->db->where('sub', $pid);
             $query = $this->db->get();
@@ -312,7 +312,7 @@ class Products extends CI_Controller
 
 
         if(isset($string['term'])) $this->db->like('title', $string['term']);
-        $this->db->from('geopos_product_cat');
+        $this->db->from('pos_product_cat');
         $this->db->where('rel_id', $wid);
         $this->db->where('c_type', 1);
         $query = $this->db->get();
@@ -367,7 +367,7 @@ class Products extends CI_Controller
         $pid = $this->input->get('id');
         if ($pid) {
             $this->db->select('product_name,barcode,code_type');
-            $this->db->from('geopos_products');
+            $this->db->from('pos_products');
             //  $this->db->where('warehouse', $warehouse);
             $this->db->where('pid', $pid);
             $query = $this->db->get();
@@ -391,7 +391,7 @@ class Products extends CI_Controller
         $pid = $this->input->get('id');
         if ($pid) {
             $this->db->select('product_name,barcode,code_type');
-            $this->db->from('geopos_products');
+            $this->db->from('pos_products');
             //  $this->db->where('warehouse', $warehouse);
             $this->db->where('pid', $pid);
             $query = $this->db->get();
@@ -414,51 +414,51 @@ class Products extends CI_Controller
     public function view_over()
     {
         $pid = $this->input->post('id');
-        $this->db->select('geopos_products.*,geopos_warehouse.title');
-        $this->db->from('geopos_products');
-        $this->db->where('geopos_products.pid', $pid);
-        $this->db->join('geopos_warehouse', 'geopos_warehouse.id = geopos_products.warehouse');
+        $this->db->select('pos_products.*,pos_warehouse.title');
+        $this->db->from('pos_products');
+        $this->db->where('pos_products.pid', $pid);
+        $this->db->join('pos_warehouse', 'pos_warehouse.id = pos_products.warehouse');
         if ($this->aauth->get_user()->loc) {
             $this->db->group_start();
-            $this->db->where('geopos_warehouse.loc', $this->aauth->get_user()->loc);
-            if (BDATA) $this->db->or_where('geopos_warehouse.loc', 0);
+            $this->db->where('pos_warehouse.loc', $this->aauth->get_user()->loc);
+            if (BDATA) $this->db->or_where('pos_warehouse.loc', 0);
             $this->db->group_end();
         } elseif (!BDATA) {
-            $this->db->where('geopos_warehouse.loc', 0);
+            $this->db->where('pos_warehouse.loc', 0);
         }
 
         $query = $this->db->get();
         $data['product'] = $query->row_array();
 
-        $this->db->select('geopos_products.*,geopos_warehouse.title');
-        $this->db->from('geopos_products');
-        $this->db->join('geopos_warehouse', 'geopos_warehouse.id = geopos_products.warehouse');
+        $this->db->select('pos_products.*,pos_warehouse.title');
+        $this->db->from('pos_products');
+        $this->db->join('pos_warehouse', 'pos_warehouse.id = pos_products.warehouse');
         if ($this->aauth->get_user()->loc) {
             $this->db->group_start();
-            $this->db->where('geopos_warehouse.loc', $this->aauth->get_user()->loc);
-            if (BDATA) $this->db->or_where('geopos_warehouse.loc', 0);
+            $this->db->where('pos_warehouse.loc', $this->aauth->get_user()->loc);
+            if (BDATA) $this->db->or_where('pos_warehouse.loc', 0);
             $this->db->group_end();
         } elseif (!BDATA) {
-            $this->db->where('geopos_warehouse.loc', 0);
+            $this->db->where('pos_warehouse.loc', 0);
         }
-        $this->db->where('geopos_products.merge', 1);
-        $this->db->where('geopos_products.sub', $pid);
+        $this->db->where('pos_products.merge', 1);
+        $this->db->where('pos_products.sub', $pid);
         $query = $this->db->get();
         $data['product_variations'] = $query->result_array();
 
-        $this->db->select('geopos_products.*,geopos_warehouse.title');
-        $this->db->from('geopos_products');
-        $this->db->join('geopos_warehouse', 'geopos_warehouse.id = geopos_products.warehouse');
+        $this->db->select('pos_products.*,pos_warehouse.title');
+        $this->db->from('pos_products');
+        $this->db->join('pos_warehouse', 'pos_warehouse.id = pos_products.warehouse');
         if ($this->aauth->get_user()->loc) {
             $this->db->group_start();
-            $this->db->where('geopos_warehouse.loc', $this->aauth->get_user()->loc);
-            if (BDATA) $this->db->or_where('geopos_warehouse.loc', 0);
+            $this->db->where('pos_warehouse.loc', $this->aauth->get_user()->loc);
+            if (BDATA) $this->db->or_where('pos_warehouse.loc', 0);
             $this->db->group_end();
         } elseif (!BDATA) {
-            $this->db->where('geopos_warehouse.loc', 0);
+            $this->db->where('pos_warehouse.loc', 0);
         }
-        $this->db->where('geopos_products.sub', $pid);
-        $this->db->where('geopos_products.merge', 2);
+        $this->db->where('pos_products.sub', $pid);
+        $this->db->where('pos_products.merge', 2);
         $query = $this->db->get();
         $data['product_warehouse'] = $query->result_array();
 
@@ -474,7 +474,7 @@ class Products extends CI_Controller
         $pid = $this->input->get('id');
         if ($pid) {
             $this->db->select('product_name,product_price,product_code,barcode,expiry,code_type');
-            $this->db->from('geopos_products');
+            $this->db->from('pos_products');
             //  $this->db->where('warehouse', $warehouse);
             $this->db->where('pid', $pid);
             $query = $this->db->get();
@@ -498,7 +498,7 @@ class Products extends CI_Controller
         $pid = $this->input->get('id');
         if ($pid) {
             $this->db->select('product_name,product_price,product_code,barcode,expiry,code_type');
-            $this->db->from('geopos_products');
+            $this->db->from('pos_products');
             //  $this->db->where('warehouse', $warehouse);
             $this->db->where('pid', $pid);
             $query = $this->db->get();
@@ -526,23 +526,23 @@ class Products extends CI_Controller
 
             switch ($r_type) {
                 case 1 :
-                    $query = $this->db->query("SELECT geopos_invoices.tid,geopos_invoice_items.qty,geopos_invoice_items.price,geopos_invoices.invoicedate FROM geopos_invoice_items LEFT JOIN geopos_invoices ON geopos_invoices.id=geopos_invoice_items.tid WHERE geopos_invoice_items.pid='$pid' AND geopos_invoices.status!='canceled' AND (DATE(geopos_invoices.invoicedate) BETWEEN DATE('$s_date') AND DATE('$e_date'))");
+                    $query = $this->db->query("SELECT pos_invoices.tid,pos_invoice_items.qty,pos_invoice_items.price,pos_invoices.invoicedate FROM pos_invoice_items LEFT JOIN pos_invoices ON pos_invoices.id=pos_invoice_items.tid WHERE pos_invoice_items.pid='$pid' AND pos_invoices.status!='canceled' AND (DATE(pos_invoices.invoicedate) BETWEEN DATE('$s_date') AND DATE('$e_date'))");
                     $result = $query->result_array();
                     break;
 
                 case 2 :
-                    $query = $this->db->query("SELECT geopos_purchase.tid,geopos_purchase_items.qty,geopos_purchase_items.price,geopos_purchase.invoicedate FROM geopos_purchase_items LEFT JOIN geopos_purchase ON geopos_purchase.id=geopos_purchase_items.tid WHERE geopos_purchase_items.pid='$pid' AND geopos_purchase.status!='canceled' AND (DATE(geopos_purchase.invoicedate) BETWEEN DATE('$s_date') AND DATE('$e_date'))");
+                    $query = $this->db->query("SELECT pos_purchase.tid,pos_purchase_items.qty,pos_purchase_items.price,pos_purchase.invoicedate FROM pos_purchase_items LEFT JOIN pos_purchase ON pos_purchase.id=pos_purchase_items.tid WHERE pos_purchase_items.pid='$pid' AND pos_purchase.status!='canceled' AND (DATE(pos_purchase.invoicedate) BETWEEN DATE('$s_date') AND DATE('$e_date'))");
                     $result = $query->result_array();
                     break;
 
                 case 3 :
-                    $query = $this->db->query("SELECT rid2 AS qty, DATE(d_time) AS  invoicedate,note FROM geopos_movers  WHERE geopos_movers.d_type='1' AND rid1='$pid'  AND (DATE(d_time) BETWEEN DATE('$s_date') AND DATE('$e_date'))");
+                    $query = $this->db->query("SELECT rid2 AS qty, DATE(d_time) AS  invoicedate,note FROM pos_movers  WHERE pos_movers.d_type='1' AND rid1='$pid'  AND (DATE(d_time) BETWEEN DATE('$s_date') AND DATE('$e_date'))");
                     $result = $query->result_array();
                     break;
             }
 
             $this->db->select('*');
-            $this->db->from('geopos_products');
+            $this->db->from('pos_products');
             $this->db->where('pid', $pid);
             $query = $this->db->get();
             $product = $query->row_array();
@@ -561,7 +561,7 @@ class Products extends CI_Controller
         } else {
             $pid = intval($this->input->get('id'));
             $this->db->select('*');
-            $this->db->from('geopos_products');
+            $this->db->from('pos_products');
             $this->db->where('pid', $pid);
             $query = $this->db->get();
             $product = $query->row_array();
@@ -597,22 +597,22 @@ class Products extends CI_Controller
             $products = array();
             if(!$this->input->post('products_l')) exit('No Product Selected!');
             foreach ($this->input->post('products_l') as $row) {
-                $this->db->select('geopos_products.product_name,geopos_products.product_price,geopos_products.product_code,geopos_products.barcode,geopos_products.expiry,geopos_products.code_type,geopos_warehouse.title,geopos_warehouse.loc');
-                $this->db->from('geopos_products');
-                $this->db->join('geopos_warehouse', 'geopos_warehouse.id = geopos_products.warehouse', 'left');
+                $this->db->select('pos_products.product_name,pos_products.product_price,pos_products.product_code,pos_products.barcode,pos_products.expiry,pos_products.code_type,pos_warehouse.title,pos_warehouse.loc');
+                $this->db->from('pos_products');
+                $this->db->join('pos_warehouse', 'pos_warehouse.id = pos_products.warehouse', 'left');
 
                 if ($this->aauth->get_user()->loc) {
                     $this->db->group_start();
-                    $this->db->where('geopos_warehouse.loc', $this->aauth->get_user()->loc);
+                    $this->db->where('pos_warehouse.loc', $this->aauth->get_user()->loc);
 
-                    if (BDATA) $this->db->or_where('geopos_warehouse.loc', 0);
+                    if (BDATA) $this->db->or_where('pos_warehouse.loc', 0);
                     $this->db->group_end();
                 } elseif (!BDATA) {
-                    $this->db->where('geopos_warehouse.loc', 0);
+                    $this->db->where('pos_warehouse.loc', 0);
                 }
 
                 //  $this->db->where('warehouse', $warehouse);
-                $this->db->where('geopos_products.pid', $row);
+                $this->db->where('pos_products.pid', $row);
                 $query = $this->db->get();
                 $resultz = $query->row_array();
 
@@ -668,22 +668,22 @@ class Products extends CI_Controller
 
 
             foreach ($this->input->post('products_l') as $row) {
-                $this->db->select('geopos_products.product_name,geopos_products.product_price,geopos_products.product_code,geopos_products.barcode,geopos_products.expiry,geopos_products.code_type,geopos_warehouse.title,geopos_warehouse.loc');
-                $this->db->from('geopos_products');
-                $this->db->join('geopos_warehouse', 'geopos_warehouse.id = geopos_products.warehouse', 'left');
+                $this->db->select('pos_products.product_name,pos_products.product_price,pos_products.product_code,pos_products.barcode,pos_products.expiry,pos_products.code_type,pos_warehouse.title,pos_warehouse.loc');
+                $this->db->from('pos_products');
+                $this->db->join('pos_warehouse', 'pos_warehouse.id = pos_products.warehouse', 'left');
 
                 if ($this->aauth->get_user()->loc) {
                     $this->db->group_start();
-                    $this->db->where('geopos_warehouse.loc', $this->aauth->get_user()->loc);
+                    $this->db->where('pos_warehouse.loc', $this->aauth->get_user()->loc);
 
-                    if (BDATA) $this->db->or_where('geopos_warehouse.loc', 0);
+                    if (BDATA) $this->db->or_where('pos_warehouse.loc', 0);
                     $this->db->group_end();
                 } elseif (!BDATA) {
-                    $this->db->where('geopos_warehouse.loc', 0);
+                    $this->db->where('pos_warehouse.loc', 0);
                 }
 
                 //  $this->db->where('warehouse', $warehouse);
-                $this->db->where('geopos_products.pid', $row);
+                $this->db->where('pos_products.pid', $row);
                 $query = $this->db->get();
                 $resultz = $query->row_array();
 
@@ -736,22 +736,22 @@ class Products extends CI_Controller
 
 
             foreach ($this->input->post('products_l') as $row) {
-                $this->db->select('geopos_products.product_name,geopos_products.product_price,geopos_products.product_code,geopos_products.barcode,geopos_products.expiry,geopos_products.code_type,geopos_warehouse.title,geopos_warehouse.loc');
-                $this->db->from('geopos_products');
-                $this->db->join('geopos_warehouse', 'geopos_warehouse.id = geopos_products.warehouse', 'left');
+                $this->db->select('pos_products.product_name,pos_products.product_price,pos_products.product_code,pos_products.barcode,pos_products.expiry,pos_products.code_type,pos_warehouse.title,pos_warehouse.loc');
+                $this->db->from('pos_products');
+                $this->db->join('pos_warehouse', 'pos_warehouse.id = pos_products.warehouse', 'left');
 
                 if ($this->aauth->get_user()->loc) {
                     $this->db->group_start();
-                    $this->db->where('geopos_warehouse.loc', $this->aauth->get_user()->loc);
+                    $this->db->where('pos_warehouse.loc', $this->aauth->get_user()->loc);
 
-                    if (BDATA) $this->db->or_where('geopos_warehouse.loc', 0);
+                    if (BDATA) $this->db->or_where('pos_warehouse.loc', 0);
                     $this->db->group_end();
                 } elseif (!BDATA) {
-                    $this->db->where('geopos_warehouse.loc', 0);
+                    $this->db->where('pos_warehouse.loc', 0);
                 }
 
                 //  $this->db->where('warehouse', $warehouse);
-                $this->db->where('geopos_products.pid', $row);
+                $this->db->where('pos_products.pid', $row);
                 $query = $this->db->get();
                 $resultz = $query->row_array();
 

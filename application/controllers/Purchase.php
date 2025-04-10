@@ -139,7 +139,7 @@ class Purchase extends CI_Controller
         $data = array('tid' => $invocieno, 'invoicedate' => $bill_date, 'invoiceduedate' => $bill_due_date, 'subtotal' => $subtotal, 'shipping' => $shipping, 'ship_tax' => $shipping_tax, 'ship_tax_type' => $ship_taxtype, 'total' => $total, 'notes' => $notes, 'csd' => $customer_id, 'eid' => $this->aauth->get_user()->id, 'taxstatus' => $tax, 'discstatus' => $discstatus, 'format_discount' => $discountFormat, 'refer' => $refer, 'term' => $pterms, 'loc' => $this->aauth->get_user()->loc, 'multi' => $currency);
 
 
-        if ($this->db->insert('geopos_purchase', $data)) {
+        if ($this->db->insert('pos_purchase', $data)) {
             $invocieno = $this->db->insert_id();
 
             $pid = $this->input->post('pid');
@@ -193,17 +193,17 @@ class Purchase extends CI_Controller
 
                         $this->db->set('qty', "qty+$amt", FALSE);
                         $this->db->where('pid', $product_id[$key]);
-                        $this->db->update('geopos_products');
+                        $this->db->update('pos_products');
                     }
                     $itc += $amt;
                 }
 
             }
             if ($prodindex > 0) {
-                $this->db->insert_batch('geopos_purchase_items', $productlist);
+                $this->db->insert_batch('pos_purchase_items', $productlist);
                 $this->db->set(array('discount' => rev_amountExchange_s(amountFormat_general($total_discount), $currency, $this->aauth->get_user()->loc), 'tax' => rev_amountExchange_s(amountFormat_general($total_tax), $currency, $this->aauth->get_user()->loc), 'items' => $itc));
                 $this->db->where('id', $invocieno);
-                $this->db->update('geopos_purchase');
+                $this->db->update('pos_purchase');
 
             } else {
                 echo json_encode(array('status' => 'Error', 'message' =>
@@ -391,7 +391,7 @@ class Purchase extends CI_Controller
 
         $prodindex = 0;
 
-        $this->db->delete('geopos_purchase_items', array('tid' => $invocieno));
+        $this->db->delete('pos_purchase_items', array('tid' => $invocieno));
         $product_id = $this->input->post('pid');
         $product_name1 = $this->input->post('product_name', true);
         $product_qty = $this->input->post('product_qty');
@@ -437,7 +437,7 @@ class Purchase extends CI_Controller
                 $amt = numberClean(@$product_qty[$key]) - numberClean(@$old_product_qty[$key]);
                 $this->db->set('qty', "qty+$amt", FALSE);
                 $this->db->where('pid', $product_id[$key]);
-                $this->db->update('geopos_products');
+                $this->db->update('pos_products');
             }
             $flag = true;
         }
@@ -453,8 +453,8 @@ class Purchase extends CI_Controller
 
         if ($flag) {
 
-            if ($this->db->update('geopos_purchase', $data)) {
-                $this->db->insert_batch('geopos_purchase_items', $productlist);
+            if ($this->db->update('pos_purchase', $data)) {
+                $this->db->insert_batch('pos_purchase_items', $productlist);
                 echo json_encode(array('status' => 'Success', 'message' =>
                     "Purchase order has  been updated successfully! <a href='view?id=$invocieno' class='btn btn-info btn-lg'><span class='fa fa-eye' aria-hidden='true'></span> View </a> "));
             } else {
@@ -480,7 +480,7 @@ class Purchase extends CI_Controller
 
                         $this->db->set('qty', "qty-$dqty", FALSE);
                         $this->db->where('pid', $prid);
-                        $this->db->update('geopos_products');
+                        $this->db->update('pos_products');
                     }
                 }
 
@@ -503,7 +503,7 @@ class Purchase extends CI_Controller
 
         $this->db->set('status', $status);
         $this->db->where('id', $tid);
-        $this->db->update('geopos_purchase');
+        $this->db->update('pos_purchase');
 
         echo json_encode(array('status' => 'Success', 'message' =>
             'Purchase Order Status updated successfully!', 'pstatus' => $status));

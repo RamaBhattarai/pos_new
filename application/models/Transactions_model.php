@@ -20,7 +20,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Transactions_model extends CI_Model
 {
-    var $table = 'geopos_transactions';
+    var $table = 'pos_transactions';
     var $column_order = array('date', 'acid', 'debit', 'credit', 'payer', 'method');
     var $column_search = array('id', 'account', 'payer');
     var $order = array('id' => 'desc');
@@ -28,7 +28,7 @@ class Transactions_model extends CI_Model
 
     private function _get_datatables_query()
     {
-        $this->db->select('geopos_transactions.*,geopos_transactions.id as id');
+        $this->db->select('pos_transactions.*,pos_transactions.id as id');
         $this->db->from($this->table);
         switch ($this->opt) {
             case 'income':
@@ -84,7 +84,7 @@ class Transactions_model extends CI_Model
 
     function count_filtered()
     {
-        $this->db->from('geopos_transactions');
+        $this->db->from('pos_transactions');
         switch ($this->opt) {
             case 'income':
                 $this->db->where('type', 'Income');
@@ -121,7 +121,7 @@ class Transactions_model extends CI_Model
     public function categories()
     {
         $this->db->select('*');
-        $this->db->from('geopos_trans_cat');
+        $this->db->from('pos_trans_cat');
         $query = $this->db->get();
         return $query->result_array();
     }
@@ -129,7 +129,7 @@ class Transactions_model extends CI_Model
     public function acc_list()
     {
         $this->db->select('id,acn,holder');
-        $this->db->from('geopos_accounts');
+        $this->db->from('pos_accounts');
         if ($this->aauth->get_user()->loc) {
             $this->db->group_start();
             $this->db->where('loc', $this->aauth->get_user()->loc);
@@ -148,7 +148,7 @@ class Transactions_model extends CI_Model
             'name' => $name
         );
 
-        return $this->db->insert('geopos_trans_cat', $data);
+        return $this->db->insert('pos_trans_cat', $data);
     }
 
     public function addtrans($payer_id, $payer_name, $pay_acc, $date, $debit, $credit, $pay_type, $pay_cat, $paymethod, $note, $eid, $loc = 0, $ty = 0)
@@ -157,7 +157,7 @@ class Transactions_model extends CI_Model
         if ($pay_acc > 0) {
 
             $this->db->select('holder');
-            $this->db->from('geopos_accounts');
+            $this->db->from('pos_accounts');
             $this->db->where('id', $pay_acc);
             if ($this->aauth->get_user()->loc) {
                 $this->db->group_start();
@@ -190,9 +190,9 @@ class Transactions_model extends CI_Model
                 $amount = $credit - $debit;
                 $this->db->set('lastbal', "lastbal+$amount", FALSE);
                 $this->db->where('id', $pay_acc);
-                $this->db->update('geopos_accounts');
+                $this->db->update('pos_accounts');
 
-                return $this->db->insert('geopos_transactions', $data);
+                return $this->db->insert('pos_transactions', $data);
             }
         }
     }
@@ -203,7 +203,7 @@ class Transactions_model extends CI_Model
         if ($pay_acc > 0) {
 
             $this->db->select('holder');
-            $this->db->from('geopos_accounts');
+            $this->db->from('pos_accounts');
             $this->db->where('id', $pay_acc);
             if ($this->aauth->get_user()->loc) {
                 $this->db->group_start();
@@ -216,7 +216,7 @@ class Transactions_model extends CI_Model
             $query = $this->db->get();
             $account = $query->row_array();
             $this->db->select('holder');
-            $this->db->from('geopos_accounts');
+            $this->db->from('pos_accounts');
             $this->db->where('id', $pay_acc2);
             if ($this->aauth->get_user()->loc) {
                 $this->db->group_start();
@@ -246,12 +246,12 @@ class Transactions_model extends CI_Model
                     'ext' => 9,
                     'loc' => $loc
                 );
-                $this->db->insert('geopos_transactions', $data);
+                $this->db->insert('pos_transactions', $data);
 
 
                 $this->db->set('lastbal', "lastbal+$amount", FALSE);
                 $this->db->where('id', $pay_acc2);
-                $this->db->update('geopos_accounts');
+                $this->db->update('pos_accounts');
                 $datec = date('Y-m-d');
 
                 $data = array(
@@ -273,9 +273,9 @@ class Transactions_model extends CI_Model
 
                 $this->db->set('lastbal', "lastbal-$amount", FALSE);
                 $this->db->where('id', $pay_acc);
-                $this->db->update('geopos_accounts');
+                $this->db->update('pos_accounts');
 
-                return $this->db->insert('geopos_transactions', $data);
+                return $this->db->insert('pos_transactions', $data);
             }
         }
     }
@@ -284,7 +284,7 @@ class Transactions_model extends CI_Model
     public function delt($id)
     {
         $this->db->select('*');
-        $this->db->from('geopos_transactions');
+        $this->db->from('pos_transactions');
         if ($this->aauth->get_user()->loc) {
             $this->db->group_start();
             $this->db->where('loc', $this->aauth->get_user()->loc);
@@ -308,23 +308,23 @@ class Transactions_model extends CI_Model
         } elseif (!BDATA) {
             $this->db->where('loc', 0);
         }
-        $this->db->update('geopos_accounts');
+        $this->db->update('pos_accounts');
 
         if ($trans['tid'] > 0 && $trans['ext'] == 0) {
             $crd = $trans['credit'];
             $this->db->set('pamnt', "pamnt-$crd", FALSE);
             $this->db->set('status', "partial");
             $this->db->where('id', $trans['tid']);
-            $this->db->update('geopos_invoices');
+            $this->db->update('pos_invoices');
         }
                 if ($trans['tid'] > 0 && $trans['ext'] == 1) {
             $crd = $trans['debit'];
             $this->db->set('pamnt', "pamnt-$crd", FALSE);
             $this->db->set('status', "partial");
             $this->db->where('id', $trans['tid']);
-            $this->db->update('geopos_purchase');
+            $this->db->update('pos_purchase');
         }
-        $this->db->delete('geopos_transactions', array('id' => $id));
+        $this->db->delete('pos_transactions', array('id' => $id));
         $alert = $this->custom->api_config(66);
         if ($alert['key2'] == 1) {
             $this->load->model('communication_model');
@@ -341,7 +341,7 @@ class Transactions_model extends CI_Model
     {
 
         $this->db->select('*');
-        $this->db->from('geopos_transactions');
+        $this->db->from('pos_transactions');
         $this->db->where('id', $id);
 
         if ($this->aauth->get_user()->loc) {
@@ -361,7 +361,7 @@ class Transactions_model extends CI_Model
 
         if ($ext == 1) {
             $this->db->select('*');
-            $this->db->from('geopos_supplier');
+            $this->db->from('pos_supplier');
             $this->db->where('id', $id);
             if ($this->aauth->get_user()->loc) {
                 $this->db->group_start();
@@ -374,10 +374,10 @@ class Transactions_model extends CI_Model
             $query = $this->db->get();
             return $query->row_array();
         } elseif ($ext == 4) {
-            $this->db->select('geopos_employees.*,geopos_users.email');
-            $this->db->from('geopos_employees');
-            $this->db->join('geopos_users', 'geopos_employees.id = geopos_users.id', 'left');
-            $this->db->where('geopos_employees.id', $id);
+            $this->db->select('pos_employees.*,pos_users.email');
+            $this->db->from('pos_employees');
+            $this->db->join('pos_users', 'pos_employees.id = pos_users.id', 'left');
+            $this->db->where('pos_employees.id', $id);
             if ($this->aauth->get_user()->loc) {
                 $this->db->group_start();
                 $this->db->where('loc', $this->aauth->get_user()->loc);
@@ -390,7 +390,7 @@ class Transactions_model extends CI_Model
             return $query->row_array();
         } else {
             $this->db->select('*');
-            $this->db->from('geopos_customers');
+            $this->db->from('pos_customers');
             $this->db->where('id', $id);
             if ($this->aauth->get_user()->loc) {
                 $this->db->group_start();
@@ -410,7 +410,7 @@ class Transactions_model extends CI_Model
     {
 
         $this->db->select('*');
-        $this->db->from('geopos_trans_cat');
+        $this->db->from('pos_trans_cat');
         $this->db->where('id', $id);
         $query = $this->db->get();
         return $query->row_array();
@@ -419,7 +419,7 @@ class Transactions_model extends CI_Model
     {
 
         $this->db->select('*');
-        $this->db->from('geopos_trans_cat');
+        $this->db->from('pos_trans_cat');
         $this->db->where('name', $id);
         $query = $this->db->get();
         return $query->row_array();
@@ -437,7 +437,7 @@ class Transactions_model extends CI_Model
         $this->db->set($data);
         $this->db->where('id', $id);
 
-        if ($this->db->update('geopos_trans_cat')) {
+        if ($this->db->update('pos_trans_cat')) {
             return true;
         } else {
             return false;
@@ -447,7 +447,7 @@ class Transactions_model extends CI_Model
     public function check_balance($id)
     {
         $this->db->select('balance');
-        $this->db->from('geopos_customers');
+        $this->db->from('pos_customers');
         $this->db->where('id', $id);
         if ($this->aauth->get_user()->loc) {
             $this->db->group_start();

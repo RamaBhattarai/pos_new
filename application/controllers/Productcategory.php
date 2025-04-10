@@ -149,10 +149,10 @@ class Productcategory extends CI_Controller
             $id = intval($this->input->post('deleteid'));
             if ($id) {
 
-                $query = $this->db->query("DELETE geopos_movers FROM geopos_movers LEFT JOIN geopos_products ON  geopos_movers.rid1=geopos_products.pid LEFT JOIN geopos_product_cat ON  geopos_products.pcat=geopos_product_cat.id WHERE geopos_product_cat.id='$id' AND  geopos_movers.d_type='1'");
+                $query = $this->db->query("DELETE pos_movers FROM pos_movers LEFT JOIN pos_products ON  pos_movers.rid1=pos_products.pid LEFT JOIN pos_product_cat ON  pos_products.pcat=pos_product_cat.id WHERE pos_product_cat.id='$id' AND  pos_movers.d_type='1'");
 
-                $this->db->delete('geopos_products', array('pcat' => $id));
-                $this->db->delete('geopos_product_cat', array('id' => $id));
+                $this->db->delete('pos_products', array('pcat' => $id));
+                $this->db->delete('pos_product_cat', array('id' => $id));
                 echo json_encode(array('status' => 'Success', 'message' => $this->lang->line('Product Category with products')));
             } else {
                 echo json_encode(array('status' => 'Error', 'message' => $this->lang->line('ERROR')));
@@ -169,10 +169,10 @@ class Productcategory extends CI_Controller
             $id = intval($this->input->post('deleteid'));
             if ($id) {
 
-                $query = $this->db->query("DELETE geopos_movers FROM geopos_movers LEFT JOIN geopos_products ON  geopos_movers.rid1=geopos_products.pid LEFT JOIN geopos_product_cat ON  geopos_products.sub_id=geopos_product_cat.id WHERE geopos_product_cat.id='$id' AND  geopos_movers.d_type='1'");
+                $query = $this->db->query("DELETE pos_movers FROM pos_movers LEFT JOIN pos_products ON  pos_movers.rid1=pos_products.pid LEFT JOIN pos_product_cat ON  pos_products.sub_id=pos_product_cat.id WHERE pos_product_cat.id='$id' AND  pos_movers.d_type='1'");
 
-                $this->db->delete('geopos_products', array('sub_id' => $id));
-                $this->db->delete('geopos_product_cat', array('id' => $id));
+                $this->db->delete('pos_products', array('sub_id' => $id));
+                $this->db->delete('pos_product_cat', array('id' => $id));
                 echo json_encode(array('status' => 'Success', 'message' => $this->lang->line('Product Category with products')));
             } else {
                 echo json_encode(array('status' => 'Error', 'message' => $this->lang->line('ERROR')));
@@ -189,8 +189,8 @@ class Productcategory extends CI_Controller
         if ($this->aauth->premission(11)) {
             $id = $this->input->post('deleteid');
             if ($id) {
-                $this->db->delete('geopos_products', array('warehouse' => $id));
-                $this->db->delete('geopos_warehouse', array('id' => $id));
+                $this->db->delete('pos_products', array('warehouse' => $id));
+                $this->db->delete('pos_warehouse', array('id' => $id));
                 echo json_encode(array('status' => 'Success', 'message' => $this->lang->line('Product Warehouse with products')));
             } else {
                 echo json_encode(array('status' => 'Error', 'message' => $this->lang->line('ERROR')));
@@ -206,7 +206,7 @@ class Productcategory extends CI_Controller
     {
         $catid = $this->input->get('id');
         $this->db->select('*');
-        $this->db->from('geopos_product_cat');
+        $this->db->from('pos_product_cat');
         $this->db->where('id', $catid);
         $query = $this->db->get();
         $data['productcat'] = $query->row_array();
@@ -219,6 +219,8 @@ class Productcategory extends CI_Controller
         $this->load->view('fixed/footer');
 
     }
+
+
 
     public function editwarehouse()
     {
@@ -244,7 +246,7 @@ class Productcategory extends CI_Controller
         } else {
             $catid = $this->input->get('id');
             $this->db->select('*');
-            $this->db->from('geopos_warehouse');
+            $this->db->from('pos_warehouse');
             $this->db->where('id', $catid);
             $query = $this->db->get();
             $data['warehouse'] = $query->row_array();
@@ -259,6 +261,8 @@ class Productcategory extends CI_Controller
 
     }
 
+
+    
     public function editcat()
     {
         $cid = $this->input->post('catid');
@@ -288,30 +292,30 @@ class Productcategory extends CI_Controller
             $qj = '';
             $wr = '';
             if ($this->aauth->get_user()->loc) {
-                $qj = "LEFT JOIN geopos_warehouse ON geopos_products.warehouse=geopos_warehouse.id";
+                $qj = "LEFT JOIN pos_warehouse ON pos_products.warehouse=pos_warehouse.id";
 
-                $wr = " AND geopos_warehouse.loc='" . $this->aauth->get_user()->loc . "'";
+                $wr = " AND pos_warehouse.loc='" . $this->aauth->get_user()->loc . "'";
             }
 
 
             switch ($r_type) {
                 case 1 :
-                    $query = $this->db->query("SELECT geopos_invoices.tid,geopos_invoice_items.qty,geopos_invoice_items.price,geopos_invoices.invoicedate FROM geopos_invoice_items LEFT JOIN geopos_invoices ON geopos_invoices.id=geopos_invoice_items.tid LEFT JOIN geopos_products ON geopos_products.pid=geopos_invoice_items.pid  LEFT JOIN geopos_product_cat ON geopos_product_cat.id=geopos_products.$filter  $qj WHERE geopos_invoices.status!='canceled' AND (DATE(geopos_invoices.invoicedate) BETWEEN DATE('$s_date') AND DATE('$e_date')) AND geopos_products.$filter='$pid' $wr");
+                    $query = $this->db->query("SELECT pos_invoices.tid,pos_invoice_items.qty,pos_invoice_items.price,pos_invoices.invoicedate FROM pos_invoice_items LEFT JOIN pos_invoices ON pos_invoices.id=pos_invoice_items.tid LEFT JOIN pos_products ON pos_products.pid=pos_invoice_items.pid  LEFT JOIN pos_product_cat ON pos_product_cat.id=pos_products.$filter  $qj WHERE pos_invoices.status!='canceled' AND (DATE(pos_invoices.invoicedate) BETWEEN DATE('$s_date') AND DATE('$e_date')) AND pos_products.$filter='$pid' $wr");
                     $result = $query->result_array();
                     break;
 
                 case 2 :
-                    $query = $this->db->query("SELECT geopos_purchase.tid,geopos_purchase_items.qty,geopos_purchase_items.price,geopos_purchase.invoicedate FROM geopos_purchase_items LEFT JOIN geopos_purchase ON geopos_purchase.id=geopos_purchase_items.tid LEFT JOIN geopos_products ON geopos_products.pid=geopos_purchase_items.pid  LEFT JOIN geopos_product_cat ON geopos_product_cat.id=geopos_products.$filter  WHERE geopos_purchase.status!='canceled' AND (DATE(geopos_purchase.invoicedate) BETWEEN DATE('$s_date') AND DATE('$e_date')) AND geopos_products.$filter='$pid' ");
+                    $query = $this->db->query("SELECT pos_purchase.tid,pos_purchase_items.qty,pos_purchase_items.price,pos_purchase.invoicedate FROM pos_purchase_items LEFT JOIN pos_purchase ON pos_purchase.id=pos_purchase_items.tid LEFT JOIN pos_products ON pos_products.pid=pos_purchase_items.pid  LEFT JOIN pos_product_cat ON pos_product_cat.id=pos_products.$filter  WHERE pos_purchase.status!='canceled' AND (DATE(pos_purchase.invoicedate) BETWEEN DATE('$s_date') AND DATE('$e_date')) AND pos_products.$filter='$pid' ");
                     $result = $query->result_array();
                     break;
 
                 case 3 :
-                    $query = $this->db->query("SELECT geopos_movers.rid2 AS qty, DATE(geopos_movers.d_time) AS  invoicedate,geopos_movers.note,geopos_products.product_price AS price,geopos_products.product_name   FROM geopos_movers LEFT JOIN geopos_products ON geopos_products.pid=geopos_movers.rid1  WHERE geopos_movers.d_type='1' AND geopos_products.$filter='$pid'  AND (DATE(geopos_movers.d_time) BETWEEN DATE('$s_date') AND DATE('$e_date'))");
+                    $query = $this->db->query("SELECT pos_movers.rid2 AS qty, DATE(pos_movers.d_time) AS  invoicedate,pos_movers.note,pos_products.product_price AS price,pos_products.product_name   FROM pos_movers LEFT JOIN pos_products ON pos_products.pid=pos_movers.rid1  WHERE pos_movers.d_type='1' AND pos_products.$filter='$pid'  AND (DATE(pos_movers.d_time) BETWEEN DATE('$s_date') AND DATE('$e_date'))");
                     $result = $query->result_array();
                     break;
             }
             $this->db->select('*');
-            $this->db->from('geopos_product_cat');
+            $this->db->from('pos_product_cat');
             $this->db->where('id', $pid);
             $query = $this->db->get();
             $product = $query->row_array();
@@ -328,7 +332,7 @@ class Productcategory extends CI_Controller
             $pid = intval($this->input->get('id'));
             $sub = $this->input->get('sub');
             $this->db->select('*');
-            $this->db->from('geopos_product_cat');
+            $this->db->from('pos_product_cat');
             $this->db->where('id', $pid);
             $query = $this->db->get();
             $product = $query->row_array();
@@ -353,31 +357,31 @@ class Productcategory extends CI_Controller
             $qj = '';
             $wr = '';
             if ($this->aauth->get_user()->loc) {
-                $qj = "LEFT JOIN geopos_warehouse ON geopos_products.warehouse=geopos_warehouse.id";
+                $qj = "LEFT JOIN pos_warehouse ON pos_products.warehouse=pos_warehouse.id";
 
-                $wr = " AND geopos_warehouse.loc='" . $this->aauth->get_user()->loc . "'";
+                $wr = " AND pos_warehouse.loc='" . $this->aauth->get_user()->loc . "'";
             }
 
             switch ($r_type) {
                 case 1 :
-                    $query = $this->db->query("SELECT geopos_invoices.tid,geopos_invoice_items.qty,geopos_invoice_items.price,geopos_invoices.invoicedate FROM geopos_invoice_items LEFT JOIN geopos_invoices ON geopos_invoices.id=geopos_invoice_items.tid LEFT JOIN geopos_products ON geopos_products.pid=geopos_invoice_items.pid $qj WHERE geopos_invoices.status!='canceled'  AND (DATE(geopos_invoices.invoicedate) BETWEEN DATE('$s_date') AND DATE('$e_date')) AND geopos_products.warehouse='$pid' $wr");
+                    $query = $this->db->query("SELECT pos_invoices.tid,pos_invoice_items.qty,pos_invoice_items.price,pos_invoices.invoicedate FROM pos_invoice_items LEFT JOIN pos_invoices ON pos_invoices.id=pos_invoice_items.tid LEFT JOIN pos_products ON pos_products.pid=pos_invoice_items.pid $qj WHERE pos_invoices.status!='canceled'  AND (DATE(pos_invoices.invoicedate) BETWEEN DATE('$s_date') AND DATE('$e_date')) AND pos_products.warehouse='$pid' $wr");
                     $result = $query->result_array();
                     break;
 
                 case 2 :
-                    $query = $this->db->query("SELECT geopos_purchase.tid,geopos_purchase_items.qty,geopos_purchase_items.price,geopos_purchase.invoicedate FROM geopos_purchase_items LEFT JOIN geopos_purchase ON geopos_purchase.id=geopos_purchase_items.tid LEFT JOIN geopos_products ON geopos_products.pid=geopos_purchase_items.pid  LEFT JOIN geopos_product_cat ON geopos_product_cat.id=geopos_products.pcat  WHERE geopos_purchase.status!='canceled' AND (DATE(geopos_purchase.invoicedate) BETWEEN DATE('$s_date') AND DATE('$e_date')) AND geopos_products.pcat='$pid' ");
+                    $query = $this->db->query("SELECT pos_purchase.tid,pos_purchase_items.qty,pos_purchase_items.price,pos_purchase.invoicedate FROM pos_purchase_items LEFT JOIN pos_purchase ON pos_purchase.id=pos_purchase_items.tid LEFT JOIN pos_products ON pos_products.pid=pos_purchase_items.pid  LEFT JOIN pos_product_cat ON pos_product_cat.id=pos_products.pcat  WHERE pos_purchase.status!='canceled' AND (DATE(pos_purchase.invoicedate) BETWEEN DATE('$s_date') AND DATE('$e_date')) AND pos_products.pcat='$pid' ");
                     $result = $query->result_array();
                     break;
 
                 case 3 :
-                    $query = $this->db->query("SELECT geopos_movers.rid2 AS qty, DATE(geopos_movers.d_time) AS  invoicedate,geopos_movers.note,geopos_products.product_price AS price,geopos_products.product_name  FROM geopos_movers LEFT JOIN geopos_products ON geopos_products.pid=geopos_movers.rid1  WHERE geopos_movers.d_type='1' AND geopos_products.warehouse='$pid'  AND (DATE(geopos_movers.d_time) BETWEEN DATE('$s_date') AND DATE('$e_date'))");
+                    $query = $this->db->query("SELECT pos_movers.rid2 AS qty, DATE(pos_movers.d_time) AS  invoicedate,pos_movers.note,pos_products.product_price AS price,pos_products.product_name  FROM pos_movers LEFT JOIN pos_products ON pos_products.pid=pos_movers.rid1  WHERE pos_movers.d_type='1' AND pos_products.warehouse='$pid'  AND (DATE(pos_movers.d_time) BETWEEN DATE('$s_date') AND DATE('$e_date'))");
                     $result = $query->result_array();
                     break;
             }
 
 
             $this->db->select('*');
-            $this->db->from('geopos_warehouse');
+            $this->db->from('pos_warehouse');
             $this->db->where('id', $pid);
             $query = $this->db->get();
             $product = $query->row_array();
@@ -394,7 +398,7 @@ class Productcategory extends CI_Controller
         } else {
             $pid = intval($this->input->get('id'));
             $this->db->select('*');
-            $this->db->from('geopos_warehouse');
+            $this->db->from('pos_warehouse');
             $this->db->where('id', $pid);
             $query = $this->db->get();
             $product = $query->row_array();

@@ -262,7 +262,7 @@ class Stockreturn extends CI_Controller
         $bill_due_date = datefordatabase($invocieduedate);
         if (!$currency) $currency = 0;
         $data = array('tid' => $invocieno, 'invoicedate' => $bill_date, 'invoiceduedate' => $bill_due_date, 'subtotal' => $subtotal, 'shipping' => $shipping, 'ship_tax' => $shipping_tax, 'ship_tax_type' => $ship_taxtype, 'total' => $total, 'notes' => $notes, 'csd' => $customer_id, 'eid' => $this->aauth->get_user()->id, 'taxstatus' => $tax, 'discstatus' => $discstatus, 'format_discount' => $discountFormat, 'refer' => $refer, 'term' => $pterms, 'loc' => $this->aauth->get_user()->loc, 'i_class' => $person_type, 'multi' => $currency,);
-        if ($this->db->insert('geopos_stock_r', $data)) {
+        if ($this->db->insert('pos_stock_r', $data)) {
             $invocieno = $this->db->insert_id();
             $pid = $this->input->post('pid');
             $productlist = array();
@@ -313,17 +313,17 @@ class Stockreturn extends CI_Controller
                         }
 
                         $this->db->where('pid', $product_id[$key]);
-                        $this->db->update('geopos_products');
+                        $this->db->update('pos_products');
                     }
                     $itc += $amt;
                 }
             }
 
             if ($prodindex > 0) {
-                $this->db->insert_batch('geopos_stock_r_items', $productlist);
+                $this->db->insert_batch('pos_stock_r_items', $productlist);
                 $this->db->set(array('discount' => rev_amountExchange_s(amountFormat_general($total_discount), $currency, $this->aauth->get_user()->loc), 'tax' => rev_amountExchange_s(amountFormat_general($total_tax), $currency, $this->aauth->get_user()->loc), 'items' => $itc));
                 $this->db->where('id', $invocieno);
-                $this->db->update('geopos_stock_r');
+                $this->db->update('pos_stock_r');
             } else {
                 echo json_encode(array('status' => 'Error', 'message' =>
                     "Please choose product from product list. Go to Item manager section if you have not added the products."));
@@ -498,7 +498,7 @@ class Stockreturn extends CI_Controller
         $pid = $this->input->post('pid');
         $productlist = array();
         $prodindex = 0;
-        $this->db->delete('geopos_stock_r_items', array('tid' => $invocieno));
+        $this->db->delete('pos_stock_r_items', array('tid' => $invocieno));
         $product_id = $this->input->post('pid');
         $product_name1 = $this->input->post('product_name', true);
         $product_qty = $this->input->post('product_qty');
@@ -538,7 +538,7 @@ class Stockreturn extends CI_Controller
                 $amt = numberClean(@$product_qty[$key]) - numberClean(@$old_product_qty[$key]);
                 $this->db->set('qty', "qty-$amt", FALSE);
                 $this->db->where('pid', $product_id[$key]);
-                $this->db->update('geopos_products');
+                $this->db->update('pos_products');
             }
             $flag = true;
         }
@@ -548,8 +548,8 @@ class Stockreturn extends CI_Controller
         $this->db->set($data);
         $this->db->where('id', $invocieno);
         if ($flag) {
-            if ($this->db->update('geopos_stock_r', $data)) {
-                $this->db->insert_batch('geopos_stock_r_items', $productlist);
+            if ($this->db->update('pos_stock_r', $data)) {
+                $this->db->insert_batch('pos_stock_r_items', $productlist);
                 echo json_encode(array('status' => 'Success', 'message' =>
                     "Updated! <a href='view?id=$invocieno' class='btn btn-info btn-lg'><span class='fa fa-eye' aria-hidden='true'></span> View </a> "));
             } else {
@@ -572,7 +572,7 @@ class Stockreturn extends CI_Controller
                     if ($prid > 0) {
                         $this->db->set('qty', "qty-$dqty", FALSE);
                         $this->db->where('pid', $prid);
-                        $this->db->update('geopos_products');
+                        $this->db->update('pos_products');
                     }
                 }
             }
@@ -589,14 +589,14 @@ class Stockreturn extends CI_Controller
         $tid = $this->input->post('tid');
         $status = $this->input->post('status');
         $this->db->select('i_class');
-        $this->db->from('geopos_stock_r');
+        $this->db->from('pos_stock_r');
         $this->db->where('id', $tid);
         $query = $this->db->get();
         $stock = $query->row_array();
         if (($stock['i_class'] != 2 && $this->aauth->premission(2)) or ($stock['i_class'] == 2 && $this->aauth->premission(1))) {
             $this->db->set('status', $status);
             $this->db->where('id', $tid);
-            $this->db->update('geopos_stock_r');
+            $this->db->update('pos_stock_r');
             echo json_encode(array('status' => 'Success', 'message' =>
                 'Status updated successfully!', 'pstatus' => $status));
         }
@@ -626,7 +626,7 @@ class Stockreturn extends CI_Controller
     {
         $tid = intval($this->input->post('tid'));
         $this->db->select('i_class');
-        $this->db->from('geopos_stock_r');
+        $this->db->from('pos_stock_r');
         $this->db->where('id', $tid);
         $query = $this->db->get();
         $stock = $query->row_array();
@@ -634,10 +634,10 @@ class Stockreturn extends CI_Controller
             $this->db->set('pamnt', "0.00", FALSE);
             $this->db->set('status', 'canceled');
             $this->db->where('id', $tid);
-            $this->db->update('geopos_stock_r');
+            $this->db->update('pos_stock_r');
             //reverse
             $this->db->select('credit,acid');
-            $this->db->from('geopos_transactions');
+            $this->db->from('pos_transactions');
             $this->db->where('tid', $tid);
             $this->db->where('ext', 6);
             $query = $this->db->get();
@@ -646,10 +646,10 @@ class Stockreturn extends CI_Controller
                 $amt = $trans['credit'];
                 $this->db->set('lastbal', "lastbal-$amt", FALSE);
                 $this->db->where('id', $trans['acid']);
-                $this->db->update('geopos_accounts');
+                $this->db->update('pos_accounts');
             }
             $this->db->select('pid,qty');
-            $this->db->from('geopos_stock_r_items');
+            $this->db->from('pos_stock_r_items');
             $this->db->where('tid', $tid);
             $query = $this->db->get();
             $prevresult = $query->result_array();
@@ -657,9 +657,9 @@ class Stockreturn extends CI_Controller
                 $amt = $prd['qty'];
                 $this->db->set('qty', "qty+$amt", FALSE);
                 $this->db->where('pid', $prd['pid']);
-                $this->db->update('geopos_products');
+                $this->db->update('pos_products');
             }
-            $this->db->delete('geopos_transactions', array('tid' => $tid, 'ext' => 6));
+            $this->db->delete('pos_transactions', array('tid' => $tid, 'ext' => 6));
             echo json_encode(array('status' => 'Success', 'message' =>
                 $this->lang->line('Return canceled')));
 
@@ -672,7 +672,7 @@ class Stockreturn extends CI_Controller
         $this->load->library("Custom");
         $tid = intval($this->input->post('tid'));
         $this->db->select('i_class');
-        $this->db->from('geopos_stock_r');
+        $this->db->from('pos_stock_r');
         $this->db->where('id', $tid);
         $query = $this->db->get();
         $stock = $query->row_array();
@@ -690,7 +690,7 @@ class Stockreturn extends CI_Controller
 
             if ($stock['i_class'] == 2 or $stock['i_class'] == 1) {
                 $this->db->select('holder');
-                $this->db->from('geopos_accounts');
+                $this->db->from('pos_accounts');
                 $this->db->where('id', $acid);
                 $query = $this->db->get();
                 $account = $query->row_array();
@@ -710,10 +710,10 @@ class Stockreturn extends CI_Controller
                     'note' => $note,
                     'ext' => 6
                 );
-                $this->db->insert('geopos_transactions', $data);
+                $this->db->insert('pos_transactions', $data);
                 $this->db->insert_id();
                 $this->db->select('total,csd,pamnt');
-                $this->db->from('geopos_stock_r');
+                $this->db->from('pos_stock_r');
                 $this->db->where('id', $tid);
                 $query = $this->db->get();
                 $invresult = $query->row();
@@ -723,11 +723,11 @@ class Stockreturn extends CI_Controller
                     $this->db->set('pamnt', "pamnt+$amount", FALSE);
                     $this->db->set('status', 'partial');
                     $this->db->where('id', $tid);
-                    $this->db->update('geopos_stock_r');
+                    $this->db->update('pos_stock_r');
                     //account update
                     $this->db->set('lastbal', "lastbal-$amount", FALSE);
                     $this->db->where('id', $acid);
-                    $this->db->update('geopos_accounts');
+                    $this->db->update('pos_accounts');
                     $paid_amount = $invresult->pamnt + $amount;
                     $status = 'Partial';
                     $totalrm = $totalrm - $amount;
@@ -736,11 +736,11 @@ class Stockreturn extends CI_Controller
                     $this->db->set('pamnt', "pamnt+$amount", FALSE);
                     $this->db->set('status', 'accepted');
                     $this->db->where('id', $tid);
-                    $this->db->update('geopos_stock_r');
+                    $this->db->update('pos_stock_r');
                     //acount update
                     $this->db->set('lastbal', "lastbal-$amount", FALSE);
                     $this->db->where('id', $acid);
-                    $this->db->update('geopos_accounts');
+                    $this->db->update('pos_accounts');
                     $totalrm = 0;
                     $status = 'Accepted';
                     $paid_amount = $amount;
@@ -749,7 +749,7 @@ class Stockreturn extends CI_Controller
                 if ($dual['key1']) {
 
                     $this->db->select('holder');
-                    $this->db->from('geopos_accounts');
+                    $this->db->from('pos_accounts');
                     $this->db->where('id', $dual['url']);
                     $query = $this->db->get();
                     $account = $query->row_array();
@@ -761,18 +761,18 @@ class Stockreturn extends CI_Controller
                     $data['account'] = $account['holder'];
                     $data['note'] = 'Credit ' . $data['note'];
 
-                    $this->db->insert('geopos_transactions', $data);
+                    $this->db->insert('pos_transactions', $data);
 
                     //account update
                     $this->db->set('lastbal', "lastbal+$amount", FALSE);
                     $this->db->where('id', $dual['url']);
-                    $this->db->update('geopos_accounts');
+                    $this->db->update('pos_accounts');
                 }
             } else {
 
 
                 $this->db->select('holder');
-                $this->db->from('geopos_accounts');
+                $this->db->from('pos_accounts');
                 $this->db->where('id', $acid);
                 $query = $this->db->get();
                 $account = $query->row_array();
@@ -792,10 +792,10 @@ class Stockreturn extends CI_Controller
                     'note' => $note,
                     'ext' => 6
                 );
-                $this->db->insert('geopos_transactions', $data);
+                $this->db->insert('pos_transactions', $data);
                 $this->db->insert_id();
                 $this->db->select('total,csd,pamnt');
-                $this->db->from('geopos_stock_r');
+                $this->db->from('pos_stock_r');
                 $this->db->where('id', $tid);
                 $query = $this->db->get();
                 $invresult = $query->row();
@@ -805,11 +805,11 @@ class Stockreturn extends CI_Controller
                     $this->db->set('pamnt', "pamnt+$amount", FALSE);
                     $this->db->set('status', 'partial');
                     $this->db->where('id', $tid);
-                    $this->db->update('geopos_stock_r');
+                    $this->db->update('pos_stock_r');
                     //account update
                     $this->db->set('lastbal', "lastbal-$amount", FALSE);
                     $this->db->where('id', $acid);
-                    $this->db->update('geopos_accounts');
+                    $this->db->update('pos_accounts');
                     $paid_amount = $invresult->pamnt + $amount;
                     $status = 'Partial';
                     $totalrm = $totalrm - $amount;
@@ -818,11 +818,11 @@ class Stockreturn extends CI_Controller
                     $this->db->set('pamnt', "pamnt+$amount", FALSE);
                     $this->db->set('status', 'accepted');
                     $this->db->where('id', $tid);
-                    $this->db->update('geopos_stock_r');
+                    $this->db->update('pos_stock_r');
                     //acount update
                     $this->db->set('lastbal', "lastbal-$amount", FALSE);
                     $this->db->where('id', $acid);
-                    $this->db->update('geopos_accounts');
+                    $this->db->update('pos_accounts');
                     $totalrm = 0;
                     $status = 'Accepted';
                     $paid_amount = $amount;

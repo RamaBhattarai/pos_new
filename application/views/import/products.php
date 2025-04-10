@@ -29,7 +29,7 @@
                 <p>Your products data file should as per this template <a
                             href="<?php echo base_url('userfiles/product/products_import.csv') ?>"><strong>Download
                             Template</strong></a>. Please download a database backup before importing the
-                    geopos_products.
+                    pos_products.
                 </p>
                 <p>Column Order in CSV File Must be like this</p>
                 <pre>

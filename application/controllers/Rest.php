@@ -226,7 +226,7 @@ class Rest extends REST_Controller
         $id = $this->get('id');
         $key = $this->get('key');
         $this->db->select('key');
-        $this->db->from('geopos_restkeys');
+        $this->db->from('pos_restkeys');
         $this->db->limit(1);
         $this->db->where('key', $key);
         $query_r = $this->db->get();

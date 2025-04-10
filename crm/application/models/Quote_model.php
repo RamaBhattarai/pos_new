@@ -20,7 +20,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Quote_model extends CI_Model
 {
-    var $table = 'geopos_quotes';
+    var $table = 'pos_quotes';
     var $column_order = array(null, 'tid', 'name', 'invoicedate', 'total', 'status', null);
     var $column_search = array('tid', 'name', 'invoicedate', 'total');
     var $order = array('tid' => 'desc');
@@ -47,7 +47,7 @@ class Quote_model extends CI_Model
     public function warehouses()
     {
         $this->db->select('*');
-        $this->db->from('geopos_warehouse');
+        $this->db->from('pos_warehouse');
         $query = $this->db->get();
         return $query->result_array();
 
@@ -56,12 +56,12 @@ class Quote_model extends CI_Model
     public function quote_details($id)
     {
 
-        $this->db->select('geopos_quotes.*,geopos_quotes.id AS iid,geopos_customers.*,geopos_customers.id AS cid,geopos_terms.id AS termid,geopos_terms.title AS termtit,geopos_terms.terms AS terms');
+        $this->db->select('pos_quotes.*,pos_quotes.id AS iid,pos_customers.*,pos_customers.id AS cid,pos_terms.id AS termid,pos_terms.title AS termtit,pos_terms.terms AS terms');
         $this->db->from($this->table);
-        $this->db->where('geopos_quotes.id', $id);
-		$this->db->where('geopos_quotes.csd', $this->session->userdata('user_details')[0]->cid);
-        $this->db->join('geopos_customers', 'geopos_quotes.csd = geopos_customers.id', 'left');
-        $this->db->join('geopos_terms', 'geopos_terms.id = geopos_quotes.term', 'left');
+        $this->db->where('pos_quotes.id', $id);
+		$this->db->where('pos_quotes.csd', $this->session->userdata('user_details')[0]->cid);
+        $this->db->join('pos_customers', 'pos_quotes.csd = pos_customers.id', 'left');
+        $this->db->join('pos_terms', 'pos_terms.id = pos_quotes.term', 'left');
         $query = $this->db->get();
         return $query->row_array();
 
@@ -71,7 +71,7 @@ class Quote_model extends CI_Model
     {
 
         $this->db->select('*');
-        $this->db->from('geopos_quotes_items');
+        $this->db->from('pos_quotes_items');
         $this->db->where('tid', $id);
         $query = $this->db->get();
         return $query->result_array();
@@ -84,10 +84,10 @@ class Quote_model extends CI_Model
 
     private function _get_datatables_query()
     {
-        $this->db->select('geopos_quotes.*,geopos_customers.name');
+        $this->db->select('pos_quotes.*,pos_customers.name');
         $this->db->from($this->table);
-        $this->db->where('geopos_quotes.csd', $this->session->userdata('user_details')[0]->cid);
-        $this->db->join('geopos_customers', 'geopos_quotes.csd=geopos_customers.id', 'left');
+        $this->db->where('pos_quotes.csd', $this->session->userdata('user_details')[0]->cid);
+        $this->db->join('pos_customers', 'pos_quotes.csd=pos_customers.id', 'left');
 
         $i = 0;
 
@@ -122,7 +122,7 @@ class Quote_model extends CI_Model
     function get_datatables()
     {
         $this->_get_datatables_query();
-		$this->db->where('geopos_quotes.csd', $this->session->userdata('user_details')[0]->cid);
+		$this->db->where('pos_quotes.csd', $this->session->userdata('user_details')[0]->cid);
         if ($_POST['length'] != -1)
             $this->db->limit($_POST['length'], $_POST['start']);
         $query = $this->db->get();
@@ -132,7 +132,7 @@ class Quote_model extends CI_Model
     function count_filtered()
     {
         $this->_get_datatables_query();
-		$this->db->where('geopos_quotes.csd', $this->session->userdata('user_details')[0]->cid);
+		$this->db->where('pos_quotes.csd', $this->session->userdata('user_details')[0]->cid);
         $query = $this->db->get();
         return $query->num_rows();
     }
@@ -140,7 +140,7 @@ class Quote_model extends CI_Model
     public function count_all()
     {
         $this->db->from($this->table);
-		$this->db->where('geopos_quotes.csd', $this->session->userdata('user_details')[0]->cid);
+		$this->db->where('pos_quotes.csd', $this->session->userdata('user_details')[0]->cid);
         return $this->db->count_all_results();
     }
 
@@ -148,24 +148,24 @@ class Quote_model extends CI_Model
     {
         $this->db->set('status', 'customer_approved');
                 $this->db->where('id', $id);
-               return $this->db->update('geopos_quotes');
+               return $this->db->update('pos_quotes');
     }
 
 
     public function billingterms()
     {
         $this->db->select('id,title');
-        $this->db->from('geopos_terms');
+        $this->db->from('pos_terms');
         $query = $this->db->get();
         return $query->result_array();
     }
 
     public function employee($id)
     {
-        $this->db->select('geopos_employees.name,geopos_employees.sign,geopos_users.roleid');
-        $this->db->from('geopos_employees');
-        $this->db->where('geopos_employees.id', $id);
-        $this->db->join('geopos_users', 'geopos_employees.id = geopos_users.id', 'left');
+        $this->db->select('pos_employees.name,pos_employees.sign,pos_users.roleid');
+        $this->db->from('pos_employees');
+        $this->db->where('pos_employees.id', $id);
+        $this->db->join('pos_users', 'pos_employees.id = pos_users.id', 'left');
         $query = $this->db->get();
         return $query->row_array();
     }
@@ -178,7 +178,7 @@ class Quote_model extends CI_Model
         $this->db->trans_start();
 
         $this->db->select('tid');
-        $this->db->from('geopos_invoices');
+        $this->db->from('pos_invoices');
         $this->db->order_by('tid', 'DESC');
         $this->db->limit(1);
         $query = $this->db->get();
@@ -212,16 +212,16 @@ class Quote_model extends CI_Model
 
             $this->db->set('qty', "qty-$amt", FALSE);
             $this->db->where('pid', $row['pid']);
-            $this->db->update('geopos_products');
+            $this->db->update('pos_products');
         }
 
 
-        $this->db->insert_batch('geopos_invoice_items', $productlist);
+        $this->db->insert_batch('pos_invoice_items', $productlist);
 
 
         $data = array('tid' => $iid, 'invoicedate' => $invoice['invoicedate'], 'invoiceduedate' => $invoice['invoicedate'], 'subtotal' => $invoice['invoicedate'], 'shipping' => $invoice['shipping'], 'discount' => $invoice['discount'], 'tax' => $invoice['tax'], 'total' => $invoice['total'], 'notes' => $invoice['notes'], 'csd' => $invoice['csd'], 'eid' => $invoice['eid'], 'items' => $invoice['items'], 'taxstatus' => $invoice['taxstatus'], 'discstatus' => $invoice['discstatus'], 'format_discount' => $invoice['format_discount'], 'refer' => $invoice['refer'], 'term' => $invoice['term']);
 
-        $this->db->insert('geopos_invoices', $data);
+        $this->db->insert('pos_invoices', $data);
 
         if ($this->db->trans_complete()) {
             return true;

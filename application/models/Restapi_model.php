@@ -21,7 +21,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Restapi_model extends CI_Model
 {
-    var $table = 'geopos_accounts';
+    var $table = 'pos_accounts';
 
     public function __construct()
     {
@@ -31,7 +31,7 @@ class Restapi_model extends CI_Model
     public function keylist()
     {
         $this->db->select('*');
-        $this->db->from('geopos_restkeys');
+        $this->db->from('pos_restkeys');
         $query = $this->db->get();
         return $query->result_array();
     }
@@ -50,7 +50,7 @@ class Restapi_model extends CI_Model
 
         );
 
-        if ($this->db->insert('geopos_restkeys', $data)) {
+        if ($this->db->insert('pos_restkeys', $data)) {
             return true;
         } else {
             return false;

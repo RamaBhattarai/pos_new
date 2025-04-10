@@ -21,15 +21,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Customers_model extends CI_Model
 {
 
-    var $table = 'geopos_customers';
-    var $column_order = array(null, 'geopos_customers.name', 'geopos_customers.address', 'geopos_customers.email', 'geopos_customers.phone', null);
-    var $column_search = array('geopos_customers.name', 'geopos_customers.phone', 'geopos_customers.address', 'geopos_customers.city', 'geopos_customers.email', 'geopos_customers.docid');
+    var $table = 'pos_customers';
+    var $column_order = array(null, 'pos_customers.name', 'pos_customers.address', 'pos_customers.email', 'pos_customers.phone', null);
+    var $column_search = array('pos_customers.name', 'pos_customers.phone', 'pos_customers.address', 'pos_customers.city', 'pos_customers.email', 'pos_customers.docid');
     var $trans_column_order = array('date', 'debit', 'credit', 'account', null);
     var $trans_column_search = array('id', 'date');
     var $inv_column_order = array(null, 'tid', 'name', 'invoicedate', 'total', 'status', null);
     var $inv_column_search = array('tid', 'name', 'invoicedate', 'total');
     var $order = array('id' => 'desc');
-    var $inv_order = array('geopos_invoices.tid' => 'desc');
+    var $inv_order = array('pos_invoices.tid' => 'desc');
     var $qto_order = array('geopos_quotes.tid' => 'desc');
     var $notecolumn_order = array(null, 'title', 'cdate', null);
     var $notecolumn_search = array('id', 'title', 'cdate');
@@ -45,19 +45,19 @@ class Customers_model extends CI_Model
         $due = $this->input->post('due');
         if ($due) {
 
-            $this->db->select('geopos_customers.*,SUM(geopos_invoices.total) AS total,SUM(geopos_invoices.pamnt) AS pamnt');
-            $this->db->from('geopos_invoices');
-            $this->db->where('geopos_invoices.status!=', 'paid');
-            $this->db->join('geopos_customers', 'geopos_customers.id = geopos_invoices.csd', 'left');
+            $this->db->select('pos_customers.*,SUM(pos_invoices.total) AS total,SUM(pos_invoices.pamnt) AS pamnt');
+            $this->db->from('pos_invoices');
+            $this->db->where('pos_invoices.status!=', 'paid');
+            $this->db->join('pos_customers', 'pos_customers.id = pos_invoices.csd', 'left');
             if ($this->aauth->get_user()->loc) {
-                $this->db->where('geopos_customers.loc', $this->aauth->get_user()->loc);
+                $this->db->where('pos_customers.loc', $this->aauth->get_user()->loc);
             } elseif (!BDATA) {
-                $this->db->where('geopos_customers.loc', 0);
+                $this->db->where('pos_customers.loc', 0);
             }
             if ($id != '') {
-                $this->db->where('geopos_customers.gid', $id);
+                $this->db->where('pos_customers.gid', $id);
             }
-            $this->db->group_by('geopos_invoices.csd');
+            $this->db->group_by('pos_invoices.csd');
             $this->db->order_by('total', 'desc');
 
         } else {
@@ -121,10 +121,10 @@ class Customers_model extends CI_Model
         $this->_get_datatables_query();
         $query = $this->db->get();
         if ($id != '') {
-            $this->db->where('geopos_customers.gid', $id);
+            $this->db->where('pos_customers.gid', $id);
         }
         if ($this->aauth->get_user()->loc) {
-            $this->db->where('geopos_customers.loc', $this->aauth->get_user()->loc);
+            $this->db->where('pos_customers.loc', $this->aauth->get_user()->loc);
         }
         return $query->num_rows($id = '');
     }
@@ -133,10 +133,10 @@ class Customers_model extends CI_Model
     {
         $this->_get_datatables_query();
         if ($this->aauth->get_user()->loc) {
-            $this->db->where('geopos_customers.loc', $this->aauth->get_user()->loc);
+            $this->db->where('pos_customers.loc', $this->aauth->get_user()->loc);
         }
         if ($id != '') {
-            $this->db->where('geopos_customers.gid', $id);
+            $this->db->where('pos_customers.gid', $id);
         }
         $query = $this->db->get();
         return $query->num_rows($id = '');
@@ -144,15 +144,15 @@ class Customers_model extends CI_Model
 
     public function details($custid,$loc=true)
     {
-        $this->db->select('geopos_customers.*,users.lang');
+        $this->db->select('pos_customers.*,users.lang');
         $this->db->from($this->table);
-        $this->db->join('users', 'users.cid=geopos_customers.id', 'left');
-        $this->db->where('geopos_customers.id', $custid);
+        $this->db->join('users', 'users.cid=pos_customers.id', 'left');
+        $this->db->where('pos_customers.id', $custid);
         if($loc) {
             if ($this->aauth->get_user()->loc) {
-                $this->db->where('geopos_customers.loc', $this->aauth->get_user()->loc);
+                $this->db->where('pos_customers.loc', $this->aauth->get_user()->loc);
             } elseif (!BDATA) {
-                $this->db->where('geopos_customers.loc', 0);
+                $this->db->where('pos_customers.loc', 0);
             }
         }
         $query = $this->db->get();
@@ -163,7 +163,7 @@ class Customers_model extends CI_Model
     {
 
         $this->db->select('SUM(debit) AS debit,SUM(credit) AS credit');
-        $this->db->from('geopos_transactions');
+        $this->db->from('pos_transactions');
         $this->db->where('payerid', $custid);
         $this->db->where('ext', 0);
         $query = $this->db->get();
@@ -174,7 +174,7 @@ class Customers_model extends CI_Model
     {
 
         $this->db->select('SUM(total) AS total,SUM(pamnt) AS pamnt,SUM(discount) AS discount,');
-        $this->db->from('geopos_invoices');
+        $this->db->from('pos_invoices');
         $this->db->where('csd', $custid);
         $query = $this->db->get();
         return $query->row_array();
@@ -184,7 +184,7 @@ class Customers_model extends CI_Model
     public function add($name, $company, $phone, $email, $address, $city, $region, $country, $postbox, $customergroup, $taxid, $name_s, $phone_s, $email_s, $address_s, $city_s, $region_s, $country_s, $postbox_s, $language = '', $create_login = true, $password = '', $docid = '', $custom = '', $discount = 0)
     {
         $this->db->select('email');
-        $this->db->from('geopos_customers');
+        $this->db->from('pos_customers');
         $this->db->where('email', $email);
         $query = $this->db->get();
         $valid = $query->row_array();
@@ -193,7 +193,7 @@ class Customers_model extends CI_Model
 
             if (!$discount) {
                 $this->db->select('disc_rate');
-                $this->db->from('geopos_cust_group');
+                $this->db->from('pos_cust_group');
                 $this->db->where('id', $customergroup);
                 $query = $this->db->get();
                 $result = $query->row_array();
@@ -231,7 +231,7 @@ class Customers_model extends CI_Model
                 $data['loc'] = $this->aauth->get_user()->loc;
             }
 
-            if ($this->db->insert('geopos_customers', $data)) {
+            if ($this->db->insert('pos_customers', $data)) {
                 $cid = $this->db->insert_id();
                 $p_string = '';
                 $temp_password = '';
@@ -326,7 +326,7 @@ class Customers_model extends CI_Model
             $this->db->where('loc', 0);
         }
 
-        if ($this->db->update('geopos_customers')) {
+        if ($this->db->update('pos_customers')) {
             $data = array(
                 'name' => $name,
                 'email' => $email,
@@ -390,7 +390,7 @@ class Customers_model extends CI_Model
         } elseif (!BDATA) {
             $this->db->where('loc', 0);
         }
-        if ($this->db->update('geopos_customers') AND $result['picture'] != 'example.png') {
+        if ($this->db->update('pos_customers') AND $result['picture'] != 'example.png') {
 
             unlink(FCPATH . 'userfiles/customers/' . $result['picture']);
             unlink(FCPATH . 'userfiles/customers/thumbnail/' . $result['picture']);
@@ -403,13 +403,13 @@ class Customers_model extends CI_Model
     {
         $whr = "";
         if ($this->aauth->get_user()->loc) {
-            $whr = "WHERE (geopos_customers.loc=" . $this->aauth->get_user()->loc . " ) ";
-            if (BDATA) $whr = "WHERE (geopos_customers.loc=" . $this->aauth->get_user()->loc . " OR geopos_customers.loc=0 ) ";
+            $whr = "WHERE (pos_customers.loc=" . $this->aauth->get_user()->loc . " ) ";
+            if (BDATA) $whr = "WHERE (pos_customers.loc=" . $this->aauth->get_user()->loc . " OR pos_customers.loc=0 ) ";
         } elseif (!BDATA) {
-            $whr = "WHERE  geopos_customers.loc=0  ";
+            $whr = "WHERE  pos_customers.loc=0  ";
         }
 
-        $query = $this->db->query("SELECT c.*,p.pc FROM geopos_cust_group AS c LEFT JOIN ( SELECT gid,COUNT(gid) AS pc FROM geopos_customers $whr GROUP BY gid) AS p ON p.gid=c.id");
+        $query = $this->db->query("SELECT c.*,p.pc FROM pos_cust_group AS c LEFT JOIN ( SELECT gid,COUNT(gid) AS pc FROM pos_customers $whr GROUP BY gid) AS p ON p.gid=c.id");
         return $query->result_array();
     }
 
@@ -418,26 +418,26 @@ class Customers_model extends CI_Model
 
 
         if ($this->aauth->get_user()->loc) {
-            $this->db->delete('geopos_customers', array('id' => $id, 'loc' => $this->aauth->get_user()->loc));
+            $this->db->delete('pos_customers', array('id' => $id, 'loc' => $this->aauth->get_user()->loc));
 
         } elseif (!BDATA) {
-            $this->db->delete('geopos_customers', array('id' => $id, 'loc' => 0));
+            $this->db->delete('pos_customers', array('id' => $id, 'loc' => 0));
         } else {
-            $this->db->delete('geopos_customers', array('id' => $id));
+            $this->db->delete('pos_customers', array('id' => $id));
         }
 
         if ($this->db->affected_rows()) {
             $this->aauth->applog("[Client Deleted]  ID " . $id, $this->aauth->get_user()->username);
             $this->db->delete('users', array('cid' => $id));
             $this->custom->del_fields($id, 1);
-            $this->db->delete('geopos_notes', array('fid' => $id, 'rid' => 1));
+            $this->db->delete('pos_notes', array('fid' => $id, 'rid' => 1));
             //docs
             $this->db->select('filename');
-            $this->db->from('geopos_documents');
+            $this->db->from('pos_documents');
             $this->db->where('id', $id);
             $query = $this->db->get();
             $result = $query->row_array();
-            if ($this->db->delete('geopos_documents', array('fid' => $id, 'rid' => 1))) {
+            if ($this->db->delete('pos_documents', array('fid' => $id, 'rid' => 1))) {
                 @unlink(FCPATH . 'userfiles/documents/' . $result['filename']);
                 $this->aauth->applog("[Client Doc Deleted]  DocId $id CID " . $id, $this->aauth->get_user()->username);
                 //docs
@@ -464,7 +464,7 @@ class Customers_model extends CI_Model
     private function _get_trans_table_query($id)
     {
 
-        $this->db->from('geopos_transactions');
+        $this->db->from('pos_transactions');
         $this->db->where('payerid', $id);
         $this->db->where('ext', 0);
         if ($this->aauth->get_user()->loc) {
@@ -524,17 +524,17 @@ class Customers_model extends CI_Model
 
     private function _inv_datatables_query($id, $tyd = 0)
     {
-        $this->db->select('geopos_invoices.*');
-        $this->db->from('geopos_invoices');
-        $this->db->where('geopos_invoices.csd', $id);
+        $this->db->select('pos_invoices.*');
+        $this->db->from('pos_invoices');
+        $this->db->where('pos_invoices.csd', $id);
         if ($this->aauth->get_user()->loc) {
-            $this->db->where('geopos_invoices.loc', $this->aauth->get_user()->loc);
+            $this->db->where('pos_invoices.loc', $this->aauth->get_user()->loc);
         } elseif (!BDATA) {
-            $this->db->where('geopos_invoices.loc', 0);
+            $this->db->where('pos_invoices.loc', 0);
         }
 
-        if ($tyd) $this->db->where('geopos_invoices.i_class>', 1);
-        $this->db->join('geopos_customers', 'geopos_invoices.csd=geopos_customers.id', 'left');
+        if ($tyd) $this->db->where('pos_invoices.i_class>', 1);
+        $this->db->join('pos_customers', 'pos_invoices.csd=pos_customers.id', 'left');
 
         $i = 0;
 
@@ -585,7 +585,7 @@ class Customers_model extends CI_Model
 
     public function inv_count_all($id)
     {
-        $this->db->from('geopos_invoices');
+        $this->db->from('pos_invoices');
         $this->db->where('csd', $id);
         return $this->db->count_all_results();
     }
@@ -601,7 +601,7 @@ class Customers_model extends CI_Model
         } elseif (!BDATA) {
             $this->db->where('geopos_quotes.loc', 0);
         }
-        $this->db->join('geopos_customers', 'geopos_quotes.csd=geopos_customers.id', 'left');
+        $this->db->join('pos_customers', 'geopos_quotes.csd=pos_customers.id', 'left');
 
         $i = 0;
 
@@ -659,7 +659,7 @@ class Customers_model extends CI_Model
     public function group_info($id)
     {
 
-        $this->db->from('geopos_cust_group');
+        $this->db->from('pos_cust_group');
         $this->db->where('id', $id);
         $query = $this->db->get();
         return $query->row_array();
@@ -668,7 +668,7 @@ class Customers_model extends CI_Model
     public function activity($id)
     {
         $this->db->select('*');
-        $this->db->from('geopos_metadata');
+        $this->db->from('pos_metadata');
         $this->db->where('type', 21);
         $this->db->where('rid', $id);
         $query = $this->db->get();
@@ -681,7 +681,7 @@ class Customers_model extends CI_Model
         $this->db->set('balance', "balance+$amount", FALSE);
         $this->db->where('id', $id);
 
-        $this->db->update('geopos_customers');
+        $this->db->update('pos_customers');
 
         $data = array(
             'type' => 21,
@@ -691,7 +691,7 @@ class Customers_model extends CI_Model
         );
 
 
-        if ($this->db->insert('geopos_metadata', $data)) {
+        if ($this->db->insert('pos_metadata', $data)) {
             $this->aauth->applog("[Client Wallet Recharge] Amt-$amount ID " . $id, $this->aauth->get_user()->username);
             return true;
         } else {
@@ -702,9 +702,9 @@ class Customers_model extends CI_Model
 
     private function _project_datatables_query($cday = '')
     {
-        $this->db->select("geopos_projects.*,geopos_customers.name AS customer");
+        $this->db->select("geopos_projects.*,pos_customers.name AS customer");
         $this->db->from('geopos_projects');
-        $this->db->join('geopos_customers', 'geopos_projects.cid = geopos_customers.id', 'left');
+        $this->db->join('pos_customers', 'geopos_projects.cid = pos_customers.id', 'left');
 
 
         $this->db->where('geopos_projects.cid=', $cday);
@@ -770,7 +770,7 @@ class Customers_model extends CI_Model
     private function _notes_datatables_query($id)
     {
 
-        $this->db->from('geopos_notes');
+        $this->db->from('pos_notes');
         $this->db->where('fid', $id);
         $this->db->where('ntype', 1);
         $i = 0;
@@ -836,7 +836,7 @@ class Customers_model extends CI_Model
         $this->db->where('fid', $cid);
 
 
-        if ($this->db->update('geopos_notes')) {
+        if ($this->db->update('pos_notes')) {
             $this->aauth->applog("[Client Note Edited]  NoteId $id CID " . $cid, $this->aauth->get_user()->username);
             return true;
         } else {
@@ -848,7 +848,7 @@ class Customers_model extends CI_Model
     public function note_v($id, $cid)
     {
         $this->db->select('*');
-        $this->db->from('geopos_notes');
+        $this->db->from('pos_notes');
         $this->db->where('id', $id);
         $this->db->where('fid', $cid);
         $query = $this->db->get();
@@ -859,14 +859,14 @@ class Customers_model extends CI_Model
     {
         $this->aauth->applog("[Client Note Added]  NoteId $title CID " . $cid, $this->aauth->get_user()->username);
         $data = array('title' => $title, 'content' => $content, 'cdate' => date('Y-m-d'), 'last_edit' => date('Y-m-d H:i:s'), 'cid' => $this->aauth->get_user()->id, 'fid' => $cid, 'rid' => 1, 'ntype' => 1);
-        return $this->db->insert('geopos_notes', $data);
+        return $this->db->insert('pos_notes', $data);
 
     }
 
     function deletenote($id, $cid)
     {
         $this->aauth->applog("[Client Note Deleted]  NoteId $id CID " . $cid, $this->aauth->get_user()->username);
-        return $this->db->delete('geopos_notes', array('id' => $id, 'fid' => $cid, 'rid' => 1));
+        return $this->db->delete('pos_notes', array('id' => $id, 'fid' => $cid, 'rid' => 1));
 
     }
 
@@ -878,7 +878,7 @@ class Customers_model extends CI_Model
     public function documentlist($cid)
     {
         $this->db->select('*');
-        $this->db->from('geopos_documents');
+        $this->db->from('pos_documents');
         $this->db->where('fid', $cid);
         $this->db->where('rid', 1);
         $query = $this->db->get();
@@ -889,19 +889,19 @@ class Customers_model extends CI_Model
     {
         $this->aauth->applog("[Client Doc Added]  DocId $title CID " . $cid, $this->aauth->get_user()->username);
         $data = array('title' => $title, 'filename' => $filename, 'cdate' => date('Y-m-d'), 'cid' => $this->aauth->get_user()->id, 'fid' => $cid, 'rid' => 1);
-        return $this->db->insert('geopos_documents', $data);
+        return $this->db->insert('pos_documents', $data);
 
     }
 
     function deletedocument($id, $cid)
     {
         $this->db->select('filename');
-        $this->db->from('geopos_documents');
+        $this->db->from('pos_documents');
         $this->db->where('id', $id);
         $query = $this->db->get();
         $result = $query->row_array();
         $this->db->trans_start();
-        if ($this->db->delete('geopos_documents', array('id' => $id, 'fid' => $cid, 'rid' => 1))) {
+        if ($this->db->delete('pos_documents', array('id' => $id, 'fid' => $cid, 'rid' => 1))) {
             if (@unlink(FCPATH . 'userfiles/documents/' . $result['filename'])) {
                 $this->aauth->applog("[Client Doc Deleted]  DocId $id CID " . $cid, $this->aauth->get_user()->username);
                 $this->db->trans_complete();
@@ -929,7 +929,7 @@ class Customers_model extends CI_Model
     private function document_datatables_query($cid)
     {
 
-        $this->db->from('geopos_documents');
+        $this->db->from('pos_documents');
         $this->db->where('fid', $cid);
         $this->db->where('rid', 1);
         $i = 0;
@@ -1010,7 +1010,7 @@ class Customers_model extends CI_Model
     {
 
         $this->db->select('id,name,email,phone');
-        $this->db->from('geopos_customers');
+        $this->db->from('pos_customers');
         $this->db->where_in('id', $ids);
         $query = $this->db->get();
         return $query->result_array();
@@ -1021,7 +1021,7 @@ class Customers_model extends CI_Model
         if ($pay) {
             $this->db->select_sum('total');
             $this->db->select_sum('pamnt');
-            $this->db->from('geopos_invoices');
+            $this->db->from('pos_invoices');
             $this->db->where('DATE(invoicedate) >=', $sdate);
             $this->db->where('DATE(invoicedate) <=', $edate);
             $this->db->where('csd', $csd);
@@ -1038,7 +1038,7 @@ class Customers_model extends CI_Model
         } else {
             if ($amount) {
                 $this->db->select('id,tid,total,pamnt');
-                $this->db->from('geopos_invoices');
+                $this->db->from('pos_invoices');
                 $this->db->where('DATE(invoicedate) >=', $sdate);
                 $this->db->where('DATE(invoicedate) <=', $edate);
                 $this->db->where('csd', $csd);
@@ -1068,13 +1068,13 @@ class Customers_model extends CI_Model
 
                     $this->db->set('pmethod', $pay_method);
                     $this->db->where('id', $row['id']);
-                    $this->db->update('geopos_invoices');
+                    $this->db->update('pos_invoices');
 
                     if ($amount_custom == 0) break;
 
                 }
                   $this->db->select('id,holder');
-        $this->db->from('geopos_accounts');
+        $this->db->from('pos_accounts');
         $this->db->where('id', $acc);
         $query = $this->db->get();
         $account = $query->row_array();
@@ -1095,11 +1095,11 @@ class Customers_model extends CI_Model
             'loc' => $this->aauth->get_user()->loc
         );
 
-        $this->db->insert('geopos_transactions', $data);
+        $this->db->insert('pos_transactions', $data);
         $tttid = $this->db->insert_id();
 		            $this->db->set('lastbal', "lastbal+$amount", FALSE);
                     $this->db->where('id', $account['id']);
-                    $this->db->update('geopos_accounts');
+                    $this->db->update('pos_accounts');
 
             }
 

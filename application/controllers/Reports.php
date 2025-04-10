@@ -382,14 +382,14 @@ class Reports extends CI_Controller
         $lid = $this->input->post('loc');
 
         if ($trans_type == 'Sales') {
-            $where = " WHERE (DATE(geopos_invoices.invoicedate) BETWEEN '$sdate' AND '$edate' )";
-            if ($lid > 0) $where .= " AND (geopos_invoices.loc=$lid)";
-            $query = $this->db->query("SELECT geopos_customers.taxid AS VAT_Number,geopos_invoices.tid AS invoice_number,geopos_invoices.total AS amount,geopos_invoices.tax AS tax,geopos_customers.name AS customer_name,geopos_customers.company AS Company_Name,geopos_invoices.invoicedate AS date FROM geopos_invoices LEFT JOIN geopos_customers ON geopos_invoices.csd=geopos_customers.id" . $where);
+            $where = " WHERE (DATE(pos_invoices.invoicedate) BETWEEN '$sdate' AND '$edate' )";
+            if ($lid > 0) $where .= " AND (pos_invoices.loc=$lid)";
+            $query = $this->db->query("SELECT pos_customers.taxid AS VAT_Number,pos_invoices.tid AS invoice_number,pos_invoices.total AS amount,pos_invoices.tax AS tax,pos_customers.name AS customer_name,pos_customers.company AS Company_Name,pos_invoices.invoicedate AS date FROM pos_invoices LEFT JOIN pos_customers ON pos_invoices.csd=pos_customers.id" . $where);
         } else {
 
-            $where = " WHERE (DATE(geopos_purchase.invoicedate) BETWEEN '$sdate' AND '$edate') ";
-            if ($lid > 0) $where .= " AND (geopos_invoices.loc=$lid)";
-            $query = $this->db->query("SELECT geopos_supplier.taxid AS VAT_Number,geopos_purchase.tid AS invoice_number,geopos_purchase.total AS amount,geopos_purchase.tax AS tax,geopos_supplier.name AS customer_name,geopos_supplier.company AS Company_Name,geopos_purchase.invoicedate AS date FROM geopos_purchase LEFT JOIN geopos_supplier ON geopos_purchase.csd=geopos_supplier.id" . $where);
+            $where = " WHERE (DATE(pos_purchase.invoicedate) BETWEEN '$sdate' AND '$edate') ";
+            if ($lid > 0) $where .= " AND (pos_invoices.loc=$lid)";
+            $query = $this->db->query("SELECT pos_supplier.taxid AS VAT_Number,pos_purchase.tid AS invoice_number,pos_purchase.total AS amount,pos_purchase.tax AS tax,pos_supplier.name AS customer_name,pos_supplier.company AS Company_Name,pos_purchase.invoicedate AS date FROM pos_purchase LEFT JOIN pos_supplier ON pos_purchase.csd=pos_supplier.id" . $where);
         }
 
 

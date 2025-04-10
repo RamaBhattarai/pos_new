@@ -5,7 +5,7 @@ class System_model extends CI_Model
 {
     public function __construct()
     {
-        $query = $this->db->query("SELECT * FROM geopos_system WHERE id=1 LIMIT 1");
+        $query = $this->db->query("SELECT * FROM pos_system WHERE id=1 LIMIT 1");
         $row = $query->row_array();
 
         $this->config->set_item('ctitle', $row["cname"]);

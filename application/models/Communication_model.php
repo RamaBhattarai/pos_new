@@ -31,7 +31,7 @@ class Communication_model extends CI_Model
     {
         $this->load->library('ultimatemailer');
         $this->db->select('host,port,auth,auth_type,username,password,sender');
-        $this->db->from('geopos_smtp');
+        $this->db->from('pos_smtp');
         $query = $this->db->get();
         $smtpresult = $query->row_array();
         $host = $smtpresult['host'];
@@ -50,7 +50,7 @@ class Communication_model extends CI_Model
     {
         $this->load->library('ultimatemailer');
         $this->db->select('host,port,auth,auth_type,username,password,sender');
-        $this->db->from('geopos_smtp');
+        $this->db->from('pos_smtp');
         $query = $this->db->get();
         $smtpresult = $query->row_array();
         $host = $smtpresult['host'];
@@ -69,7 +69,7 @@ class Communication_model extends CI_Model
     {
         $this->load->library('ultimatemailer');
         $this->db->select('host,port,auth,auth_type,username,password,sender');
-        $this->db->from('geopos_smtp');
+        $this->db->from('pos_smtp');
         $query = $this->db->get();
         $smtpresult = $query->row_array();
         $host = $smtpresult['host'];

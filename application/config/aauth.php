@@ -91,16 +91,16 @@ $config_aauth["default"] = array(
 
     'db_profile' => 'default',
 
-    'users' => 'geopos_users',
+    'users' => 'pos_users',
     'groups' => 'aauth_groups',
     'group_to_group' => 'aauth_group_to_group',
     'user_to_group' => 'aauth_user_to_group',
     'perms' => 'aauth_perms',
     'perm_to_group' => 'aauth_perm_to_group',
     'perm_to_user' => 'aauth_perm_to_user',
-    'pms' => 'geopos_pms',
+    'pms' => 'pos_pms',
     'user_variables' => 'aauth_user_variables',
-    'login_attempts' => 'geopos_login_attempts',
+    'login_attempts' => 'pos_login_attempts',
 
     'remember' => ' +3 days',
 

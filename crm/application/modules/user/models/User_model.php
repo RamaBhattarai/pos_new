@@ -107,7 +107,7 @@ class User_model extends CI_Model
      */
     function get_users($userID = '')
     {
-        $this->db->select('users.*,geopos_customers.picture');
+        $this->db->select('users.*,pos_customers.picture');
         $this->db->from('users');
         $this->db->where('users.is_deleted', '0');
         if (isset($userID) && $userID != '') {
@@ -118,7 +118,7 @@ class User_model extends CI_Model
             $this->db->where('users.users_id !=', '1');
         }
 
-        $this->db->join('geopos_customers', 'users.cid = geopos_customers.id', 'left');
+        $this->db->join('pos_customers', 'users.cid = pos_customers.id', 'left');
         $result = $this->db->get()->result();
         return $result;
     }
@@ -171,7 +171,7 @@ class User_model extends CI_Model
 
         function get_users_full($userID = '')
     {
-        $this->db->select('users.*,geopos_customers.*');
+        $this->db->select('users.*,pos_customers.*');
         $this->db->from('users');
         $this->db->where('users.is_deleted', '0');
         if (isset($userID) && $userID != '') {
@@ -182,7 +182,7 @@ class User_model extends CI_Model
             $this->db->where('users.users_id !=', '1');
         }
 
-        $this->db->join('geopos_customers', 'users.cid = geopos_customers.id', 'left');
+        $this->db->join('pos_customers', 'users.cid = pos_customers.id', 'left');
         $result = $this->db->get()->row_array();
         return $result;
     }

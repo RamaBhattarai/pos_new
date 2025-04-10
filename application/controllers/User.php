@@ -175,7 +175,7 @@ class User extends CI_Controller
             $this->employee->update_employee($id, $name, $phone, $phonealt, $address, $city, $region, $country, $postbox, $this->aauth->get_user()->loc);
             $this->db->set('lang',$lang);
             $this->db->where('id', $id);
-            $this->db->update('geopos_users');
+            $this->db->update('pos_users');
 
         } else {
             $head['usernm'] = $this->aauth->get_user()->username;

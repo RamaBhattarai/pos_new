@@ -114,7 +114,7 @@ class Clientgroup extends CI_Controller
     {
         $gid = $this->input->get('id');
         $this->db->select('*');
-        $this->db->from('geopos_cust_group');
+        $this->db->from('pos_cust_group');
         $this->db->where('id', $gid);
         $query = $this->db->get();
         $data['group'] = $query->row_array();
@@ -141,10 +141,10 @@ class Clientgroup extends CI_Controller
         if ($this->aauth->premission(11)) {
             $id = $this->input->post('deleteid');
             if ($id != 1) {
-                $this->db->delete('geopos_cust_group', array('id' => $id));
+                $this->db->delete('pos_cust_group', array('id' => $id));
                 $this->db->set(array('gid' => 1));
                 $this->db->where('gid', $id);
-                $this->db->update('geopos_customers');
+                $this->db->update('pos_customers');
                 echo json_encode(array('status' => 'Success', 'message' => $this->lang->line('DELETED')));
             } else if ($id == 1) {
                 echo json_encode(array('status' => 'Error', 'message' => 'You can not delete the default group!'));

@@ -78,7 +78,7 @@ class Promo extends CI_Controller
         $id = $this->input->post('deleteid');
         if ($id) {
             $this->db->select('*');
-            $this->db->from('geopos_promo');
+            $this->db->from('pos_promo');
             $this->db->where('id', $id);
             $query = $this->db->get();
             $promo = $query->row_array();
@@ -86,7 +86,7 @@ class Promo extends CI_Controller
             if ($promo['reflect'] > 0) {
                 $amount = $promo['amount'] * $promo['available'];
                 $this->db->select('holder');
-                $this->db->from('geopos_accounts');
+                $this->db->from('pos_accounts');
                 $this->db->where('id', $promo['reflect']);
                 $query = $this->db->get();
                 $account = $query->row_array();
@@ -107,10 +107,10 @@ class Promo extends CI_Controller
                 );
                 $this->db->set('lastbal', "lastbal+$amount", FALSE);
                 $this->db->where('id', $promo['reflect']);
-                $this->db->update('geopos_accounts');
-                $this->db->insert('geopos_transactions', $data);
+                $this->db->update('pos_accounts');
+                $this->db->insert('pos_transactions', $data);
             }
-            $this->db->delete('geopos_promo', array('id' => $id));
+            $this->db->delete('pos_promo', array('id' => $id));
 
 
             echo json_encode(array('status' => 'Success', 'message' => $this->lang->line('DELETED')));

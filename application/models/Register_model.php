@@ -21,23 +21,23 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Register_model extends CI_Model
 {
 
-    var $table = 'geopos_register';
-    var $column_order = array(null, 'DATE(geopos_register.o_date)', 'geopos_register.c_date', 'geopos_register.active', null);
-    var $column_search = array('geopos_register.o_date', 'geopos_register.c_date');
-    var $order = array('geopos_register.id' => 'desc');
+    var $table = 'pos_register';
+    var $column_order = array(null, 'DATE(pos_register.o_date)', 'pos_register.c_date', 'pos_register.active', null);
+    var $column_search = array('pos_register.o_date', 'pos_register.c_date');
+    var $order = array('pos_register.id' => 'desc');
 
     private function _get_datatables_query()
     {
-        $this->db->select('geopos_register.*,geopos_users.username');
+        $this->db->select('pos_register.*,pos_users.username');
         $this->db->from($this->table);
-        $this->db->join('geopos_users', 'geopos_register.uid=geopos_users.id', 'left');
+        $this->db->join('pos_users', 'pos_register.uid=pos_users.id', 'left');
             if ($this->aauth->get_user()->loc) {
             $this->db->group_start();
-            $this->db->where('geopos_users.loc', $this->aauth->get_user()->loc);
-            if (BDATA) $this->db->or_where('geopos_users.loc', 0);
+            $this->db->where('pos_users.loc', $this->aauth->get_user()->loc);
+            if (BDATA) $this->db->or_where('pos_users.loc', 0);
             $this->db->group_end();
         } elseif (!BDATA) {
-            $this->db->where('geopos_users.loc', 0);
+            $this->db->where('pos_users.loc', 0);
         }
         $i = 0;
 

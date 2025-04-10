@@ -21,7 +21,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Cronjob_model extends CI_Model
 {
-    var $table = 'geopos_accounts';
+    var $table = 'pos_accounts';
 
     public function __construct()
     {
@@ -66,11 +66,11 @@ class Cronjob_model extends CI_Model
 
         $duedate = date('Y-m-d');
 
-        $this->db->select('geopos_invoices.*,geopos_customers.name,geopos_customers.email');
-        $this->db->from('geopos_invoices');
-        $this->db->where('DATE(geopos_invoices.invoiceduedate)<=', $duedate);
-        $this->db->where('geopos_invoices.status', 'due');
-        $this->db->join('geopos_customers', 'geopos_customers.id=geopos_invoices.csd', 'left');
+        $this->db->select('pos_invoices.*,pos_customers.name,pos_customers.email');
+        $this->db->from('pos_invoices');
+        $this->db->where('DATE(pos_invoices.invoiceduedate)<=', $duedate);
+        $this->db->where('pos_invoices.status', 'due');
+        $this->db->join('pos_customers', 'pos_customers.id=pos_invoices.csd', 'left');
         $query = $this->db->get();
         return $query->result_array();
 
@@ -83,13 +83,13 @@ class Cronjob_model extends CI_Model
 
         $year = date('Y');
 
-        $this->db->delete('geopos_reports', array('year' => $year));
+        $this->db->delete('pos_reports', array('year' => $year));
 
 
-        $query = $this->db->query("SELECT MONTH(invoicedate) AS month,YEAR(invoicedate) AS year,COUNT(tid) AS invoices,SUM(total) AS sales,SUM(items) AS items FROM geopos_invoices WHERE (YEAR(invoicedate)='$year') GROUP BY MONTH(invoicedate)");
+        $query = $this->db->query("SELECT MONTH(invoicedate) AS month,YEAR(invoicedate) AS year,COUNT(tid) AS invoices,SUM(total) AS sales,SUM(items) AS items FROM pos_invoices WHERE (YEAR(invoicedate)='$year') GROUP BY MONTH(invoicedate)");
         $arrayA = $query->result_array();
 
-        $query = $this->db->query("SELECT MONTH(date) AS month,YEAR(date) AS year,SUM(credit) AS income,SUM(debit) AS expense FROM geopos_transactions WHERE (YEAR(date)='$year') GROUP BY MONTH(date)");
+        $query = $this->db->query("SELECT MONTH(date) AS month,YEAR(date) AS year,SUM(credit) AS income,SUM(debit) AS expense FROM pos_transactions WHERE (YEAR(date)='$year') GROUP BY MONTH(date)");
         $arrayB = $query->result_array();
         $output = array();
 
@@ -116,7 +116,7 @@ class Cronjob_model extends CI_Model
             $i++;
         }
 
-        $this->db->insert_batch('geopos_reports', $batch);
+        $this->db->insert_batch('pos_reports', $batch);
 
         return true;
 
@@ -129,7 +129,7 @@ class Cronjob_model extends CI_Model
         $updateData = array();
         //$cindex = 0;
         $this->db->select('id,code,rate');
-        $this->db->from('geopos_currencies');
+        $this->db->from('pos_currencies');
         $query = $this->db->get();
         $result = $query->result_array();
         foreach ($result as $key => $value) {
@@ -140,7 +140,7 @@ class Cronjob_model extends CI_Model
 
         }
 //print_r($updateData);
-        $this->db->update_batch('geopos_currencies', $updateData, 'id');
+        $this->db->update_batch('pos_currencies', $updateData, 'id');
 
 
     }
@@ -160,7 +160,7 @@ class Cronjob_model extends CI_Model
         $config = 0;
 
 		$this->db->select('id,tid');
-        $this->db->from('geopos_invoices');
+        $this->db->from('pos_invoices');
         $this->db->order_by('id', 'DESC');
         $this->db->limit(1);
         $query_id = $this->db->get();
@@ -169,7 +169,7 @@ class Cronjob_model extends CI_Model
 
         $this->db->select('id,tid');
         $this->db->where('i_class >', 1);
-        $this->db->from('geopos_invoices');
+        $this->db->from('pos_invoices');
 
         $this->db->order_by('id', 'DESC');
         $this->db->limit(1);
@@ -182,7 +182,7 @@ class Cronjob_model extends CI_Model
         if ($config == 0) {
             $duedate = date('Y-m-d');
 
-            $this->db->from('geopos_invoices');
+            $this->db->from('pos_invoices');
             $this->db->where('DATE(invoiceduedate)<=', $duedate);
             $this->db->where('i_class', 2);
             $query = $this->db->get();
@@ -206,7 +206,7 @@ class Cronjob_model extends CI_Model
                 $invoice_list[$inv_index] = $data;
                 $old_invoice_list[$inv_index] = $data2;
                 $inv_index++;
-                $this->db->from('geopos_invoice_items');
+                $this->db->from('pos_invoice_items');
                 $this->db->where('tid', $row['id']);
                 $query = $this->db->get();
                 $result_p = $query->result_array();
@@ -236,20 +236,20 @@ class Cronjob_model extends CI_Model
                     if ($rowp['pid'] > 0) {
                         $this->db->set('qty', "qty-$amt", FALSE);
                         $this->db->where('pid', $rowp['pid']);
-                        $this->db->update('geopos_products');
+                        $this->db->update('pos_products');
                     }
                     //    $itc += $amt;
 
 
                 }
-                $this->db->insert_batch('geopos_invoice_items', $productlist_p);
+                $this->db->insert_batch('pos_invoice_items', $productlist_p);
 
                 //profit calculation
                 $t_profit = 0;
-                $this->db->select('geopos_invoice_items.pid, geopos_invoice_items.price, geopos_invoice_items.qty, geopos_products.fproduct_price');
-                $this->db->from('geopos_invoice_items');
-                $this->db->join('geopos_products', 'geopos_products.pid = geopos_invoice_items.pid', 'left');
-                $this->db->where('geopos_invoice_items.tid', $last_id);
+                $this->db->select('pos_invoice_items.pid, pos_invoice_items.price, pos_invoice_items.qty, pos_products.fproduct_price');
+                $this->db->from('pos_invoice_items');
+                $this->db->join('pos_products', 'pos_products.pid = pos_invoice_items.pid', 'left');
+                $this->db->where('pos_invoice_items.tid', $last_id);
                 $query = $this->db->get();
                 $pids = $query->result_array();
                 foreach ($pids as $profit) {
@@ -260,14 +260,14 @@ class Cronjob_model extends CI_Model
                 }
                 $data = array('type' => 9, 'rid' => $last_id, 'col1' => $t_profit, 'd_date' => date('Y-m-d'));
 
-                $this->db->insert('geopos_metadata', $data);
+                $this->db->insert('pos_metadata', $data);
 
             }
 
             if ($result) {
 
-                $this->db->insert_batch('geopos_invoices', $invoice_list);
-                if ($this->db->update_batch('geopos_invoices', $old_invoice_list, 'id')) {
+                $this->db->insert_batch('pos_invoices', $invoice_list);
+                if ($this->db->update_batch('pos_invoices', $old_invoice_list, 'id')) {
                     return true;
 
                 } else {
@@ -283,7 +283,7 @@ class Cronjob_model extends CI_Model
     public function stock()
     {
 
-        $query = $this->db->query("SELECT product_name,product_price,qty,unit FROM geopos_products WHERE qty<=alert ORDER BY product_name");
+        $query = $this->db->query("SELECT product_name,product_price,qty,unit FROM pos_products WHERE qty<=alert ORDER BY product_name");
         $result = $query->result_array();
         $html_table = '<h2>Product Stock Alert</h2><p>Dear Business Owner, You have some products running low/out of stock.</p><table><tr><th>Product Name</th><th>Qty</th><th>Price</th></tr>';
         foreach ($result as $row) {
@@ -301,7 +301,7 @@ class Cronjob_model extends CI_Model
     public function expiry()
     {
 
-        $query = $this->db->query("SELECT product_name,product_price,qty,unit,expiry FROM geopos_products WHERE DATE(expiry)<='" . date('Y-m-d') . "' ORDER BY product_name");
+        $query = $this->db->query("SELECT product_name,product_price,qty,unit,expiry FROM pos_products WHERE DATE(expiry)<='" . date('Y-m-d') . "' ORDER BY product_name");
         $result = $query->result_array();
         $html_table = '<h2>Product Expiry Alert</h2><p>Dear Business Owner, You have some products near to expire.</p><table><tr><th>Product Name</th><th>Qty</th><th>Price</th></tr>';
         foreach ($result as $row) {
@@ -320,7 +320,7 @@ class Cronjob_model extends CI_Model
     {
 
         $this->db->select('id,name,email,phone');
-        $this->db->from('geopos_customers');
+        $this->db->from('pos_customers');
         if($limit && $start) $this->db->limit($limit, $start);
         $query = $this->db->get();
         return $query->result_array();

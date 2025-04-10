@@ -21,7 +21,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Supplier_model extends CI_Model
 {
 
-    var $table = 'geopos_supplier';
+    var $table = 'pos_supplier';
     var $column_order = array(null, 'name', 'address', 'email', 'phone', null);
     var $column_search = array('name', 'phone', 'address', 'city', 'email');
     var $trans_column_order = array('date', 'debit', 'credit', 'account', null);
@@ -29,7 +29,7 @@ class Supplier_model extends CI_Model
     var $inv_column_order = array(null, 'tid', 'name', 'invoicedate', 'total', 'status', null);
     var $inv_column_search = array('tid', 'name', 'invoicedate', 'total');
     var $order = array('id' => 'desc');
-    var $inv_order = array('geopos_purchase.tid' => 'desc');
+    var $inv_order = array('pos_purchase.tid' => 'desc');
 
 
     private function _get_datatables_query($id = '')
@@ -138,7 +138,7 @@ class Supplier_model extends CI_Model
     {
 
         $this->db->select('SUM(debit) AS debit,SUM(credit) AS credit');
-        $this->db->from('geopos_transactions');
+        $this->db->from('pos_transactions');
         $this->db->where('payerid', $custid);
         $this->db->where('ext', 1);
         $query = $this->db->get();
@@ -166,7 +166,7 @@ class Supplier_model extends CI_Model
         }
 
 
-        if ($this->db->insert('geopos_supplier', $data)) {
+        if ($this->db->insert('pos_supplier', $data)) {
             $cid = $this->db->insert_id();
             echo json_encode(array('status' => 'Success', 'message' =>
                 $this->lang->line('UPDATED') . ' <a href="' . base_url('supplier/view?id=' . $cid) . '" class="btn btn-info btn-sm"><span class="icon-eye"></span> ' . $this->lang->line('View') . '</a>', 'cid' => $cid));
@@ -203,7 +203,7 @@ class Supplier_model extends CI_Model
             $this->db->where('loc', 0);
         }
 
-        if ($this->db->update('geopos_supplier')) {
+        if ($this->db->update('pos_supplier')) {
             echo json_encode(array('status' => 'Success', 'message' =>
                 $this->lang->line('UPDATED')));
         } else {
@@ -230,7 +230,7 @@ class Supplier_model extends CI_Model
 
         $this->db->set($data);
         $this->db->where('id', $id);
-        if ($this->db->update('geopos_supplier')) {
+        if ($this->db->update('pos_supplier')) {
 
             unlink(FCPATH . 'userfiles/supplier/' . $result['picture']);
             unlink(FCPATH . 'userfiles/supplier/thumbnail/' . $result['picture']);
@@ -241,14 +241,14 @@ class Supplier_model extends CI_Model
 
     public function group_list()
     {
-        $query = $this->db->query("SELECT c.*,p.pc FROM geopos_cust_group AS c LEFT JOIN ( SELECT gid,COUNT(gid) AS pc FROM geopos_supplier GROUP BY gid) AS p ON p.gid=c.id");
+        $query = $this->db->query("SELECT c.*,p.pc FROM pos_cust_group AS c LEFT JOIN ( SELECT gid,COUNT(gid) AS pc FROM pos_supplier GROUP BY gid) AS p ON p.gid=c.id");
         return $query->result_array();
     }
 
     public function delete($id)
     {
 
-        return $this->db->delete('geopos_supplier', array('id' => $id));
+        return $this->db->delete('pos_supplier', array('id' => $id));
     }
 
 
@@ -267,7 +267,7 @@ class Supplier_model extends CI_Model
     private function _get_trans_table_query($id)
     {
 
-        $this->db->from('geopos_transactions');
+        $this->db->from('pos_transactions');
         if ($this->aauth->get_user()->loc) {
             $this->db->where('loc', $this->aauth->get_user()->loc);
         } elseif (!BDATA) {
@@ -337,14 +337,14 @@ class Supplier_model extends CI_Model
 
     private function _inv_datatables_query($id)
     {
-        $this->db->select('geopos_purchase.*');
-        $this->db->from('geopos_purchase');
-        $this->db->where('geopos_purchase.csd', $id);
-        $this->db->join('geopos_supplier', 'geopos_purchase.csd=geopos_supplier.id', 'left');
+        $this->db->select('pos_purchase.*');
+        $this->db->from('pos_purchase');
+        $this->db->where('pos_purchase.csd', $id);
+        $this->db->join('pos_supplier', 'pos_purchase.csd=pos_supplier.id', 'left');
         if ($this->aauth->get_user()->loc) {
-            $this->db->where('geopos_purchase.loc', $this->aauth->get_user()->loc);
+            $this->db->where('pos_purchase.loc', $this->aauth->get_user()->loc);
         } elseif (!BDATA) {
-            $this->db->where('geopos_purchase.loc', 0);
+            $this->db->where('pos_purchase.loc', 0);
         }
         $i = 0;
 
@@ -389,9 +389,9 @@ class Supplier_model extends CI_Model
     {
         $this->_inv_datatables_query($id);
         if ($this->aauth->get_user()->loc) {
-            $this->db->where('geopos_purchase.loc', $this->aauth->get_user()->loc);
+            $this->db->where('pos_purchase.loc', $this->aauth->get_user()->loc);
         } elseif (!BDATA) {
-            $this->db->where('geopos_purchase.loc', 0);
+            $this->db->where('pos_purchase.loc', 0);
         }
         $query = $this->db->get();
         return $query->num_rows();
@@ -399,7 +399,7 @@ class Supplier_model extends CI_Model
 
     public function inv_count_all($id)
     {
-        $this->db->from('geopos_purchase');
+        $this->db->from('pos_purchase');
         $this->db->where('csd', $id);
         return $this->db->count_all_results();
     }
@@ -407,7 +407,7 @@ class Supplier_model extends CI_Model
     public function group_info($id)
     {
 
-        $this->db->from('geopos_cust_group');
+        $this->db->from('pos_cust_group');
         $this->db->where('id', $id);
         $query = $this->db->get();
         return $query->row_array();
@@ -418,7 +418,7 @@ class Supplier_model extends CI_Model
         if ($pay) {
             $this->db->select_sum('total');
             $this->db->select_sum('pamnt');
-            $this->db->from('geopos_purchase');
+            $this->db->from('pos_purchase');
             $this->db->where('DATE(invoicedate) >=', $sdate);
             $this->db->where('DATE(invoicedate) <=', $edate);
             $this->db->where('csd', $csd);
@@ -435,7 +435,7 @@ class Supplier_model extends CI_Model
         } else {
             if ($amount) {
                 $this->db->select('id,tid,total,pamnt');
-                $this->db->from('geopos_purchase');
+                $this->db->from('pos_purchase');
                 $this->db->where('DATE(invoicedate) >=', $sdate);
                 $this->db->where('DATE(invoicedate) <=', $edate);
                 $this->db->where('csd', $csd);
@@ -465,13 +465,13 @@ class Supplier_model extends CI_Model
 
                     $this->db->set('pmethod', $pay_method);
                     $this->db->where('id', $row['id']);
-                    $this->db->update('geopos_purchase');
+                    $this->db->update('pos_purchase');
 
                     if ($amount_custom == 0) break;
 
                 }
                 $this->db->select('id,holder');
-                $this->db->from('geopos_accounts');
+                $this->db->from('pos_accounts');
                 $this->db->where('id', $acc);
                 $query = $this->db->get();
                 $account = $query->row_array();
@@ -493,11 +493,11 @@ class Supplier_model extends CI_Model
                     'loc' => $this->aauth->get_user()->loc
                 );
 
-                $this->db->insert('geopos_transactions', $data);
+                $this->db->insert('pos_transactions', $data);
                 $tttid = $this->db->insert_id();
                 $this->db->set('lastbal', "lastbal-$amount", FALSE);
                 $this->db->where('id', $account['id']);
-                $this->db->update('geopos_accounts');
+                $this->db->update('pos_accounts');
 
             }
 

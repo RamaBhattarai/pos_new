@@ -44,7 +44,7 @@ class Barcode extends CI_Controller
         $pid = $this->input->get('pid');
         if ($pid) {
             $this->db->select('product_name,barcode,code_type');
-            $this->db->from('geopos_products');
+            $this->db->from('pos_products');
             //  $this->db->where('warehouse', $warehouse);
             $this->db->where('pid', $pid);
             $query = $this->db->get();

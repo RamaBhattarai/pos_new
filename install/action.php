@@ -71,7 +71,7 @@ if (isset($_POST)) {
     {
         $salt = md5($id);
         $password = hash('sha256', $salt . '' . $pass);
-        $query = " INSERT INTO `geopos_users` (`id`, `email`, `pass`, `username`, `banned`, `last_login`, `last_activity`, `date_created`, `forgot_exp`, `remember_time`, `remember_exp`, `verification_code`, `totp_secret`, `ip_address`, `roleid`, `picture`, `loc`) VALUES
+        $query = " INSERT INTO `pos_users` (`id`, `email`, `pass`, `username`, `banned`, `last_login`, `last_activity`, `date_created`, `forgot_exp`, `remember_time`, `remember_exp`, `verification_code`, `totp_secret`, `ip_address`, `roleid`, `picture`, `loc`) VALUES
 ($id, '$email', '$password', 'admin', 0, '" . date("Y-m-d H:i:s") . "', '" . date("Y-m-d H:i:s") . "',  '" . date("Y-m-d H:i:s") . "', NULL, NULL, NULL, '', NULL, '::1', 5, 'example.png', 0);";
         return $query;
     }
@@ -101,7 +101,7 @@ if (isset($_POST)) {
     do {
 
     } while (mysqli_more_results($mysqli) && mysqli_next_result($mysqli));
-    $validate = $mysqli->query("SELECT id FROM geopos_users WHERE id='$uid'");
+    $validate = $mysqli->query("SELECT id FROM pos_users WHERE id='$uid'");
 
     if (@$validate->num_rows > 0) {
         $mysqli->close();

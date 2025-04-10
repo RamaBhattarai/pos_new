@@ -53,7 +53,7 @@ class Payments extends CI_Controller
 
     public function ajax_list()
     {
-        $query = $this->db->query("SELECT currency FROM geopos_system WHERE id=1 LIMIT 1");
+        $query = $this->db->query("SELECT currency FROM pos_system WHERE id=1 LIMIT 1");
         $row = $query->row_array();
 
         $this->config->set_item('currency', $row["currency"]);

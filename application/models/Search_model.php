@@ -25,7 +25,7 @@ class Search_model extends CI_Model
     {
 
 
-        $query = $this->db->query("SELECT pid,product_name,product_price FROM geopos_products WHERE UPPER(product_name) LIKE '" . strtoupper($name) . "%'");
+        $query = $this->db->query("SELECT pid,product_name,product_price FROM pos_products WHERE UPPER(product_name) LIKE '" . strtoupper($name) . "%'");
 
         $result = $query->result_array();
 

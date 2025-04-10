@@ -96,7 +96,7 @@ class Accounts extends CI_Controller
             if ($this->aauth->get_user()->loc) {
                 $whr = array('id' => $id, 'loc' => $this->aauth->get_user()->loc);
             }
-            $this->db->delete('geopos_accounts', $whr);
+            $this->db->delete('pos_accounts', $whr);
             echo json_encode(array('status' => 'Success', 'message' => $this->lang->line('ACC_DELETED')));
         } else {
             echo json_encode(array('status' => 'Error', 'message' => $this->lang->line('ERROR')));
@@ -108,7 +108,7 @@ class Accounts extends CI_Controller
     {
         $catid = $this->input->get('id');
         $this->db->select('*');
-        $this->db->from('geopos_accounts');
+        $this->db->from('pos_accounts');
         $this->db->where('id', $catid);
         if ($this->aauth->get_user()->loc) {
             $this->db->where('loc', $this->aauth->get_user()->loc);

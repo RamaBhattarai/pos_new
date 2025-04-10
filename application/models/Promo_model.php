@@ -154,7 +154,7 @@ class Promo_model extends CI_Model
             if ($pay_acc > 0) {
                 $amount = $amount * $qty;
                 $this->db->select('holder');
-                $this->db->from('geopos_accounts');
+                $this->db->from('pos_accounts');
                 $this->db->where('id', $pay_acc);
                 $query = $this->db->get();
                 $account = $query->row_array();
@@ -175,8 +175,8 @@ class Promo_model extends CI_Model
                 );
                 $this->db->set('lastbal', "lastbal-$amount", FALSE);
                 $this->db->where('id', $pay_acc);
-                $this->db->update('geopos_accounts');
-                $this->db->insert('geopos_transactions', $data);
+                $this->db->update('pos_accounts');
+                $this->db->insert('pos_transactions', $data);
             }
             echo json_encode(array('status' => 'Success', 'message' =>
                 $this->lang->line('ADDED')));
@@ -210,7 +210,7 @@ class Promo_model extends CI_Model
     public function accountslist()
     {
         $this->db->select('*');
-        $this->db->from('geopos_accounts');
+        $this->db->from('pos_accounts');
                     if ($this->aauth->get_user()->loc) {
             $this->db->group_start();
             $this->db->where('loc', $this->aauth->get_user()->loc);

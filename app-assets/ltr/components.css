@@ -385,7 +385,7 @@ footer.footer-dark {
             .main-menu.menu-dark .navigation > li ul .active .hover > a {
               background-color: transparent; }
         .main-menu.menu-dark .navigation > li > ul {
-          background: #404E67; }
+          background: #02225b; }
     .main-menu.menu-dark ul.menu-popout {
       background: #404E67; }
       .main-menu.menu-dark ul.menu-popout li a {
@@ -454,7 +454,8 @@ footer.footer-dark {
 
 .navigation {
   font-size: 1rem;
-  font-family: "Montserrat", Georgia, "Times New Roman", Times, serif;
+  /* font-family: "Montserrat", Georgia, "Times New Roman", Times, serif; */
+  font-family: Kumbh Sans, sans-serif;
   font-weight: 300;
   overflow-y: hidden;
   padding-bottom: 20px; }

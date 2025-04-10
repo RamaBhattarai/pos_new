@@ -23,40 +23,40 @@ class Employee_model extends CI_Model
 
     public function list_employee()
     {
-        $this->db->select('geopos_employees.*,geopos_users.banned,geopos_users.roleid,geopos_users.loc');
-        $this->db->from('geopos_employees');
+        $this->db->select('pos_employees.*,pos_users.banned,pos_users.roleid,pos_users.loc');
+        $this->db->from('pos_employees');
 
-        $this->db->join('geopos_users', 'geopos_employees.id = geopos_users.id', 'left');
+        $this->db->join('pos_users', 'pos_employees.id = pos_users.id', 'left');
         if ($this->aauth->get_user()->loc) {
             $this->db->group_start();
-            $this->db->where('geopos_users.loc', $this->aauth->get_user()->loc);
+            $this->db->where('pos_users.loc', $this->aauth->get_user()->loc);
             if (BDATA) $this->db->or_where('loc', 0);
             $this->db->group_end();
         }
-        $this->db->order_by('geopos_users.roleid', 'DESC');
+        $this->db->order_by('pos_users.roleid', 'DESC');
         $query = $this->db->get();
         return $query->result_array();
     }
 
     public function list_project_employee($id)
     {
-        $this->db->select('geopos_employees.*');
-        $this->db->from('geopos_project_meta');
-        $this->db->where('geopos_project_meta.pid', $id);
-        $this->db->where('geopos_project_meta.meta_key', 19);
-        $this->db->join('geopos_employees', 'geopos_employees.id = geopos_project_meta.meta_data', 'left');
-        $this->db->join('geopos_users', 'geopos_employees.id = geopos_users.id', 'left');
-        $this->db->order_by('geopos_users.roleid', 'DESC');
+        $this->db->select('pos_employees.*');
+        $this->db->from('pos_project_meta');
+        $this->db->where('pos_project_meta.pid', $id);
+        $this->db->where('pos_project_meta.meta_key', 19);
+        $this->db->join('pos_employees', 'pos_employees.id = pos_project_meta.meta_data', 'left');
+        $this->db->join('pos_users', 'pos_employees.id = pos_users.id', 'left');
+        $this->db->order_by('pos_users.roleid', 'DESC');
         $query = $this->db->get();
         return $query->result_array();
     }
 
     public function employee_details($id)
     {
-        $this->db->select('geopos_employees.*,geopos_users.email,geopos_users.loc,geopos_users.roleid,');
-        $this->db->from('geopos_employees');
-        $this->db->where('geopos_employees.id', $id);
-        $this->db->join('geopos_users', 'geopos_employees.id = geopos_users.id', 'left');
+        $this->db->select('pos_employees.*,pos_users.email,pos_users.loc,pos_users.roleid,');
+        $this->db->from('pos_employees');
+        $this->db->where('pos_employees.id', $id);
+        $this->db->join('pos_users', 'pos_employees.id = pos_users.id', 'left');
         $query = $this->db->get();
         return $query->row_array();
     }
@@ -64,7 +64,7 @@ class Employee_model extends CI_Model
     public function salary_history($id)
     {
         $this->db->select('*');
-        $this->db->from('geopos_hrm');
+        $this->db->from('pos_hrm');
         $this->db->where('typ', 1);
         $this->db->where('rid', $id);
         $query = $this->db->get();
@@ -74,12 +74,12 @@ class Employee_model extends CI_Model
     public function update_employee($id, $name, $phone, $phonealt, $address, $city, $region, $country, $postbox, $location, $salary = 0, $department = -1, $commission = 0, $roleid = false)
     {
         $this->db->select('salary');
-        $this->db->from('geopos_employees');
+        $this->db->from('pos_employees');
         $this->db->where('id', $id);
         $query = $this->db->get();
         $sal = $query->row_array();
         $this->db->select('roleid');
-        $this->db->from('geopos_users');
+        $this->db->from('pos_users');
         $this->db->where('id', $id);
         $query = $this->db->get();
         $role = $query->row_array();
@@ -118,13 +118,13 @@ class Employee_model extends CI_Model
         $this->db->where('id', $id);
 
 
-        if ($this->db->update('geopos_employees')) {
+        if ($this->db->update('pos_employees')) {
 
             if ($roleid && $role['roleid'] != 5) {
                 $this->db->set('loc', $location);
                 $this->db->set('roleid', $roleid);
                 $this->db->where('id', $id);
-                $this->db->update('geopos_users');
+                $this->db->update('pos_users');
             }
             if (($salary != $sal['salary']) AND ($salary > 0.00)) {
                 $data1 = array(
@@ -135,7 +135,7 @@ class Employee_model extends CI_Model
                     'val3' => date('Y-m-d H:i:s')
                 );
 
-                $this->db->insert('geopos_hrm', $data1);
+                $this->db->insert('pos_hrm', $data1);
             }
 
             echo json_encode(array('status' => 'Success', 'message' =>
@@ -156,7 +156,7 @@ class Employee_model extends CI_Model
     public function editpicture($id, $pic)
     {
         $this->db->select('picture');
-        $this->db->from('geopos_employees');
+        $this->db->from('pos_employees');
         $this->db->where('id', $id);
 
         $query = $this->db->get();
@@ -170,10 +170,10 @@ class Employee_model extends CI_Model
 
         $this->db->set($data);
         $this->db->where('id', $id);
-        if ($this->db->update('geopos_employees')) {
+        if ($this->db->update('pos_employees')) {
             $this->db->set($data);
             $this->db->where('id', $id);
-            $this->db->update('geopos_users');
+            $this->db->update('pos_users');
             unlink(FCPATH . 'userfiles/employee/' . $result['picture']);
             unlink(FCPATH . 'userfiles/employee/thumbnail/' . $result['picture']);
         }
@@ -185,7 +185,7 @@ class Employee_model extends CI_Model
     public function editsign($id, $pic)
     {
         $this->db->select('sign');
-        $this->db->from('geopos_employees');
+        $this->db->from('pos_employees');
         $this->db->where('id', $id);
 
         $query = $this->db->get();
@@ -199,7 +199,7 @@ class Employee_model extends CI_Model
 
         $this->db->set($data);
         $this->db->where('id', $id);
-        if ($this->db->update('geopos_employees')) {
+        if ($this->db->update('pos_employees')) {
 
             unlink(FCPATH . 'userfiles/employee_sign/' . $result['sign']);
             unlink(FCPATH . 'userfiles/employee_sign/thumbnail/' . $result['sign']);
@@ -209,18 +209,18 @@ class Employee_model extends CI_Model
     }
 
 
-    var $table = 'geopos_invoices';
-    var $column_order = array(null, 'geopos_invoices.tid', 'geopos_invoices.invoicedate', 'geopos_invoices.total', 'geopos_invoices.status');
-    var $column_search = array('geopos_invoices.tid', 'geopos_invoices.invoicedate', 'geopos_invoices.total', 'geopos_invoices.status');
-    var $order = array('geopos_invoices.tid' => 'asc');
+    var $table = 'pos_invoices';
+    var $column_order = array(null, 'pos_invoices.tid', 'pos_invoices.invoicedate', 'pos_invoices.total', 'pos_invoices.status');
+    var $column_search = array('pos_invoices.tid', 'pos_invoices.invoicedate', 'pos_invoices.total', 'pos_invoices.status');
+    var $order = array('pos_invoices.tid' => 'asc');
 
 
     private function _invoice_datatables_query($id)
     {
-        $this->db->select('geopos_invoices.*,geopos_customers.name');
-        $this->db->from('geopos_invoices');
-        $this->db->where('geopos_invoices.eid', $id);
-        $this->db->join('geopos_customers', 'geopos_invoices.csd=geopos_customers.id', 'left');
+        $this->db->select('pos_invoices.*,pos_customers.name');
+        $this->db->from('pos_invoices');
+        $this->db->where('pos_invoices.eid', $id);
+        $this->db->join('pos_customers', 'pos_invoices.csd=pos_customers.id', 'left');
 
         $i = 0;
 
@@ -268,7 +268,7 @@ class Employee_model extends CI_Model
         $this->_invoice_datatables_query($id);
         $query = $this->db->get();
         if ($id != '') {
-            $this->db->where('geopos_invoices.eid', $id);
+            $this->db->where('pos_invoices.eid', $id);
         }
         return $query->num_rows($id);
     }
@@ -278,7 +278,7 @@ class Employee_model extends CI_Model
         $this->_invoice_datatables_query($id);
         $query = $this->db->get();
         if ($id != '') {
-            $this->db->where('geopos_invoices.eid', $id);
+            $this->db->where('pos_invoices.eid', $id);
         }
         return $query->num_rows($id = '');
     }
@@ -294,7 +294,7 @@ class Employee_model extends CI_Model
     private function _get_datatables_query()
     {
 
-        $this->db->from('geopos_transactions');
+        $this->db->from('pos_transactions');
 
         $this->db->where('eid', $this->eid);
 
@@ -341,14 +341,14 @@ class Employee_model extends CI_Model
 
     function count_filtered()
     {
-        $this->db->from('geopos_transactions');
+        $this->db->from('pos_transactions');
         $query = $this->db->get();
         return $query->num_rows();
     }
 
     public function count_all()
     {
-        $this->db->from('geopos_transactions');
+        $this->db->from('pos_transactions');
         $this->db->where('eid', $this->eid);
         return $this->db->count_all_results();
     }
@@ -372,7 +372,7 @@ class Employee_model extends CI_Model
         );
 
 
-        if ($this->db->insert('geopos_employees', $data)) {
+        if ($this->db->insert('pos_employees', $data)) {
             $data1 = array(
                 'roleid' => $roleid,
                 'loc' => $location
@@ -381,7 +381,7 @@ class Employee_model extends CI_Model
             $this->db->set($data1);
             $this->db->where('id', $id);
 
-            $this->db->update('geopos_users');
+            $this->db->update('pos_users');
             echo json_encode(array('status' => 'Success', 'message' =>
                 $this->lang->line('ADDED')));
         } else {
@@ -394,7 +394,7 @@ class Employee_model extends CI_Model
     public function employee_validate($email)
     {
         $this->db->select('*');
-        $this->db->from('geopos_users');
+        $this->db->from('pos_users');
         $this->db->where('email', $email);
         $query = $this->db->get();
         return $query->row_array();
@@ -403,7 +403,7 @@ class Employee_model extends CI_Model
     public function money_details($eid)
     {
         $this->db->select('SUM(debit) AS debit,SUM(credit) AS credit');
-        $this->db->from('geopos_transactions');
+        $this->db->from('pos_transactions');
         $this->db->where('eid', $eid);
         $query = $this->db->get();
         return $query->row_array();
@@ -412,7 +412,7 @@ class Employee_model extends CI_Model
     public function sales_details($eid)
     {
         $this->db->select('SUM(pamnt) AS total');
-        $this->db->from('geopos_invoices');
+        $this->db->from('pos_invoices');
         $this->db->where('eid', $eid);
         $query = $this->db->get();
         return $query->row_array();
@@ -421,7 +421,7 @@ class Employee_model extends CI_Model
     public function employee_permissions()
     {
         $this->db->select('*');
-        $this->db->from('geopos_premissions');
+        $this->db->from('pos_premissions');
         $this->db->order_by('id', 'ASC');
         $query = $this->db->get();
         return $query->result_array();
@@ -436,14 +436,14 @@ class Employee_model extends CI_Model
     function addholidays($loc, $hday, $hdayto, $note)
     {
         $data = array('typ' => 2, 'rid' => $loc, 'val1' => $hday, 'val2' => $hdayto, 'val3' => $note);
-        return $this->db->insert('geopos_hrm', $data);
+        return $this->db->insert('pos_hrm', $data);
 
     }
 
     function deleteholidays($id)
     {
 
-        if ($this->db->delete('geopos_hrm', array('id' => $id, 'typ' => 2))) {
+        if ($this->db->delete('pos_hrm', array('id' => $id, 'typ' => 2))) {
 
 
             return true;
@@ -466,7 +466,7 @@ class Employee_model extends CI_Model
     private function holidays_datatables_query()
     {
 
-        $this->db->from('geopos_hrm');
+        $this->db->from('pos_hrm');
         $this->db->where('typ', 2);
         if ($this->aauth->get_user()->loc) {
             $this->db->where('rid', $this->aauth->get_user()->loc);
@@ -517,7 +517,7 @@ class Employee_model extends CI_Model
     public function hday_view($id, $loc)
     {
         $this->db->select('*');
-        $this->db->from('geopos_hrm');
+        $this->db->from('pos_hrm');
         $this->db->where('id', $id);
         $this->db->where('typ', 2);
         if ($this->aauth->get_user()->loc) {
@@ -541,7 +541,7 @@ class Employee_model extends CI_Model
         }
 
 
-        $this->db->update('geopos_hrm');
+        $this->db->update('pos_hrm');
         return true;
 
     }
@@ -549,7 +549,7 @@ class Employee_model extends CI_Model
     public function department_list($id, $rid = 0)
     {
         $this->db->select('*');
-        $this->db->from('geopos_hrm');
+        $this->db->from('pos_hrm');
         $this->db->where('typ', 3);
         if ($this->aauth->get_user()->loc) {
             $this->db->where('rid', $id);
@@ -561,7 +561,7 @@ class Employee_model extends CI_Model
     public function department_elist($id)
     {
         $this->db->select('*');
-        $this->db->from('geopos_employees');
+        $this->db->from('pos_employees');
 
         $this->db->where('dept', $id);
         $query = $this->db->get();
@@ -572,7 +572,7 @@ class Employee_model extends CI_Model
     public function department_view($id, $loc)
     {
         $this->db->select('*');
-        $this->db->from('geopos_hrm');
+        $this->db->from('pos_hrm');
         $this->db->where('id', $id);
         $this->db->where('typ', 3);
         if ($this->aauth->get_user()->loc) {
@@ -587,14 +587,14 @@ class Employee_model extends CI_Model
     function adddepartment($loc, $name)
     {
         $data = array('typ' => 3, 'rid' => $loc, 'val1' => $name);
-        return $this->db->insert('geopos_hrm', $data);
+        return $this->db->insert('pos_hrm', $data);
 
     }
 
     function deletedepartment($id)
     {
 
-        if ($this->db->delete('geopos_hrm', array('id' => $id, 'typ' => 3))) {
+        if ($this->db->delete('pos_hrm', array('id' => $id, 'typ' => 3))) {
 
 
             return true;
@@ -619,7 +619,7 @@ class Employee_model extends CI_Model
         }
 
 
-        $this->db->update('geopos_hrm');
+        $this->db->update('pos_hrm');
         return true;
 
     }
@@ -629,7 +629,7 @@ class Employee_model extends CI_Model
     private function _pay_get_datatables_query($eid)
     {
 
-        $this->db->from('geopos_transactions');
+        $this->db->from('pos_transactions');
         if ($this->aauth->get_user()->loc) {
             $this->db->where('loc', $this->aauth->get_user()->loc);
         }
@@ -681,7 +681,7 @@ class Employee_model extends CI_Model
 
     function pay_count_filtered($eid)
     {
-        $this->db->from('geopos_transactions');
+        $this->db->from('pos_transactions');
         $this->db->where('ext', 4);
         if ($eid) {
             $this->db->where('payerid', $eid);
@@ -692,7 +692,7 @@ class Employee_model extends CI_Model
 
     public function pay_count_all($eid)
     {
-        $this->db->from('geopos_transactions');
+        $this->db->from('pos_transactions');
         $this->db->where('ext', 4);
         if ($eid) {
             $this->db->where('payerid', $eid);
@@ -708,11 +708,11 @@ class Employee_model extends CI_Model
 
             $this->db->where('emp', $row);
             $this->db->where('DATE(adate)', $adate);
-            $num = $this->db->count_all_results('geopos_attendance');
+            $num = $this->db->count_all_results('pos_attendance');
 
             if (!$num) {
                 $data = array('emp' => $row, 'created' => date('Y-m-d H:i:s'), 'adate' => $adate, 'tfrom' => $tfrom, 'tto' => $tto, 'note' => $note);
-                $this->db->insert('geopos_attendance', $data);
+                $this->db->insert('pos_attendance', $data);
             }
 
         }
@@ -724,7 +724,7 @@ class Employee_model extends CI_Model
     function deleteattendance($id)
     {
 
-        if ($this->db->delete('geopos_attendance', array('id' => $id))) {
+        if ($this->db->delete('pos_attendance', array('id' => $id))) {
             return true;
         } else {
             return false;
@@ -732,8 +732,8 @@ class Employee_model extends CI_Model
 
     }
 
-    var $acolumn_order = array(null, 'geopos_attendance.emp', 'geopos_attendance.adate', null, null);
-    var $acolumn_search = array('geopos_employees.name', 'geopos_attendance.adate');
+    var $acolumn_order = array(null, 'pos_attendance.emp', 'pos_attendance.adate', null, null);
+    var $acolumn_search = array('pos_employees.name', 'pos_attendance.adate');
 
     function attendance_datatables($cid)
     {
@@ -746,15 +746,15 @@ class Employee_model extends CI_Model
 
     private function attendance_datatables_query($cid = 0)
     {
-        $this->db->select('geopos_attendance.*,geopos_employees.name');
-        $this->db->from('geopos_attendance');
-        $this->db->join('geopos_employees', 'geopos_employees.id=geopos_attendance.emp', 'left');
+        $this->db->select('pos_attendance.*,pos_employees.name');
+        $this->db->from('pos_attendance');
+        $this->db->join('pos_employees', 'pos_employees.id=pos_attendance.emp', 'left');
         if ($this->aauth->get_user()->loc) {
-            $this->db->join('geopos_users', 'geopos_users.id=geopos_attendance.emp', 'left');
-            $this->db->where('geopos_users.loc', $this->aauth->get_user()->loc);
+            $this->db->join('pos_users', 'pos_users.id=pos_attendance.emp', 'left');
+            $this->db->where('pos_users.loc', $this->aauth->get_user()->loc);
 
         }
-        if ($cid) $this->db->where('geopos_attendance.emp', $cid);
+        if ($cid) $this->db->where('pos_attendance.emp', $cid);
         $i = 0;
 
         foreach ($this->acolumn_search as $item) // loop column
@@ -801,7 +801,7 @@ class Employee_model extends CI_Model
     public function getAttendance($emp, $start, $end)
     {
 
-        $sql = "SELECT  CONCAT(tfrom, ' - ', tto) AS title,DATE(adate) as start ,DATE(adate) as end FROM geopos_attendance WHERE (emp='$emp') AND (DATE(adate) BETWEEN ? AND ? ) ORDER BY DATE(adate) ASC";
+        $sql = "SELECT  CONCAT(tfrom, ' - ', tto) AS title,DATE(adate) as start ,DATE(adate) as end FROM pos_attendance WHERE (emp='$emp') AND (DATE(adate) BETWEEN ? AND ? ) ORDER BY DATE(adate) ASC";
         return $this->db->query($sql, array($start, $end))->result();
 
     }
@@ -809,7 +809,7 @@ class Employee_model extends CI_Model
     public function getHolidays($loc, $start, $end)
     {
 
-        $sql = "SELECT  CONCAT(DATE(val1), ' - ', DATE(val2),' - ',val3) AS title,DATE(val1) as start ,DATE(val2) as end FROM geopos_hrm WHERE  (typ='2') AND  (rid='$loc') AND (DATE(val1) BETWEEN ? AND ? ) ORDER BY DATE(val1) ASC";
+        $sql = "SELECT  CONCAT(DATE(val1), ' - ', DATE(val2),' - ',val3) AS title,DATE(val1) as start ,DATE(val2) as end FROM pos_hrm WHERE  (typ='2') AND  (rid='$loc') AND (DATE(val1) BETWEEN ? AND ? ) ORDER BY DATE(val1) ASC";
         return $this->db->query($sql, array($start, $end))->result();
 
     }
@@ -817,7 +817,7 @@ class Employee_model extends CI_Model
 
     public function salary_view($eid)
     {
-        $this->db->from('geopos_transactions');
+        $this->db->from('pos_transactions');
         $this->db->where('ext', 4);
         $this->db->where('payerid', $eid);
         $query = $this->db->get();

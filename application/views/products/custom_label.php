@@ -228,32 +228,25 @@
         </div>
     </div>
 
+    <!-- Showing products according to warehouse -->
     <script type="text/javascript">
-$(document).ready(function() {
-    // Initialize products select2 with placeholder
-    $("#products_l").select2({
-        placeholder: "Select products...",
-        allowClear: true
-    });
+$(document).ready(function () {
+    const $productsSelect = $("#products_l");
+    const $warehouse = $("#wfrom");
 
-    // Clear products when warehouse changes
-    $("#wfrom").off('change').on('change', function() {
-        var warehouseId = $(this).val();
-        var $productsSelect = $("#products_l");
-        
-        // Clear previous selection and reset
-        $productsSelect.val(null).trigger('change').empty();
-        
-        // Don't proceed if no warehouse selected
-        if (!warehouseId || warehouseId == '0') {
+    function getCsrfToken() {
+        return $('meta[name="csrf-token"]').attr('content');
+    }
+
+    function initProductSelect2(warehouseId) {
+        if (!warehouseId || warehouseId === '0') {
             $productsSelect.select2({
                 placeholder: "Please select a warehouse first",
                 allowClear: true
             });
             return;
         }
-        
-        // Reinitialize Select2 with fresh configuration
+
         $productsSelect.select2('destroy').select2({
             placeholder: "Type to search products...",
             allowClear: true,
@@ -263,42 +256,51 @@ $(document).ready(function() {
                 dataType: 'json',
                 type: 'POST',
                 delay: 300,
-                data: function(params) {
+                cache: false,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Cache-Control': 'no-cache'
+                },
+                data: function (params) {
                     return {
                         product: { term: params.term },
-                        '<?=$this->security->get_csrf_token_name()?>': crsf_hash
+                        '<?= $this->security->get_csrf_token_name() ?>': getCsrfToken()
                     };
                 },
-                processResults: function(data) {
-                    if (data && data.length > 0) {
-                        return {
-                            results: $.map(data, function(item) {
-                                return {
-                                    text: item.product_name + (item.product_code ? ' (' + item.product_code + ')' : ''),
-                                    id: item.pid
-                                }
-                            })
-                        };
-                    }
-                    return { results: [] };
+                processResults: function (data) {
+                    return {
+                        results: $.map(data, function (item) {
+                            return {
+                                id: item.pid,
+                                text: item.product_name + (item.product_code ? ' (' + item.product_code + ')' : '')
+                            };
+                        })
+                    };
                 },
-                error: function(xhr, status, error) {
-                    console.error("AJAX Error:", status, error);
-                    return { results: [] };
+                error: function (xhr) {
+                    console.error("AJAX Error:", xhr.responseText);
                 }
             }
         });
-        
-        // Manually open the dropdown to prompt user to search
-        setTimeout(function() {
-            $productsSelect.select2('open');
-        }, 100);
-    });
-    
-    // Reset form when coming back (if needed)
-    if (performance.navigation.type === 2) {
-        // This page was loaded via back/forward button
-        $("#wfrom").trigger('change');
     }
+
+    // On warehouse change, reload products
+    $warehouse.on('change', function () {
+        const warehouseId = $(this).val();
+        $productsSelect.val(null).trigger('change');
+        initProductSelect2(warehouseId);
+    });
+
+    // On back/forward cache restore (important after print or navigating back)
+    $(window).on("pageshow", function (event) {
+        if (event.originalEvent.persisted || performance.getEntriesByType("navigation")[0]?.type === "back_forward") {
+            const selectedWarehouse = $warehouse.val();
+            initProductSelect2(selectedWarehouse);
+        }
+    });
+
+    // Initial setup
+    const selectedWarehouse = $warehouse.val();
+    initProductSelect2(selectedWarehouse);
 });
 </script>

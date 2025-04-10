@@ -139,7 +139,7 @@ class Import extends CI_Controller
         }
         unlink(FCPATH . 'userfiles/' . $name);
         if (count($sheetData[0]) == 9) {
-            $out = $this->db->insert_batch('geopos_products', $products);
+            $out = $this->db->insert_batch('pos_products', $products);
             if ($out) {
                 echo json_encode(array('status' => 'Success', 'message' =>
                     "Product Data Imported Successfully!"));
@@ -227,7 +227,7 @@ class Import extends CI_Controller
         $data2 = array();
 
         $this->db->select('id');
-        $this->db->from('geopos_customers');
+        $this->db->from('pos_customers');
         $this->db->order_by('id', 'DESC');
         $this->db->limit(1);
 
@@ -289,7 +289,7 @@ class Import extends CI_Controller
         }
         // unlink(FCPATH . 'userfiles/' . $name);
         if (count($sheetData[0]) == 19) {
-            $out = $this->db->insert_batch('geopos_customers', $data);
+            $out = $this->db->insert_batch('pos_customers', $data);
             $out = $this->db->insert_batch('users', $data2);
             if ($out) {
                 echo json_encode(array('status' => 'Success', 'message' =>

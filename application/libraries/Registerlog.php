@@ -32,7 +32,7 @@ class Registerlog
 
     public function check($id)
     {
-        $this->RI->db->from('geopos_register');
+        $this->RI->db->from('pos_register');
         $this->RI->db->where('uid', $id);
         $this->RI->db->where('active', 1);
         $query = $this->RI->db->get();
@@ -47,16 +47,16 @@ class Registerlog
 
     public function view($id)
     {
-        $this->RI->db->from('geopos_register');
-        $this->RI->db->where('geopos_register.id', $id);
-              $this->RI->db->join('geopos_users', 'geopos_register.uid=geopos_users.id', 'left');
+        $this->RI->db->from('pos_register');
+        $this->RI->db->where('pos_register.id', $id);
+              $this->RI->db->join('pos_users', 'pos_register.uid=pos_users.id', 'left');
             if ($this->RI->aauth->get_user()->loc) {
             $this->RI->db->group_start();
-            $this->RI->db->where('geopos_users.loc', $this->RI->aauth->get_user()->loc);
-            if (BDATA) $this->RI->db->or_where('geopos_users.loc', 0);
+            $this->RI->db->where('pos_users.loc', $this->RI->aauth->get_user()->loc);
+            if (BDATA) $this->RI->db->or_where('pos_users.loc', 0);
             $this->RI->db->group_end();
         } elseif (!BDATA) {
-            $this->RI->db->where('geopos_users.loc', 0);
+            $this->RI->db->where('pos_users.loc', 0);
         }
         $query = $this->RI->db->get();
         $result = $query->row_array();
@@ -80,7 +80,7 @@ class Registerlog
             'cheque' => $cheque,
             'active'=>1
         );
-        return $this->RI->db->insert('geopos_register', $data);
+        return $this->RI->db->insert('pos_register', $data);
     }
 
     public function update($id, $cash = 0,  $card = 0, $bank = 0, $cheque = 0,$change = 0)
@@ -93,7 +93,7 @@ class Registerlog
         $this->RI->db->set('r_change', "r_change+$change", FALSE);
         $this->RI->db->where('uid', $id);
         $this->RI->db->where('active', 1);
-        $this->RI->db->update('geopos_register');
+        $this->RI->db->update('pos_register');
     }
 
 
@@ -103,15 +103,15 @@ class Registerlog
           $this->RI->db->set('c_date',  date('Y-m-d H:i:s'));
         $this->RI->db->where('uid', $id);
         $this->RI->db->where('active', 1);
-        $this->RI->db->update('geopos_register');
+        $this->RI->db->update('pos_register');
     }
 
     public function lists($loc=0)
     {
-       $this->RI->db->select('geopos_register.*,geopos_users.username,geopos_users.loc');
-        $this->RI->db->from('geopos_register');
-       $this->RI->db->join('geopos_users','geopos_register.uid=geopos_users.id','left');
-       if($loc)    $this->RI->db->where('geopos_users.loc',$loc);
+       $this->RI->db->select('pos_register.*,pos_users.username,pos_users.loc');
+        $this->RI->db->from('pos_register');
+       $this->RI->db->join('pos_users','pos_register.uid=pos_users.id','left');
+       if($loc)    $this->RI->db->where('pos_users.loc',$loc);
         $query = $this->RI->db->get();
         $result = $query->result_array();
 

@@ -30,7 +30,7 @@ class Tools_model extends CI_Model
     private function _task_datatables_query($cday = '')
     {
 
-        $this->db->from('geopos_todolist');
+        $this->db->from('pos_todolist');
         if ($cday) {
             $this->db->where('DATE(duedate)=', $cday);
         }
@@ -96,7 +96,7 @@ class Tools_model extends CI_Model
     {
 
         $data = array('tdate' => date('Y-m-d H:i:s'), 'name' => $name, 'status' => $status, 'start' => $stdate, 'duedate' => $tdate, 'description' => $content, 'eid' => $employee, 'aid' => $assign, 'related' => 0, 'priority' => $priority, 'rid' => 0);
-        return $this->db->insert('geopos_todolist', $data);
+        return $this->db->insert('pos_todolist', $data);
     }
 
     public function edittask($id, $name, $status, $priority, $stdate, $tdate, $employee, $content)
@@ -105,8 +105,8 @@ class Tools_model extends CI_Model
         $data = array('tdate' => date('Y-m-d H:i:s'), 'name' => $name, 'status' => $status, 'start' => $stdate, 'duedate' => $tdate, 'description' => $content, 'eid' => $employee, 'related' => 0, 'priority' => $priority, 'rid' => 0);
         $this->db->set($data);
         $this->db->where('id', $id);
-        return $this->db->update('geopos_todolist');
-        //return $this->db->insert('geopos_todolist', $data);
+        return $this->db->update('pos_todolist');
+        //return $this->db->insert('pos_todolist', $data);
     }
 
     public function settask($id, $stat)
@@ -115,23 +115,23 @@ class Tools_model extends CI_Model
         $data = array('status' => $stat);
         $this->db->set($data);
         $this->db->where('id', $id);
-        return $this->db->update('geopos_todolist');
+        return $this->db->update('pos_todolist');
     }
 
     public function deletetask($id)
     {
 
-        return $this->db->delete('geopos_todolist', array('id' => $id));
+        return $this->db->delete('pos_todolist', array('id' => $id));
     }
 
     public function viewtask($id)
     {
 
-        $this->db->select('geopos_todolist.*,geopos_employees.name AS emp, assi.name AS assign');
-        $this->db->from('geopos_todolist');
-        $this->db->where('geopos_todolist.id', $id);
-        $this->db->join('geopos_employees', 'geopos_employees.id = geopos_todolist.eid', 'left');
-        $this->db->join('geopos_employees AS assi', 'assi.id = geopos_todolist.aid', 'left');
+        $this->db->select('pos_todolist.*,pos_employees.name AS emp, assi.name AS assign');
+        $this->db->from('pos_todolist');
+        $this->db->where('pos_todolist.id', $id);
+        $this->db->join('pos_employees', 'pos_employees.id = pos_todolist.eid', 'left');
+        $this->db->join('pos_employees AS assi', 'assi.id = pos_todolist.aid', 'left');
         $query = $this->db->get();
         return $query->row_array();
     }
@@ -144,7 +144,7 @@ class Tools_model extends CI_Model
 				COUNT(IF( status = 'Due', id, NULL)) AS Due,
 				COUNT(IF( status = 'Progress', id, NULL)) AS Progress,
 				COUNT(IF( status = 'Done', id, NULL)) AS Done
-				FROM geopos_todolist ");
+				FROM pos_todolist ");
 
         echo json_encode($query->result_array());
 
@@ -156,7 +156,7 @@ class Tools_model extends CI_Model
     {
 
         $this->db->select('*');
-        $this->db->from('geopos_goals');
+        $this->db->from('pos_goals');
         $this->db->where('id', $id);
         $query = $this->db->get();
         return $query->row_array();
@@ -169,7 +169,7 @@ class Tools_model extends CI_Model
         $data = array('income' => $income, 'expense' => $expense, 'sales' => $sales, 'netincome' => $netincome);
         $this->db->set($data);
         $this->db->where('id', 1);
-        return $this->db->update('geopos_goals');
+        return $this->db->update('pos_goals');
     }
 
     //notes
@@ -177,7 +177,7 @@ class Tools_model extends CI_Model
     private function _notes_datatables_query()
     {
 
-        $this->db->from('geopos_notes');
+        $this->db->from('pos_notes');
         $this->db->where('ntype', 0);
         $i = 0;
 
@@ -235,14 +235,14 @@ class Tools_model extends CI_Model
     function addnote($title, $content)
     {
         $data = array('title' => $title, 'content' => $content, 'cdate' => date('Y-m-d'), 'last_edit' => date('Y-m-d H:i:s'), 'cid' => $this->aauth->get_user()->id, 'fid' => $this->aauth->get_user()->id, 'ntype' => 0);
-        return $this->db->insert('geopos_notes', $data);
+        return $this->db->insert('pos_notes', $data);
 
     }
 
     public function note_v($id)
     {
         $this->db->select('*');
-        $this->db->from('geopos_notes');
+        $this->db->from('pos_notes');
         $this->db->where('id', $id);
         $query = $this->db->get();
         return $query->row_array();
@@ -250,7 +250,7 @@ class Tools_model extends CI_Model
 
     function deletenote($id)
     {
-        return $this->db->delete('geopos_notes', array('id' => $id));
+        return $this->db->delete('pos_notes', array('id' => $id));
 
     }
 
@@ -263,7 +263,7 @@ class Tools_model extends CI_Model
     public function documentlist()
     {
         $this->db->select('*');
-        $this->db->from('geopos_documents');
+        $this->db->from('pos_documents');
         $query = $this->db->get();
         return $query->result_array();
     }
@@ -271,18 +271,18 @@ class Tools_model extends CI_Model
     function adddocument($title, $filename)
     {
         $data = array('title' => $title, 'filename' => $filename, 'cdate' => date('Y-m-d'));
-        return $this->db->insert('geopos_documents', $data);
+        return $this->db->insert('pos_documents', $data);
 
     }
 
     function deletedocument($id)
     {
         $this->db->select('filename');
-        $this->db->from('geopos_documents');
+        $this->db->from('pos_documents');
         $this->db->where('id', $id);
         $query = $this->db->get();
         $result = $query->row_array();
-        if ($this->db->delete('geopos_documents', array('id' => $id))) {
+        if ($this->db->delete('pos_documents', array('id' => $id))) {
 
             unlink(FCPATH . 'userfiles/documents/' . $result['filename']);
             return true;
@@ -305,7 +305,7 @@ class Tools_model extends CI_Model
     private function document_datatables_query()
     {
 
-        $this->db->from('geopos_documents');
+        $this->db->from('pos_documents');
 
         $i = 0;
 
@@ -353,7 +353,7 @@ class Tools_model extends CI_Model
     public function pending_tasks()
     {
         $this->db->select('*');
-        $this->db->from('geopos_todolist');
+        $this->db->from('pos_todolist');
         $this->db->where('status', 'Due');
         $this->db->order_by('DATE(duedate)', 'ASC');
         $query = $this->db->get();
@@ -364,7 +364,7 @@ class Tools_model extends CI_Model
     public function pending_tasks_user($id)
     {
         $this->db->select('*');
-        $this->db->from('geopos_todolist');
+        $this->db->from('pos_todolist');
         $this->db->where('status', 'Due');
         $this->db->where('eid', $id);
         $this->db->order_by('DATE(duedate)', 'ASC');
@@ -388,7 +388,7 @@ class Tools_model extends CI_Model
         $this->db->set($data);
         $this->db->where('id', $id);
 
-        if ($this->db->update('geopos_notes')) {
+        if ($this->db->update('pos_notes')) {
             return true;
         } else {
             return false;

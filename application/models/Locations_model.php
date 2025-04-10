@@ -24,7 +24,7 @@ class Locations_model extends CI_Model
 
     public function locations_list()
     {
-        $query = $this->db->query("SELECT * FROM geopos_locations ORDER BY id DESC");
+        $query = $this->db->query("SELECT * FROM pos_locations ORDER BY id DESC");
         return $query->result_array();
     }
 
@@ -32,7 +32,7 @@ class Locations_model extends CI_Model
     {
         $where = '';
         if ($this->aauth->get_user()->loc) $where = 'WHERE id=' . $this->aauth->get_user()->loc . '';
-        $query = $this->db->query("SELECT * FROM geopos_locations $where ORDER BY id DESC");
+        $query = $this->db->query("SELECT * FROM pos_locations $where ORDER BY id DESC");
         return $query->result_array();
     }
 
@@ -40,7 +40,7 @@ class Locations_model extends CI_Model
     public function view($id)
     {
 
-        $this->db->from('geopos_locations');
+        $this->db->from('pos_locations');
         $this->db->where('id', $id);
         $query = $this->db->get();
         $result = $query->row_array();
@@ -65,7 +65,7 @@ class Locations_model extends CI_Model
             'ware' => $wid
         );
 
-        if ($this->db->insert('geopos_locations', $data)) {
+        if ($this->db->insert('pos_locations', $data)) {
             echo json_encode(array('status' => 'Success', 'message' =>
                 $this->lang->line('ADDED')));
         } else {
@@ -96,7 +96,7 @@ class Locations_model extends CI_Model
         $this->db->set($data);
         $this->db->where('id', $id);
 
-        if ($this->db->update('geopos_locations')) {
+        if ($this->db->update('pos_locations')) {
             echo json_encode(array('status' => 'Success', 'message' =>
                 $this->lang->line('UPDATED')));
         } else {
@@ -110,7 +110,7 @@ class Locations_model extends CI_Model
     {
 
         $this->db->select('*');
-        $this->db->from('geopos_currencies');
+        $this->db->from('pos_currencies');
 
         $query = $this->db->get();
         return $query->result_array();
@@ -120,7 +120,7 @@ class Locations_model extends CI_Model
     public function currency_d($id)
     {
         $this->db->select('*');
-        $this->db->from('geopos_currencies');
+        $this->db->from('pos_currencies');
         $this->db->where('id', $id);
         $query = $this->db->get();
         return $query->row_array();
@@ -129,7 +129,7 @@ class Locations_model extends CI_Model
     public function accountslist()
     {
         $this->db->select('*');
-        $this->db->from('geopos_accounts');
+        $this->db->from('pos_accounts');
 
         if ($this->aauth->get_user()->loc) {
             $this->db->where('loc', $this->aauth->get_user()->loc);
@@ -143,10 +143,10 @@ class Locations_model extends CI_Model
     public function online_pay_settings($id)
     {
 
-        $this->db->select('geopos_accounts.id,geopos_accounts.holder,');
-        $this->db->from('geopos_locations');
-        $this->db->where('geopos_locations.id', $id);
-        $this->db->join('geopos_accounts', 'geopos_locations.ext = geopos_accounts.id', 'left');
+        $this->db->select('pos_accounts.id,pos_accounts.holder,');
+        $this->db->from('pos_locations');
+        $this->db->where('pos_locations.id', $id);
+        $this->db->join('pos_accounts', 'pos_locations.ext = pos_accounts.id', 'left');
         $query = $this->db->get();
         return $query->row_array();
 
@@ -155,7 +155,7 @@ class Locations_model extends CI_Model
     public function warehouses()
     {
         $this->db->select('*');
-        $this->db->from('geopos_warehouse');
+        $this->db->from('pos_warehouse');
         if ($this->aauth->get_user()->loc) {
             $this->db->where('loc', $this->aauth->get_user()->loc);
         } elseif (!BDATA) {

@@ -427,7 +427,7 @@ class User extends CI_Controller
             $data['profile_pic'] = $profile_pic;
             $data2['picture'] = $profile_pic;
             $this->User_model->updateRow('users', 'users_id', $id, $data);
-            $this->User_model->updateRow('geopos_customers', 'id', $this->session->userdata('user_details')[0]->cid, $data2);
+            $this->User_model->updateRow('pos_customers', 'id', $this->session->userdata('user_details')[0]->cid, $data2);
 
             $this->session->set_flashdata('messagePr', 'Your data updated Successfully..');
             redirect(base_url() . 'user/' . $redirect, 'refresh');
@@ -497,7 +497,7 @@ class User extends CI_Controller
                         $udata['code'] = $this->generate_token();
                     }
                     //in customer
-                    $cid = $this->User_model->insertRow('geopos_customers', $zdata1);
+                    $cid = $this->User_model->insertRow('pos_customers', $zdata1);
 
                     $udata['user_id'] = 1;
 
@@ -894,7 +894,7 @@ class User extends CI_Controller
 
         );
 
-              $this->User_model->updateRow('geopos_customers', 'id',$id,$data);
+              $this->User_model->updateRow('pos_customers', 'id',$id,$data);
 
               $data2 = array(
                 'name' => $name,

@@ -24,7 +24,7 @@ class Barcode_model extends CI_Model
 
     public function locations_list()
     {
-        $query = $this->db->query("SELECT * FROM geopos_locations ORDER BY id DESC");
+        $query = $this->db->query("SELECT * FROM pos_locations ORDER BY id DESC");
         return $query->result_array();
     }
 
@@ -102,7 +102,7 @@ class Barcode_model extends CI_Model
             'extra' => $cat_desc
         );
 
-        if ($this->db->insert('geopos_warehouse', $data)) {
+        if ($this->db->insert('pos_warehouse', $data)) {
             echo json_encode(array('status' => 'Success', 'message' =>
                 $this->lang->line('ADDED')));
         } else {
@@ -124,7 +124,7 @@ class Barcode_model extends CI_Model
         $this->db->set($data);
         $this->db->where('id', $catid);
 
-        if ($this->db->update('geopos_warehouse')) {
+        if ($this->db->update('pos_warehouse')) {
             echo json_encode(array('status' => 'Success', 'message' =>
                 $this->lang->line('UPDATED')));
         } else {

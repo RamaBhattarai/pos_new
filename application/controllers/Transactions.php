@@ -105,7 +105,7 @@ class Transactions extends CI_Controller
         $paydate = datefordatabase($paydate);
 
         $this->db->select('holder');
-        $this->db->from('geopos_accounts');
+        $this->db->from('pos_accounts');
         $this->db->where('id', $acid);
         $query = $this->db->get();
         $account = $query->row_array();
@@ -117,13 +117,13 @@ class Transactions extends CI_Controller
 
                 $this->db->set('balance', "balance-$amount", FALSE);
                 $this->db->where('id', $cid);
-                $this->db->update('geopos_customers');
+                $this->db->update('pos_customers');
             } else {
 
                 $amount = rev_amountExchange_s($customer['balance'], 0, $this->aauth->get_user()->loc);
                 $this->db->set('balance', 0, FALSE);
                 $this->db->where('id', $cid);
-                $this->db->update('geopos_customers');
+                $this->db->update('pos_customers');
             }
         }
 
@@ -143,11 +143,11 @@ class Transactions extends CI_Controller
             'loc' => $this->aauth->get_user()->loc
         );
 
-        $this->db->insert('geopos_transactions', $data);
+        $this->db->insert('pos_transactions', $data);
         $tttid = $this->db->insert_id();
 
         $this->db->select('total,csd,pamnt');
-        $this->db->from('geopos_invoices');
+        $this->db->from('pos_invoices');
         $this->db->where('id', $tid);
         $query = $this->db->get();
         $invresult = $query->row();
@@ -160,13 +160,13 @@ class Transactions extends CI_Controller
 
             $this->db->set('status', 'partial');
             $this->db->where('id', $tid);
-            $this->db->update('geopos_invoices');
+            $this->db->update('pos_invoices');
 
 
             //account update
             $this->db->set('lastbal', "lastbal+$amount", FALSE);
             $this->db->where('id', $acid);
-            $this->db->update('geopos_accounts');
+            $this->db->update('pos_accounts');
             $paid_amount = $invresult->pamnt + $amount;
             $status = 'Partial';
             $totalrm = $totalrm - $amount;
@@ -178,21 +178,21 @@ class Transactions extends CI_Controller
                 $amount = $totalrm;
                 $this->db->set('balance', "balance+$diff", FALSE);
                 $this->db->where('id', $cid);
-                $this->db->update('geopos_customers');
+                $this->db->update('pos_customers');
                 $this->db->set('credit', "credit-$diff", FALSE);
                 $this->db->where('id', $tttid);
-                $this->db->update('geopos_transactions');
+                $this->db->update('pos_transactions');
 
             }
             $this->db->set('pmethod', $pmethod);
             $this->db->set('pamnt', "pamnt+$totalrm", FALSE);
             $this->db->set('status', 'paid');
             $this->db->where('id', $tid);
-            $this->db->update('geopos_invoices');
+            $this->db->update('pos_invoices');
             //account update
             $this->db->set('lastbal', "lastbal+$totalrm", FALSE);
             $this->db->where('id', $acid);
-            $this->db->update('geopos_accounts');
+            $this->db->update('pos_accounts');
             $totalrm = 0;
             $status = 'Paid';
         }
@@ -203,7 +203,7 @@ class Transactions extends CI_Controller
         if ($dual['key1']) {
 
             $this->db->select('holder');
-            $this->db->from('geopos_accounts');
+            $this->db->from('pos_accounts');
             $this->db->where('id', $dual['key2']);
             $query = $this->db->get();
             $account = $query->row_array();
@@ -215,12 +215,12 @@ class Transactions extends CI_Controller
             $data['account'] = $account['holder'];
             $data['note'] = 'Debit ' . $data['note'];
 
-            $this->db->insert('geopos_transactions', $data);
+            $this->db->insert('pos_transactions', $data);
 
             //account update
             $this->db->set('lastbal', "lastbal-$amount", FALSE);
             $this->db->where('id', $dual['key2']);
-            $this->db->update('geopos_accounts');
+            $this->db->update('pos_accounts');
         }
         echo json_encode(array('status' => 'Success', 'message' =>
             $this->lang->line('Transaction has been added'), 'pstatus' => $this->lang->line($status), 'activity' => $activitym, 'amt' => $totalrm, 'ttlpaid' => amountExchange_s($amount, 0, $this->aauth->get_user()->loc)));
@@ -251,7 +251,7 @@ class Transactions extends CI_Controller
         $cname = $this->input->post('cname', true);
         $paydate = datefordatabase($paydate);
         $this->db->select('holder');
-        $this->db->from('geopos_accounts');
+        $this->db->from('pos_accounts');
         $this->db->where('id', $acid);
         $query = $this->db->get();
         $account = $query->row_array();
@@ -271,10 +271,10 @@ class Transactions extends CI_Controller
             'ext' => 1,
             'loc' => $this->aauth->get_user()->loc
         );
-        $this->db->insert('geopos_transactions', $data);
+        $this->db->insert('pos_transactions', $data);
         $this->db->insert_id();
         $this->db->select('total,csd,pamnt');
-        $this->db->from('geopos_purchase');
+        $this->db->from('pos_purchase');
         $this->db->where('id', $tid);
         $query = $this->db->get();
         $invresult = $query->row();
@@ -284,11 +284,11 @@ class Transactions extends CI_Controller
             $this->db->set('pamnt', "pamnt+$amount", FALSE);
             $this->db->set('status', 'partial');
             $this->db->where('id', $tid);
-            $this->db->update('geopos_purchase');
+            $this->db->update('pos_purchase');
             //account update
             $this->db->set('lastbal', "lastbal-$amount", FALSE);
             $this->db->where('id', $acid);
-            $this->db->update('geopos_accounts');
+            $this->db->update('pos_accounts');
             $paid_amount = $invresult->pamnt + $amount;
             $status = 'Partial';
             $totalrm = $totalrm - $amount;
@@ -297,11 +297,11 @@ class Transactions extends CI_Controller
             $this->db->set('pamnt', "pamnt+$amount", FALSE);
             $this->db->set('status', 'paid');
             $this->db->where('id', $tid);
-            $this->db->update('geopos_purchase');
+            $this->db->update('pos_purchase');
             //acount update
             $this->db->set('lastbal', "lastbal-$amount", FALSE);
             $this->db->where('id', $acid);
-            $this->db->update('geopos_accounts');
+            $this->db->update('pos_accounts');
             $totalrm = 0;
             $status = 'Paid';
             $paid_amount = $amount;
@@ -311,7 +311,7 @@ class Transactions extends CI_Controller
         if ($dual['key1']) {
 
             $this->db->select('holder');
-            $this->db->from('geopos_accounts');
+            $this->db->from('pos_accounts');
             $this->db->where('id', $dual['url']);
             $query = $this->db->get();
             $account = $query->row_array();
@@ -323,12 +323,12 @@ class Transactions extends CI_Controller
             $data['account'] = $account['holder'];
             $data['note'] = 'Credit ' . $data['note'];
 
-            $this->db->insert('geopos_transactions', $data);
+            $this->db->insert('pos_transactions', $data);
 
             //account update
             $this->db->set('lastbal', "lastbal+$amount", FALSE);
             $this->db->where('id', $dual['url']);
-            $this->db->update('geopos_accounts');
+            $this->db->update('pos_accounts');
         }
         $activitym = "<tr><td>" . substr($paydate, 0, 10) . "</td><td>$pmethod</td><td>$amount</td><td>$note</td></tr>";
 
@@ -355,10 +355,10 @@ class Transactions extends CI_Controller
         $this->db->set('items', 0);
         $this->db->set('status', 'canceled');
         $this->db->where('id', $tid);
-        $this->db->update('geopos_invoices');
+        $this->db->update('pos_invoices');
         //reverse
         $this->db->select('credit,debit,acid');
-        $this->db->from('geopos_transactions');
+        $this->db->from('pos_transactions');
         $this->db->where('tid', $tid);
         $query = $this->db->get();
         $revresult = $query->result_array();
@@ -366,10 +366,10 @@ class Transactions extends CI_Controller
             $amt = $trans['credit'] - $trans['debit'];
             $this->db->set('lastbal', "lastbal-$amt", FALSE);
             $this->db->where('id', $trans['acid']);
-            $this->db->update('geopos_accounts');
+            $this->db->update('pos_accounts');
         }
         $this->db->select('pid,qty');
-        $this->db->from('geopos_invoice_items');
+        $this->db->from('pos_invoice_items');
         $this->db->where('tid', $tid);
         $query = $this->db->get();
         $prevresult = $query->result_array();
@@ -377,11 +377,11 @@ class Transactions extends CI_Controller
             $amt = $prd['qty'];
             $this->db->set('qty', "qty+$amt", FALSE);
             $this->db->where('pid', $prd['pid']);
-            $this->db->update('geopos_products');
+            $this->db->update('pos_products');
         }
-        $this->db->delete('geopos_transactions', array('tid' => $tid));
+        $this->db->delete('pos_transactions', array('tid' => $tid));
         $data = array('type' => 9, 'rid' => $tid);
-        $this->db->delete('geopos_metadata', $data);
+        $this->db->delete('pos_metadata', $data);
         echo json_encode(array('status' => 'Success', 'message' =>
             $this->lang->line('Invoice canceled')));
     }
@@ -396,10 +396,10 @@ class Transactions extends CI_Controller
         $this->db->set('pamnt', "0.00", FALSE);
         $this->db->set('status', 'canceled');
         $this->db->where('id', $tid);
-        $this->db->update('geopos_purchase');
+        $this->db->update('pos_purchase');
         //reverse
         $this->db->select('debit,credit,acid');
-        $this->db->from('geopos_transactions');
+        $this->db->from('pos_transactions');
         $this->db->where('tid', $tid);
         $this->db->where('ext', 1);
         $query = $this->db->get();
@@ -408,10 +408,10 @@ class Transactions extends CI_Controller
             $amt = $trans['debit'] - $trans['credit'];
             $this->db->set('lastbal', "lastbal+$amt", FALSE);
             $this->db->where('id', $trans['acid']);
-            $this->db->update('geopos_accounts');
+            $this->db->update('pos_accounts');
         }
         $this->db->select('pid,qty');
-        $this->db->from('geopos_purchase_items');
+        $this->db->from('pos_purchase_items');
         $this->db->where('tid', $tid);
         $query = $this->db->get();
         $prevresult = $query->result_array();
@@ -419,9 +419,9 @@ class Transactions extends CI_Controller
             $amt = $prd['qty'];
             $this->db->set('qty', "qty-$amt", FALSE);
             $this->db->where('pid', $prd['pid']);
-            $this->db->update('geopos_products');
+            $this->db->update('pos_products');
         }
-        $this->db->delete('geopos_transactions', array('tid' => $tid, 'ext' => 1));
+        $this->db->delete('pos_transactions', array('tid' => $tid, 'ext' => 1));
         echo json_encode(array('status' => 'Success', 'message' =>
             $this->lang->line('Purchase canceled!')));
     }
@@ -569,7 +569,7 @@ class Transactions extends CI_Controller
 
         $id = $this->input->post('deleteid');
         if ($id) {
-            $this->db->delete('geopos_trans_cat', array('id' => $id));
+            $this->db->delete('pos_trans_cat', array('id' => $id));
             echo json_encode(array('status' => 'Success', 'message' => $this->lang->line('DELETED')));
         } else {
             echo json_encode(array('status' => 'Error', 'message' => 'Error!'));

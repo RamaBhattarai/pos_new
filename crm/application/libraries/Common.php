@@ -39,7 +39,7 @@ class Common
         }
         else{
             $this->PI->db->select('lang');
-            $this->PI->db->from('geopos_system');
+            $this->PI->db->from('pos_system');
             $this->PI->db->where('id', 1);
             $query = $this->PI->db->get();
             $out = $query->row_array();
@@ -273,13 +273,13 @@ class Common
 
         if ($id) {
             $this->PI->db->select('lang');
-            $this->PI->db->from('geopos_locations');
+            $this->PI->db->from('pos_locations');
             $this->PI->db->where('id', $id);
             $query = $this->PI->db->get();
             $out = $query->row_array();
         } else {
             $this->PI->db->select('lang');
-            $this->PI->db->from('geopos_system');
+            $this->PI->db->from('pos_system');
             $this->PI->db->where('id', 1);
             $query = $this->PI->db->get();
             $out = $query->row_array();

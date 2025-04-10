@@ -166,7 +166,7 @@ class Productgroups_model extends CI_Model
     public function valid_warehouse($warehouse)
     {
         $this->db->select('id,loc');
-        $this->db->from('geopos_warehouse');
+        $this->db->from('pos_warehouse');
         $this->db->where('id', $warehouse);
         $query = $this->db->get();
         $row = $query->row_array();

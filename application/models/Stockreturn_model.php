@@ -20,10 +20,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Stockreturn_model extends CI_Model
 {
-    var $table = 'geopos_stock_r';
-    var $column_order = array(null, 'geopos_stock_r.tid', 'name', 'geopos_stock_r.invoicedate', 'geopos_stock_r.total', 'geopos_stock_r.status', null);
-    var $column_search = array('geopos_stock_r.tid', 'name', 'geopos_stock_r.invoicedate', 'geopos_stock_r.total','geopos_stock_r.status');
-    var $order = array('geopos_stock_r.tid' => 'desc');
+    var $table = 'pos_stock_r';
+    var $column_order = array(null, 'pos_stock_r.tid', 'name', 'pos_stock_r.invoicedate', 'pos_stock_r.total', 'pos_stock_r.status', null);
+    var $column_search = array('pos_stock_r.tid', 'name', 'pos_stock_r.invoicedate', 'pos_stock_r.total','pos_stock_r.status');
+    var $order = array('pos_stock_r.tid' => 'desc');
 
     public function __construct()
     {
@@ -47,7 +47,7 @@ class Stockreturn_model extends CI_Model
     public function warehouses()
     {
         $this->db->select('*');
-        $this->db->from('geopos_warehouse');
+        $this->db->from('pos_warehouse');
     if ($this->aauth->get_user()->loc) {
             $this->db->where('loc', $this->aauth->get_user()->loc);
           if(BDATA)  $this->db->or_where('loc', 0);
@@ -61,7 +61,7 @@ class Stockreturn_model extends CI_Model
     {
 
         $this->db->select('*');
-        $this->db->from('geopos_currencies');
+        $this->db->from('pos_currencies');
         $query = $this->db->get();
         return $query->result_array();
     }
@@ -69,36 +69,36 @@ class Stockreturn_model extends CI_Model
     public function purchase_details($id)
     {
 
-        $this->db->select('geopos_stock_r.i_class');
+        $this->db->select('pos_stock_r.i_class');
         $this->db->from($this->table);
-        $this->db->where('geopos_stock_r.id', $id);
+        $this->db->where('pos_stock_r.id', $id);
         $query = $this->db->get();
         $out = $query->row_array();
 
         if ($out['i_class']) {
-            $this->db->select('geopos_stock_r.*,geopos_stock_r.id AS iid,SUM(geopos_stock_r.shipping + geopos_stock_r.ship_tax) AS shipping,geopos_customers.*,geopos_stock_r.loc as loc,geopos_customers.id AS cid,geopos_terms.id AS termid,geopos_terms.title AS termtit,geopos_terms.terms AS terms');
+            $this->db->select('pos_stock_r.*,pos_stock_r.id AS iid,SUM(pos_stock_r.shipping + pos_stock_r.ship_tax) AS shipping,pos_customers.*,pos_stock_r.loc as loc,pos_customers.id AS cid,pos_terms.id AS termid,pos_terms.title AS termtit,pos_terms.terms AS terms');
             $this->db->from($this->table);
-            $this->db->where('geopos_stock_r.id', $id);
-            $this->db->join('geopos_customers', 'geopos_stock_r.csd = geopos_customers.id', 'left');
-            $this->db->join('geopos_terms', 'geopos_terms.id = geopos_stock_r.term', 'left');
+            $this->db->where('pos_stock_r.id', $id);
+            $this->db->join('pos_customers', 'pos_stock_r.csd = pos_customers.id', 'left');
+            $this->db->join('pos_terms', 'pos_terms.id = pos_stock_r.term', 'left');
                if ($this->aauth->get_user()->loc) {
-            $this->db->where('geopos_stock_r.loc', $this->aauth->get_user()->loc);
+            $this->db->where('pos_stock_r.loc', $this->aauth->get_user()->loc);
         } elseif (!BDATA) {
-            $this->db->where('geopos_stock_r.loc', 0);
+            $this->db->where('pos_stock_r.loc', 0);
         }
             $query = $this->db->get();
             return $query->row_array();
         } else {
 
-            $this->db->select('geopos_stock_r.*,geopos_stock_r.id AS iid,SUM(geopos_stock_r.shipping + geopos_stock_r.ship_tax) AS shipping,geopos_supplier.*,geopos_stock_r.loc as loc,geopos_supplier.id AS cid,geopos_terms.id AS termid,geopos_terms.title AS termtit,geopos_terms.terms AS terms');
+            $this->db->select('pos_stock_r.*,pos_stock_r.id AS iid,SUM(pos_stock_r.shipping + pos_stock_r.ship_tax) AS shipping,pos_supplier.*,pos_stock_r.loc as loc,pos_supplier.id AS cid,pos_terms.id AS termid,pos_terms.title AS termtit,pos_terms.terms AS terms');
             $this->db->from($this->table);
-            $this->db->where('geopos_stock_r.id', $id);
-            $this->db->join('geopos_supplier', 'geopos_stock_r.csd = geopos_supplier.id', 'left');
-            $this->db->join('geopos_terms', 'geopos_terms.id = geopos_stock_r.term', 'left');
+            $this->db->where('pos_stock_r.id', $id);
+            $this->db->join('pos_supplier', 'pos_stock_r.csd = pos_supplier.id', 'left');
+            $this->db->join('pos_terms', 'pos_terms.id = pos_stock_r.term', 'left');
               if ($this->aauth->get_user()->loc) {
-            $this->db->where('geopos_stock_r.loc', $this->aauth->get_user()->loc);
+            $this->db->where('pos_stock_r.loc', $this->aauth->get_user()->loc);
         } elseif (!BDATA) {
-            $this->db->where('geopos_stock_r.loc', 0);
+            $this->db->where('pos_stock_r.loc', 0);
         }
             $query = $this->db->get();
             return $query->row_array();
@@ -110,7 +110,7 @@ class Stockreturn_model extends CI_Model
     {
 
         $this->db->select('*');
-        $this->db->from('geopos_stock_r_items');
+        $this->db->from('pos_stock_r_items');
         $this->db->where('tid', $id);
         $query = $this->db->get();
         return $query->result_array();
@@ -121,7 +121,7 @@ class Stockreturn_model extends CI_Model
     {
 
         $this->db->select('*');
-        $this->db->from('geopos_transactions');
+        $this->db->from('pos_transactions');
         $this->db->where('tid', $id);
         $this->db->where('ext', 6);
         $query = $this->db->get();
@@ -135,13 +135,13 @@ class Stockreturn_model extends CI_Model
         $this->db->trans_start();
 
         $this->db->select('pid,qty');
-        $this->db->from('geopos_stock_r_items');
+        $this->db->from('pos_stock_r_items');
         $this->db->where('tid', $id);
         $query = $this->db->get();
         $prevresult = $query->result_array();
 
         $this->db->select('i_class');
-        $this->db->from('geopos_stock_r');
+        $this->db->from('pos_stock_r');
         $this->db->where('id', $id);
         $query = $this->db->get();
         $stock = $query->row_array();
@@ -150,14 +150,14 @@ class Stockreturn_model extends CI_Model
                 $amt = $prd['qty'];
                 $this->db->set('qty', "qty+$amt", FALSE);
                 $this->db->where('pid', $prd['pid']);
-                $this->db->update('geopos_products');
+                $this->db->update('pos_products');
             }
             $whr = array('id' => $id);
             if ($this->aauth->get_user()->loc) {
                 $whr = array('id' => $id, 'loc' => $this->aauth->get_user()->loc);
             }
-            $this->db->delete('geopos_stock_r', $whr);
-            if ($this->db->affected_rows()) $this->db->delete('geopos_stock_r_items', array('tid' => $id));
+            $this->db->delete('pos_stock_r', $whr);
+            if ($this->db->affected_rows()) $this->db->delete('pos_stock_r_items', array('tid' => $id));
             if ($this->db->trans_complete()) {
                 return true;
             } else {
@@ -171,28 +171,28 @@ class Stockreturn_model extends CI_Model
     {
         if ($type) {
 
-            $this->db->select('geopos_stock_r.id,geopos_stock_r.tid,geopos_stock_r.invoicedate,geopos_stock_r.invoiceduedate,geopos_stock_r.total,geopos_stock_r.status,geopos_customers.name');
+            $this->db->select('pos_stock_r.id,pos_stock_r.tid,pos_stock_r.invoicedate,pos_stock_r.invoiceduedate,pos_stock_r.total,pos_stock_r.status,pos_customers.name');
             $this->db->from($this->table);
-            $this->db->where('geopos_stock_r.i_class', $type);
-            $this->db->join('geopos_customers', 'geopos_stock_r.csd=geopos_customers.id', 'left');
+            $this->db->where('pos_stock_r.i_class', $type);
+            $this->db->join('pos_customers', 'pos_stock_r.csd=pos_customers.id', 'left');
                   if ($this->aauth->get_user()->loc) {
-            $this->db->where('geopos_stock_r.loc', $this->aauth->get_user()->loc);
+            $this->db->where('pos_stock_r.loc', $this->aauth->get_user()->loc);
         }
-        elseif(!BDATA) { $this->db->where('geopos_stock_r.loc', 0); }
+        elseif(!BDATA) { $this->db->where('pos_stock_r.loc', 0); }
         } else {
-            $this->db->select('geopos_stock_r.id,geopos_stock_r.tid,geopos_stock_r.invoicedate,geopos_stock_r.invoiceduedate,geopos_stock_r.total,geopos_stock_r.status,geopos_supplier.name');
+            $this->db->select('pos_stock_r.id,pos_stock_r.tid,pos_stock_r.invoicedate,pos_stock_r.invoiceduedate,pos_stock_r.total,pos_stock_r.status,pos_supplier.name');
             $this->db->from($this->table);
-            $this->db->where('geopos_stock_r.i_class', $type);
-            $this->db->join('geopos_supplier', 'geopos_stock_r.csd=geopos_supplier.id', 'left');
+            $this->db->where('pos_stock_r.i_class', $type);
+            $this->db->join('pos_supplier', 'pos_stock_r.csd=pos_supplier.id', 'left');
                  if ($this->aauth->get_user()->loc) {
-            $this->db->where('geopos_stock_r.loc', $this->aauth->get_user()->loc);
+            $this->db->where('pos_stock_r.loc', $this->aauth->get_user()->loc);
         }
-        elseif(!BDATA) { $this->db->where('geopos_stock_r.loc', 0); }
+        elseif(!BDATA) { $this->db->where('pos_stock_r.loc', 0); }
         }
                     if ($this->input->post('start_date') && $this->input->post('end_date')) // if datatable send POST for search
         {
-            $this->db->where('DATE(geopos_stock_r.invoicedate) >=', datefordatabase($this->input->post('start_date')));
-            $this->db->where('DATE(geopos_stock_r.invoicedate) <=', datefordatabase($this->input->post('end_date')));
+            $this->db->where('DATE(pos_stock_r.invoicedate) >=', datefordatabase($this->input->post('start_date')));
+            $this->db->where('DATE(pos_stock_r.invoicedate) <=', datefordatabase($this->input->post('end_date')));
         }
         $i = 0;
 
@@ -246,9 +246,9 @@ class Stockreturn_model extends CI_Model
     {
         $this->db->from($this->table);
                if ($this->aauth->get_user()->loc) {
-            $this->db->where('geopos_stock_r.loc', $this->aauth->get_user()->loc);
+            $this->db->where('pos_stock_r.loc', $this->aauth->get_user()->loc);
         }
-        elseif(!BDATA) { $this->db->where('geopos_stock_r.loc', 0); }
+        elseif(!BDATA) { $this->db->where('pos_stock_r.loc', 0); }
         return $this->db->count_all_results();
     }
 
@@ -256,17 +256,17 @@ class Stockreturn_model extends CI_Model
     public function billingterms()
     {
         $this->db->select('id,title');
-        $this->db->from('geopos_terms');
+        $this->db->from('pos_terms');
         $query = $this->db->get();
         return $query->result_array();
     }
 
     public function employee($id)
     {
-        $this->db->select('geopos_employees.name,geopos_employees.sign,geopos_users.roleid');
-        $this->db->from('geopos_employees');
-        $this->db->where('geopos_employees.id', $id);
-        $this->db->join('geopos_users', 'geopos_employees.id = geopos_users.id', 'left');
+        $this->db->select('pos_employees.name,pos_employees.sign,pos_users.roleid');
+        $this->db->from('pos_employees');
+        $this->db->where('pos_employees.id', $id);
+        $this->db->join('pos_users', 'pos_employees.id = pos_users.id', 'left');
         $query = $this->db->get();
         return $query->row_array();
     }
@@ -276,7 +276,7 @@ class Stockreturn_model extends CI_Model
 
         $data = array('type' => $type, 'rid' => $id, 'col1' => $meta_data);
         if ($id) {
-            return $this->db->insert('geopos_metadata', $data);
+            return $this->db->insert('pos_metadata', $data);
         } else {
             return 0;
         }
@@ -284,10 +284,10 @@ class Stockreturn_model extends CI_Model
 
     public function attach($id)
     {
-        $this->db->select('geopos_metadata.*');
-        $this->db->from('geopos_metadata');
-        $this->db->where('geopos_metadata.type', 4);
-        $this->db->where('geopos_metadata.rid', $id);
+        $this->db->select('pos_metadata.*');
+        $this->db->from('pos_metadata');
+        $this->db->where('pos_metadata.type', 4);
+        $this->db->where('pos_metadata.rid', $id);
         $query = $this->db->get();
         return $query->result_array();
     }
@@ -295,7 +295,7 @@ class Stockreturn_model extends CI_Model
     public function meta_delete($id, $type, $name)
     {
         if (@unlink(FCPATH . 'userfiles/attach/' . $name)) {
-            return $this->db->delete('geopos_metadata', array('rid' => $id, 'type' => $type, 'col1' => $name));
+            return $this->db->delete('pos_metadata', array('rid' => $id, 'type' => $type, 'col1' => $name));
         }
     }
 

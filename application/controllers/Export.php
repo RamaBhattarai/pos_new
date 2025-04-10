@@ -120,7 +120,7 @@ class Export extends CI_Controller
         }
 
 
-        $query = $this->db->query("SELECT name,address,city,region,country,postbox,email,phone,company FROM geopos_customers $whr");
+        $query = $this->db->query("SELECT name,address,city,region,country,postbox,email,phone,company FROM pos_customers $whr");
         echo "\xEF\xBB\xBF"; // Byte Order Mark
         echo $this->dbutil->csv_from_result($query);
         //  force_download('customers_' . $this->date . '.csv', );
@@ -135,7 +135,7 @@ class Export extends CI_Controller
         } elseif (!BDATA) {
             $whr = " WHERE loc='0';";
         }
-        $query = $this->db->query("SELECT name,address,city,region,country,postbox,email,phone,company FROM geopos_supplier $whr");
+        $query = $this->db->query("SELECT name,address,city,region,country,postbox,email,phone,company FROM pos_supplier $whr");
         $this->load->dbutil();
         $this->load->helper('file');
         $this->load->helper('download');
@@ -193,7 +193,7 @@ class Export extends CI_Controller
         header('Content-Type: application/octet-stream');
         header('Content-Disposition: attachment; filename=transactions_' . $this->date . '..csv');
         header('Content-Transfer-Encoding: binary');
-        $query = $this->db->query("SELECT account,type,cat AS category,debit,credit,payer,method,date,note FROM geopos_transactions" . $where . ' ' . $whr);
+        $query = $this->db->query("SELECT account,type,cat AS category,debit,credit,payer,method,date,note FROM pos_transactions" . $where . ' ' . $whr);
         echo "\xEF\xBB\xBF"; // Byte Order Mark
         echo $this->dbutil->csv_from_result($query);
     }
@@ -212,20 +212,20 @@ class Export extends CI_Controller
     {
         $whr = '';
         if ($this->aauth->get_user()->loc) {
-            $whr = "LEFT JOIN geopos_warehouse ON geopos_products.warehouse=geopos_warehouse.id WHERE geopos_warehouse.loc='" . $this->aauth->get_user()->loc . "';";
+            $whr = "LEFT JOIN pos_warehouse ON pos_products.warehouse=pos_warehouse.id WHERE pos_warehouse.loc='" . $this->aauth->get_user()->loc . "';";
         } elseif (!BDATA) {
-            $whr = "LEFT JOIN geopos_warehouse ON geopos_products.warehouse=geopos_warehouse.id WHERE geopos_warehouse.loc='0';";
+            $whr = "LEFT JOIN pos_warehouse ON pos_products.warehouse=pos_warehouse.id WHERE pos_warehouse.loc='0';";
         }
 
         $type = $this->input->post('type');
         $query = '';
         switch ($type) {
             case 1 :
-                $query = "SELECT product_name,product_code,product_price,fproduct_price AS factory_price,taxrate,disrate AS discount_rate,qty FROM geopos_products $whr";
+                $query = "SELECT product_name,product_code,product_price,fproduct_price AS factory_price,taxrate,disrate AS discount_rate,qty FROM pos_products $whr";
                 break;
 
             case 2 :
-                $query = "SELECT geopos_product_cat.title as category,geopos_products.product_name,geopos_products.product_code,geopos_products.product_price,geopos_products.fproduct_price AS factory_price,geopos_products.taxrate,geopos_products.disrate AS discount_rate,geopos_products.qty FROM geopos_products LEFT JOIN geopos_product_cat ON geopos_products.pcat=geopos_product_cat.id $whr";
+                $query = "SELECT pos_product_cat.title as category,pos_products.product_name,pos_products.product_code,pos_products.product_price,pos_products.fproduct_price AS factory_price,pos_products.taxrate,pos_products.disrate AS discount_rate,pos_products.qty FROM pos_products LEFT JOIN pos_product_cat ON pos_products.pcat=pos_product_cat.id $whr";
                 break;
         }
         $query = $this->db->query($query);
@@ -480,11 +480,11 @@ class Export extends CI_Controller
         $whr = '';
         $whr2 = '';
         if ($this->aauth->get_user()->loc) {
-            $whr = " AND geopos_invoices.loc='" . $this->aauth->get_user()->loc . "';";
-            $whr2 = " AND geopos_purchase.loc='" . $this->aauth->get_user()->loc . "';";
+            $whr = " AND pos_invoices.loc='" . $this->aauth->get_user()->loc . "';";
+            $whr2 = " AND pos_purchase.loc='" . $this->aauth->get_user()->loc . "';";
         } elseif (!BDATA) {
-            $whr = " AND geopos_invoices.loc='0';";
-            $whr2 = " AND geopos_purchase.loc='0';";
+            $whr = " AND pos_invoices.loc='0';";
+            $whr2 = " AND pos_purchase.loc='0';";
         }
 
         $sdate = datefordatabase($this->input->post('sdate'));
@@ -516,8 +516,8 @@ xml_add_attribute($MoneyData, 'description', 'faktury vydané');
 $SeznamFaktVyd=xml_add_child($MoneyData, 'SeznamFaktVyd');
 
 
-   $where = " WHERE (DATE(geopos_invoices.invoicedate) BETWEEN '$sdate' AND '$edate') $whr";
-                $query = $this->db->query("SELECT geopos_customers.name,geopos_customers.address,geopos_customers.city,geopos_customers.postbox,geopos_customers.country,geopos_customers.docid,geopos_customers.taxid,geopos_customers.phone,geopos_customers.email,geopos_customers.company,geopos_invoices.tid,geopos_invoices.id AS inv_id,concat('$prefix',geopos_invoices.tid) AS invoice_number,geopos_invoices.total,geopos_invoices.tax,geopos_invoices.pmethod,geopos_invoices.tax, geopos_invoices.pmethod AS payment_method, geopos_invoices.invoicedate AS date,geopos_invoices.invoiceduedate FROM geopos_invoices LEFT JOIN geopos_customers ON geopos_invoices.csd=geopos_customers.id" . $where);
+   $where = " WHERE (DATE(pos_invoices.invoicedate) BETWEEN '$sdate' AND '$edate') $whr";
+                $query = $this->db->query("SELECT pos_customers.name,pos_customers.address,pos_customers.city,pos_customers.postbox,pos_customers.country,pos_customers.docid,pos_customers.taxid,pos_customers.phone,pos_customers.email,pos_customers.company,pos_invoices.tid,pos_invoices.id AS inv_id,concat('$prefix',pos_invoices.tid) AS invoice_number,pos_invoices.total,pos_invoices.tax,pos_invoices.pmethod,pos_invoices.tax, pos_invoices.pmethod AS payment_method, pos_invoices.invoicedate AS date,pos_invoices.invoiceduedate FROM pos_invoices LEFT JOIN pos_customers ON pos_invoices.csd=pos_customers.id" . $where);
 
                 $xml_result= $query->result_array()  ;
 
@@ -630,7 +630,7 @@ foreach($xml_result as $xml_row) {
     //////////////////////////////////////////////////////////////////////////CRITICAL MEMORY CONSUMPTION 128 REC PASS
     /// ///
     ///
-      $product_query = $this->db->query("SELECT geopos_invoice_items.product, geopos_invoice_items.qty AS s_qty,geopos_invoice_items.price,geopos_invoice_items.tax,geopos_invoice_items.totaldiscount,geopos_invoice_items.product_des,geopos_products.unit,geopos_products.product_code ,geopos_products.barcode FROM geopos_invoice_items LEFT JOIN geopos_products ON geopos_invoice_items.pid=geopos_products.pid WHERE geopos_invoice_items.tid=".$xml_row['inv_id']);
+      $product_query = $this->db->query("SELECT pos_invoice_items.product, pos_invoice_items.qty AS s_qty,pos_invoice_items.price,pos_invoice_items.tax,pos_invoice_items.totaldiscount,pos_invoice_items.product_des,pos_products.unit,pos_products.product_code ,pos_products.barcode FROM pos_invoice_items LEFT JOIN pos_products ON pos_invoice_items.pid=pos_products.pid WHERE pos_invoice_items.tid=".$xml_row['inv_id']);
     $product_xml_result= $product_query->result_array()    ;
 
 foreach($product_xml_result as $product_xml_row) {
@@ -691,15 +691,15 @@ xml_print($dom);
             $this->load->dbutil();
 
             if ($trans_type == 'Sales') {
-                $where = " WHERE (DATE(geopos_invoices.invoicedate) BETWEEN '$sdate' AND '$edate') $whr";
-                $query = $this->db->query("SELECT geopos_customers.taxid AS TAX_Number,concat('$prefix',geopos_invoices.tid) AS invoice_number,concat('$curr',geopos_invoices.total) AS amount,geopos_invoices.shipping AS shipping,geopos_invoices.ship_tax AS ship_tax,geopos_invoices.ship_tax_type AS ship_tax_type,geopos_invoices.discount AS discount,geopos_invoices.tax AS tax,geopos_invoices.pmethod AS payment_method,geopos_invoices.status AS status,geopos_invoices.refer AS referance,geopos_customers.name AS customer_name,geopos_customers.company AS Company_Name,geopos_invoices.invoicedate AS date FROM geopos_invoices LEFT JOIN geopos_customers ON geopos_invoices.csd=geopos_customers.id" . $where);
+                $where = " WHERE (DATE(pos_invoices.invoicedate) BETWEEN '$sdate' AND '$edate') $whr";
+                $query = $this->db->query("SELECT pos_customers.taxid AS TAX_Number,concat('$prefix',pos_invoices.tid) AS invoice_number,concat('$curr',pos_invoices.total) AS amount,pos_invoices.shipping AS shipping,pos_invoices.ship_tax AS ship_tax,pos_invoices.ship_tax_type AS ship_tax_type,pos_invoices.discount AS discount,pos_invoices.tax AS tax,pos_invoices.pmethod AS payment_method,pos_invoices.status AS status,pos_invoices.refer AS referance,pos_customers.name AS customer_name,pos_customers.company AS Company_Name,pos_invoices.invoicedate AS date FROM pos_invoices LEFT JOIN pos_customers ON pos_invoices.csd=pos_customers.id" . $where);
 
                 $csv_result = $this->dbutil->csv_from_result($query);
 
             } else {
 
-                $where = " WHERE (DATE(geopos_purchase.invoicedate) BETWEEN '$sdate' AND '$edate') $whr";
-                $query = $this->db->query("SELECT concat('$prefix',geopos_purchase.tid) AS receipt_number,concat('$curr',geopos_purchase.total) AS amount,geopos_purchase.tax AS tax,geopos_supplier.name AS supplier_name,geopos_supplier.company AS Company_Name,geopos_purchase.invoicedate AS date FROM geopos_purchase LEFT JOIN geopos_supplier ON geopos_purchase.csd=geopos_supplier.id" . $where);
+                $where = " WHERE (DATE(pos_purchase.invoicedate) BETWEEN '$sdate' AND '$edate') $whr";
+                $query = $this->db->query("SELECT concat('$prefix',pos_purchase.tid) AS receipt_number,concat('$curr',pos_purchase.total) AS amount,pos_purchase.tax AS tax,pos_supplier.name AS supplier_name,pos_supplier.company AS Company_Name,pos_purchase.invoicedate AS date FROM pos_purchase LEFT JOIN pos_supplier ON pos_purchase.csd=pos_supplier.id" . $where);
 
                 $csv_result = $this->dbutil->csv_from_result($query);
 

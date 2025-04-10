@@ -20,10 +20,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Extended_invoices_model extends CI_Model
 {
-    var $table = 'geopos_invoice_items';
-    var $column_order = array(null, 'geopos_invoices.tid', 'geopos_customers.name', 'geopos_invoices.invoicedate', 'geopos_invoice_items.subtotal', 'geopos_invoice_items.qty', 'geopos_invoice_items.discount','geopos_invoice_items.tax');
-    var $column_search = array('geopos_invoices.tid', 'geopos_customers.name', 'geopos_invoices.invoicedate', 'geopos_invoice_items.subtotal','geopos_invoice_items.qty','geopos_invoice_items.tax');
-    var $order = array('geopos_invoices.tid' => 'desc');
+    var $table = 'pos_invoice_items';
+    var $column_order = array(null, 'pos_invoices.tid', 'pos_customers.name', 'pos_invoices.invoicedate', 'pos_invoice_items.subtotal', 'pos_invoice_items.qty', 'pos_invoice_items.discount','pos_invoice_items.tax');
+    var $column_search = array('pos_invoices.tid', 'pos_customers.name', 'pos_invoices.invoicedate', 'pos_invoice_items.subtotal','pos_invoice_items.qty','pos_invoice_items.tax');
+    var $order = array('pos_invoices.tid' => 'desc');
 
     public function __construct()
     {
@@ -37,24 +37,24 @@ class Extended_invoices_model extends CI_Model
 
     private function _get_datatables_query($opt = '')
     {
-        $this->db->select('geopos_invoices.id,geopos_invoices.tid,geopos_invoices.invoicedate,geopos_invoices.invoiceduedate,geopos_invoice_items.subtotal,geopos_invoice_items.qty,geopos_invoice_items.product,geopos_invoice_items.discount,geopos_invoice_items.tax,geopos_customers.name');
+        $this->db->select('pos_invoices.id,pos_invoices.tid,pos_invoices.invoicedate,pos_invoices.invoiceduedate,pos_invoice_items.subtotal,pos_invoice_items.qty,pos_invoice_items.product,pos_invoice_items.discount,pos_invoice_items.tax,pos_customers.name');
         $this->db->from($this->table);
-        //$this->db->where('geopos_invoices.i_class', 1);
-          $this->db->where('geopos_invoices.status !=', 'canceled');
+        //$this->db->where('pos_invoices.i_class', 1);
+          $this->db->where('pos_invoices.status !=', 'canceled');
         if ($opt) {
-            $this->db->where('geopos_invoices.eid', $opt);
+            $this->db->where('pos_invoices.eid', $opt);
         }
         if ($this->input->post('start_date') && $this->input->post('end_date')) // if datatable send POST for search
         {
-            $this->db->where('DATE(geopos_invoices.invoicedate) >=', datefordatabase($this->input->post('start_date')));
-            $this->db->where('DATE(geopos_invoices.invoicedate) <=', datefordatabase($this->input->post('end_date')));
+            $this->db->where('DATE(pos_invoices.invoicedate) >=', datefordatabase($this->input->post('start_date')));
+            $this->db->where('DATE(pos_invoices.invoicedate) <=', datefordatabase($this->input->post('end_date')));
         }
         if ($this->aauth->get_user()->loc) {
-            $this->db->where('geopos_invoices.loc', $this->aauth->get_user()->loc);
+            $this->db->where('pos_invoices.loc', $this->aauth->get_user()->loc);
         }
-          elseif(!BDATA) { $this->db->where('geopos_invoices.loc', 0); }
-        $this->db->join('geopos_invoices', 'geopos_invoices.id=geopos_invoice_items.tid', 'left');
-        $this->db->join('geopos_customers', 'geopos_invoices.csd=geopos_customers.id', 'left');
+          elseif(!BDATA) { $this->db->where('pos_invoices.loc', 0); }
+        $this->db->join('pos_invoices', 'pos_invoices.id=pos_invoice_items.tid', 'left');
+        $this->db->join('pos_customers', 'pos_invoices.csd=pos_customers.id', 'left');
 
         $i = 0;
 
@@ -94,7 +94,7 @@ class Extended_invoices_model extends CI_Model
 
         $query = $this->db->get();
 
-      //  $this->db->join('geopos_invoices', 'geopos_invoices.id=geopos_invoice_items.tid', 'left');
+      //  $this->db->join('pos_invoices', 'pos_invoices.id=pos_invoice_items.tid', 'left');
         return $query->result();
     }
 
@@ -106,14 +106,14 @@ class Extended_invoices_model extends CI_Model
 
         }
 
- //       $this->db->join('geopos_invoices', 'geopos_invoices.id=geopos_invoice_items.tid', 'left');
+ //       $this->db->join('pos_invoices', 'pos_invoices.id=pos_invoice_items.tid', 'left');
         $query = $this->db->get();
         return $query->num_rows();
     }
 
     public function count_all($opt = '')
     {
-        $this->db->select('geopos_invoice_items.id');
+        $this->db->select('pos_invoice_items.id');
         $this->db->from($this->table);
         return $this->db->count_all_results();
     }

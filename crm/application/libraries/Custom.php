@@ -12,7 +12,7 @@ class Custom
         $this->PI->db->where('f_module', $id);
         if($apply) $this->PI->db->where('f_view', $apply);
         $this->PI->db->order_by('id', 'DESC');
-        $query = $this->PI->db->get('geopos_custom_fields');
+        $query = $this->PI->db->get('pos_custom_fields');
         $result = $query->result_array();
         return $result;
     }
@@ -24,7 +24,7 @@ class Custom
         $this->PI->db->where('f_module', $id);
         if($apply)  $this->PI->db->where('f_view', $apply);
         $this->PI->db->order_by('id', 'DESC');
-        $query = $this->PI->db->get('geopos_custom_fields');
+        $query = $this->PI->db->get('pos_custom_fields');
         $result = $query->result_array();
         return $result;
     }
@@ -47,7 +47,7 @@ class Custom
                     $dindex++;
                 }
             }
-            $this->PI->db->insert_batch('geopos_custom_data', $datalist);
+            $this->PI->db->insert_batch('pos_custom_data', $datalist);
         }
     }
 
@@ -57,7 +57,7 @@ class Custom
          if(is_array($custom)) {
              $datalist = array();
              $dindex = 0;
-             $this->PI->db->delete('geopos_custom_data', array('rid' => $rid, 'module' => $r_type));
+             $this->PI->db->delete('pos_custom_data', array('rid' => $rid, 'module' => $r_type));
              foreach ($custom as $key => $value) {
                  if ($value) {
                      $data = array(
@@ -71,7 +71,7 @@ class Custom
                  }
              }
 
-             $this->PI->db->insert_batch('geopos_custom_data', $datalist);
+             $this->PI->db->insert_batch('pos_custom_data', $datalist);
          }
     }
 
@@ -79,15 +79,15 @@ class Custom
     {
 
 
-        $this->PI->db->select("geopos_custom_data.*,geopos_custom_fields.name ");
-        $this->PI->db->from('geopos_custom_data');
-        $this->PI->db->join('geopos_custom_fields', 'geopos_custom_data.field_id = geopos_custom_fields.id', 'left');
+        $this->PI->db->select("pos_custom_data.*,pos_custom_fields.name ");
+        $this->PI->db->from('pos_custom_data');
+        $this->PI->db->join('pos_custom_fields', 'pos_custom_data.field_id = pos_custom_fields.id', 'left');
 
 
-            $this->PI->db->where('geopos_custom_data.rid=', $rid);
-             $this->PI->db->where('geopos_custom_data.module=', $r_type);
-              $this->PI->db->where('geopos_custom_data.module=', $r_type);
-              if($view)  $this->PI->db->where('geopos_custom_fields.f_view=', $view);
+            $this->PI->db->where('pos_custom_data.rid=', $rid);
+             $this->PI->db->where('pos_custom_data.module=', $r_type);
+              $this->PI->db->where('pos_custom_data.module=', $r_type);
+              if($view)  $this->PI->db->where('pos_custom_fields.f_view=', $view);
           $query = $this->PI->db->get();
         $result = $query->result_array();
         return $result;
@@ -98,7 +98,7 @@ class Custom
     {
 
 
-          $query = $this->PI->db->query("SELECT `geopos_custom_data`.`data`, `geopos_custom_fields`.* FROM `geopos_custom_fields` LEFT OUTER JOIN `geopos_custom_data` ON `geopos_custom_fields`.`id`=`geopos_custom_data`.`field_id` AND (`geopos_custom_data`.`rid` = '$id' OR `geopos_custom_data`.`rid` IS NULL) WHERE  `geopos_custom_fields`.`f_module` = $apply;");
+          $query = $this->PI->db->query("SELECT `pos_custom_data`.`data`, `pos_custom_fields`.* FROM `pos_custom_fields` LEFT OUTER JOIN `pos_custom_data` ON `pos_custom_fields`.`id`=`pos_custom_data`.`field_id` AND (`pos_custom_data`.`rid` = '$id' OR `pos_custom_data`.`rid` IS NULL) WHERE  `pos_custom_fields`.`f_module` = $apply;");
         return $query->result_array();
     }
 
@@ -108,7 +108,7 @@ class Custom
 
     function del_fields($rid,$r_type)
     {
-        $this->PI->db->delete('geopos_custom_data', array('rid' => $rid,'module'=>$r_type));
+        $this->PI->db->delete('pos_custom_data', array('rid' => $rid,'module'=>$r_type));
 
     }
 

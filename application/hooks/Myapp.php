@@ -24,7 +24,7 @@ class Myapp extends CI_Controller
     {
         $ci =& get_instance();
         $ci->load->database();
-        $query = $ci->db->query("SELECT * FROM geopos_system WHERE id=1 LIMIT 1");
+        $query = $ci->db->query("SELECT * FROM pos_system WHERE id=1 LIMIT 1");
         if(is_array($query->row_array())) {
             $row = $query->row_array();
             $this->lang->load($row["lang"], $row["lang"]);

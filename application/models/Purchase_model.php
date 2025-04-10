@@ -20,10 +20,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Purchase_model extends CI_Model
 {
-    var $table = 'geopos_purchase';
-    var $column_order = array(null, 'geopos_purchase.tid', 'geopos_supplier.name', 'geopos_purchase.invoicedate', 'geopos_purchase.total', 'geopos_purchase.status', null);
-    var $column_search = array('geopos_purchase.tid', 'geopos_supplier.name', 'geopos_purchase.invoicedate', 'geopos_purchase.total','geopos_purchase.status');
-    var $order = array('geopos_purchase.tid' => 'desc');
+    var $table = 'pos_purchase';
+    var $column_order = array(null, 'pos_purchase.tid', 'pos_supplier.name', 'pos_purchase.invoicedate', 'pos_purchase.total', 'pos_purchase.status', null);
+    var $column_search = array('pos_purchase.tid', 'pos_supplier.name', 'pos_purchase.invoicedate', 'pos_purchase.total','pos_purchase.status');
+    var $order = array('pos_purchase.tid' => 'desc');
 
     public function __construct()
     {
@@ -47,7 +47,7 @@ class Purchase_model extends CI_Model
     public function warehouses()
     {
         $this->db->select('*');
-        $this->db->from('geopos_warehouse');
+        $this->db->from('pos_warehouse');
         if ($this->aauth->get_user()->loc) {
             $this->db->where('loc', $this->aauth->get_user()->loc);
             if (BDATA) $this->db->or_where('loc', 0);
@@ -62,17 +62,17 @@ class Purchase_model extends CI_Model
     public function purchase_details($id)
     {
 
-        $this->db->select('geopos_purchase.*,geopos_purchase.id AS iid,SUM(geopos_purchase.shipping + geopos_purchase.ship_tax) AS shipping,geopos_supplier.*,geopos_supplier.id AS cid,geopos_terms.id AS termid,geopos_terms.title AS termtit,geopos_terms.terms AS terms');
+        $this->db->select('pos_purchase.*,pos_purchase.id AS iid,SUM(pos_purchase.shipping + pos_purchase.ship_tax) AS shipping,pos_supplier.*,pos_supplier.id AS cid,pos_terms.id AS termid,pos_terms.title AS termtit,pos_terms.terms AS terms');
         $this->db->from($this->table);
-        $this->db->where('geopos_purchase.id', $id);
+        $this->db->where('pos_purchase.id', $id);
         if ($this->aauth->get_user()->loc) {
-            $this->db->where('geopos_purchase.loc', $this->aauth->get_user()->loc);
-            if (BDATA) $this->db->or_where('geopos_purchase.loc', 0);
+            $this->db->where('pos_purchase.loc', $this->aauth->get_user()->loc);
+            if (BDATA) $this->db->or_where('pos_purchase.loc', 0);
         } elseif (!BDATA) {
-            $this->db->where('geopos_purchase.loc', 0);
+            $this->db->where('pos_purchase.loc', 0);
         }
-        $this->db->join('geopos_supplier', 'geopos_purchase.csd = geopos_supplier.id', 'left');
-        $this->db->join('geopos_terms', 'geopos_terms.id = geopos_purchase.term', 'left');
+        $this->db->join('pos_supplier', 'pos_purchase.csd = pos_supplier.id', 'left');
+        $this->db->join('pos_terms', 'pos_terms.id = pos_purchase.term', 'left');
         $query = $this->db->get();
         return $query->row_array();
 
@@ -81,7 +81,7 @@ class Purchase_model extends CI_Model
     public function purchase_products($id)
     {
         $this->db->select('*');
-        $this->db->from('geopos_purchase_items');
+        $this->db->from('pos_purchase_items');
         $this->db->where('tid', $id);
         $query = $this->db->get();
         return $query->result_array();
@@ -90,7 +90,7 @@ class Purchase_model extends CI_Model
     public function purchase_transactions($id)
     {
         $this->db->select('*');
-        $this->db->from('geopos_transactions');
+        $this->db->from('pos_transactions');
         $this->db->where('tid', $id);
         $this->db->where('ext', 1);
         $query = $this->db->get();
@@ -101,7 +101,7 @@ class Purchase_model extends CI_Model
     {
         $this->db->trans_start();
         $this->db->select('pid,qty');
-        $this->db->from('geopos_purchase_items');
+        $this->db->from('pos_purchase_items');
         $this->db->where('tid', $id);
         $query = $this->db->get();
         $prevresult = $query->result_array();
@@ -109,7 +109,7 @@ class Purchase_model extends CI_Model
             $amt = $prd['qty'];
             $this->db->set('qty', "qty-$amt", FALSE);
             $this->db->where('pid', $prd['pid']);
-            $this->db->update('geopos_products');
+            $this->db->update('pos_products');
         }
         $whr = array('id' => $id);
         if ($this->aauth->get_user()->loc) {
@@ -117,8 +117,8 @@ class Purchase_model extends CI_Model
         } elseif (!BDATA) {
                $whr = array('id' => $id, 'loc' =>0);
         }
-        $this->db->delete('geopos_purchase', $whr);
-        if ($this->db->affected_rows()) $this->db->delete('geopos_purchase_items', array('tid' => $id));
+        $this->db->delete('pos_purchase', $whr);
+        if ($this->db->affected_rows()) $this->db->delete('pos_purchase_items', array('tid' => $id));
         if ($this->db->trans_complete()) {
             return true;
         } else {
@@ -129,17 +129,17 @@ class Purchase_model extends CI_Model
 
     private function _get_datatables_query()
     {
-        $this->db->select('geopos_purchase.id,geopos_purchase.tid,geopos_purchase.invoicedate,geopos_purchase.invoiceduedate,geopos_purchase.total,geopos_purchase.status,geopos_supplier.name');
+        $this->db->select('pos_purchase.id,pos_purchase.tid,pos_purchase.invoicedate,pos_purchase.invoiceduedate,pos_purchase.total,pos_purchase.status,pos_supplier.name');
         $this->db->from($this->table);
-        $this->db->join('geopos_supplier', 'geopos_purchase.csd=geopos_supplier.id', 'left');
+        $this->db->join('pos_supplier', 'pos_purchase.csd=pos_supplier.id', 'left');
             if ($this->aauth->get_user()->loc) {
-            $this->db->where('geopos_purchase.loc', $this->aauth->get_user()->loc);
+            $this->db->where('pos_purchase.loc', $this->aauth->get_user()->loc);
         }
-        elseif(!BDATA) { $this->db->where('geopos_purchase.loc', 0); }
+        elseif(!BDATA) { $this->db->where('pos_purchase.loc', 0); }
                     if ($this->input->post('start_date') && $this->input->post('end_date')) // if datatable send POST for search
         {
-            $this->db->where('DATE(geopos_purchase.invoicedate) >=', datefordatabase($this->input->post('start_date')));
-            $this->db->where('DATE(geopos_purchase.invoicedate) <=', datefordatabase($this->input->post('end_date')));
+            $this->db->where('DATE(pos_purchase.invoicedate) >=', datefordatabase($this->input->post('start_date')));
+            $this->db->where('DATE(pos_purchase.invoicedate) <=', datefordatabase($this->input->post('end_date')));
         }
         $i = 0;
         foreach ($this->column_search as $item) // loop column
@@ -190,9 +190,9 @@ class Purchase_model extends CI_Model
     {
         $this->db->from($this->table);
            if ($this->aauth->get_user()->loc) {
-            $this->db->where('geopos_purchase.loc', $this->aauth->get_user()->loc);
+            $this->db->where('pos_purchase.loc', $this->aauth->get_user()->loc);
         }
-        elseif(!BDATA) { $this->db->where('geopos_purchase.loc', 0); }
+        elseif(!BDATA) { $this->db->where('pos_purchase.loc', 0); }
         return $this->db->count_all_results();
     }
 
@@ -200,7 +200,7 @@ class Purchase_model extends CI_Model
     public function billingterms()
     {
         $this->db->select('id,title');
-        $this->db->from('geopos_terms');
+        $this->db->from('pos_terms');
         $this->db->where('type', 4);
         $this->db->or_where('type', 0);
         $query = $this->db->get();
@@ -211,7 +211,7 @@ class Purchase_model extends CI_Model
     {
 
         $this->db->select('*');
-        $this->db->from('geopos_currencies');
+        $this->db->from('pos_currencies');
         $query = $this->db->get();
         return $query->result_array();
     }
@@ -219,7 +219,7 @@ class Purchase_model extends CI_Model
     public function currency_d($id)
     {
         $this->db->select('*');
-        $this->db->from('geopos_currencies');
+        $this->db->from('pos_currencies');
         $this->db->where('id', $id);
         $query = $this->db->get();
         return $query->row_array();
@@ -227,10 +227,10 @@ class Purchase_model extends CI_Model
 
     public function employee($id)
     {
-        $this->db->select('geopos_employees.name,geopos_employees.sign,geopos_users.roleid');
-        $this->db->from('geopos_employees');
-        $this->db->where('geopos_employees.id', $id);
-        $this->db->join('geopos_users', 'geopos_employees.id = geopos_users.id', 'left');
+        $this->db->select('pos_employees.name,pos_employees.sign,pos_users.roleid');
+        $this->db->from('pos_employees');
+        $this->db->where('pos_employees.id', $id);
+        $this->db->join('pos_users', 'pos_employees.id = pos_users.id', 'left');
         $query = $this->db->get();
         return $query->row_array();
     }
@@ -240,7 +240,7 @@ class Purchase_model extends CI_Model
 
         $data = array('type' => $type, 'rid' => $id, 'col1' => $meta_data);
         if ($id) {
-            return $this->db->insert('geopos_metadata', $data);
+            return $this->db->insert('pos_metadata', $data);
         } else {
             return 0;
         }
@@ -248,10 +248,10 @@ class Purchase_model extends CI_Model
 
     public function attach($id)
     {
-        $this->db->select('geopos_metadata.*');
-        $this->db->from('geopos_metadata');
-        $this->db->where('geopos_metadata.type', 4);
-        $this->db->where('geopos_metadata.rid', $id);
+        $this->db->select('pos_metadata.*');
+        $this->db->from('pos_metadata');
+        $this->db->where('pos_metadata.type', 4);
+        $this->db->where('pos_metadata.rid', $id);
         $query = $this->db->get();
         return $query->result_array();
     }
@@ -259,7 +259,7 @@ class Purchase_model extends CI_Model
     public function meta_delete($id, $type, $name)
     {
         if (@unlink(FCPATH . 'userfiles/attach/' . $name)) {
-            return $this->db->delete('geopos_metadata', array('rid' => $id, 'type' => $type, 'col1' => $name));
+            return $this->db->delete('pos_metadata', array('rid' => $id, 'type' => $type, 'col1' => $name));
         }
     }
 

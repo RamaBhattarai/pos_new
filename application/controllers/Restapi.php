@@ -51,7 +51,7 @@ class Restapi extends CI_Controller
     {
         $id = $this->input->post('deleteid');
         if ($id) {
-            $this->db->delete('geopos_restkeys', array('id' => $id));
+            $this->db->delete('pos_restkeys', array('id' => $id));
             echo json_encode(array('status' => 'Success', 'message' => $this->lang->line('API Key deleted')));
         } else {
             echo json_encode(array('status' => 'Error', 'message' => $this->lang->line('ERROR')));

@@ -261,9 +261,9 @@ class Cronjob extends CI_Controller
 
             // $ndate = date("Y-m-d", strtotime(date('Y-m-d') . " -7 days"));
             $this->db->where('tid>', 1);
-            $this->db->delete('geopos_draft');
+            $this->db->delete('pos_draft');
             $this->db->where('tid>', 1);
-            $this->db->delete('geopos_draft_items');
+            $this->db->delete('pos_draft_items');
 
             echo "---------------Success! Process Done! -------------------------\n";
 
@@ -390,7 +390,7 @@ class Cronjob extends CI_Controller
 
             // $ndate = date("Y-m-d", strtotime(date('Y-m-d') . " -7 days"));
             $this->db->where('DATE(created)<', date('Y-m-d', strtotime(date('Y-m-d') . " -7 days")));
-            $this->db->delete('geopos_log');
+            $this->db->delete('pos_log');
 
             echo "---------------Success! Process Done! -------------------------\n";
 

@@ -276,7 +276,7 @@ class Employee extends CI_Controller
         } else {
 
             $this->db->select('banned');
-            $this->db->from('geopos_users');
+            $this->db->from('pos_users');
             $this->db->where('id', $uid);
             $query = $this->db->get();
             $result = $query->row_array();
@@ -331,9 +331,9 @@ class Employee extends CI_Controller
                 'You can not delete yourself!'));
         } else {
 
-            $this->db->delete('geopos_employees', array('id' => $uid));
+            $this->db->delete('pos_employees', array('id' => $uid));
 
-            $this->db->delete('geopos_users', array('id' => $uid));
+            $this->db->delete('pos_users', array('id' => $uid));
 
             echo json_encode(array('status' => 'Success', 'message' =>
                 'User Profile deleted successfully! Please refresh the page!'));
@@ -546,7 +546,7 @@ class Employee extends CI_Controller
             $data = array('r_1' => $val1, 'r_2' => $val2, 'r_3' => $val3, 'r_4' => $val4, 'r_5' => $val5, 'r_6' => $val6, 'r_7' => $val7);
             $this->db->set($data);
             $this->db->where('id', $i);
-            $this->db->update('geopos_premissions');
+            $this->db->update('pos_premissions');
         }
 
         echo json_encode(array('status' => 'Success', 'message' =>
@@ -783,10 +783,10 @@ class Employee extends CI_Controller
 
         $whr = '';
         if ($this->aauth->get_user()->loc) {
-            $whr = ' (geopos_users.loc=' . $this->aauth->get_user()->loc . ') AND ';
+            $whr = ' (pos_users.loc=' . $this->aauth->get_user()->loc . ') AND ';
         }
         if ($name) {
-            $query = $this->db->query("SELECT geopos_employees.* ,geopos_users.email FROM geopos_employees  LEFT JOIN geopos_users ON geopos_users.id=geopos_employees.id  WHERE $whr (UPPER(geopos_employees.name)  LIKE '%" . strtoupper($name) . "%' OR UPPER(geopos_employees.phone)  LIKE '" . strtoupper($name) . "%') LIMIT 6");
+            $query = $this->db->query("SELECT pos_employees.* ,pos_users.email FROM pos_employees  LEFT JOIN pos_users ON pos_users.id=pos_employees.id  WHERE $whr (UPPER(pos_employees.name)  LIKE '%" . strtoupper($name) . "%' OR UPPER(pos_employees.phone)  LIKE '" . strtoupper($name) . "%') LIMIT 6");
             $result = $query->result_array();
             echo '<ol>';
             $i = 1;

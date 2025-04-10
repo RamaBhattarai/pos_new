@@ -112,7 +112,7 @@ class Printer extends CI_Controller
     {
         $id = $this->input->post('deleteid');
         if ($id) {
-            $this->db->delete('geopos_config', array('id' => $id, 'type' => 1));
+            $this->db->delete('pos_config', array('id' => $id, 'type' => 1));
             echo json_encode(array('status' => 'Success', 'message' => 'Printer Removed'));
         } else {
             echo json_encode(array('status' => 'Error', 'message' => $this->lang->line('ERROR')));

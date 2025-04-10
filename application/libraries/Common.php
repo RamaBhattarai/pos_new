@@ -31,7 +31,7 @@ class Common
             $this->PI->db->where('id', $id);
             $this->PI->db->where('type', 2);
             $this->PI->db->order_by('id', 'DESC');
-            $query = $this->PI->db->get('geopos_config');
+            $query = $this->PI->db->get('pos_config');
             $row1 = $query->row_array();
             $tax_list .= '<option value="' . $row1['val4'] . '" data-tformat="' . $row1['val3'] . '" data-trate="' . $row1['val2'] . '">' . $row1['val1'] . '</option> ';
         }
@@ -43,7 +43,7 @@ class Common
 
         $this->PI->db->where('type', 2);
         $this->PI->db->order_by('id', 'DESC');
-        $query = $this->PI->db->get('geopos_config');
+        $query = $this->PI->db->get('pos_config');
         $result = $query->result_array();
         foreach ($result as $row) {
             $tax_list .= '<option value="' . $row['val4'] . '" data-tformat="' . $row['val3'] . '" data-trate="' . $row['val2'] . '">' . $row['val1'] . '</option> ';
@@ -98,7 +98,7 @@ class Common
             $this->PI->db->where('id', $id);
             $this->PI->db->where('type', 2);
             $this->PI->db->order_by('id', 'DESC');
-            $query = $this->PI->db->get('geopos_config');
+            $query = $this->PI->db->get('pos_config');
             $row1 = $query->row_array();
             $tax_list .= '<option value="' . $row1['id'] . '" data-tformat="' . $row1['val3'] . '" data-trate="' . $row1['val2'] . '">' . $row1['val1'] . '</option> ';
         }
@@ -110,7 +110,7 @@ class Common
 
         $this->PI->db->where('type', 2);
         $this->PI->db->order_by('id', 'DESC');
-        $query = $this->PI->db->get('geopos_config');
+        $query = $this->PI->db->get('pos_config');
         $result = $query->result_array();
         foreach ($result as $row) {
             $tax_list .= '<option value="' . $row['id'] . '" data-tformat="' . $row['val3'] . '" data-trate="' . $row['val2'] . '">' . $row['val1'] . '</option> ';
@@ -146,7 +146,7 @@ class Common
 
         $this->PI->db->where('type', 2);
         $this->PI->db->order_by('id', 'DESC');
-        $query = $this->PI->db->get('geopos_config');
+        $query = $this->PI->db->get('pos_config');
         $result = $query->result_array();
         foreach ($result as $row) {
             $tax_list .= '<option value="' . $row['val4'] . '" data-tformat="' . $row['val3'] . '" data-trate="' . $row['val2'] . '">' . $row['val1'] . '</option> ';
@@ -185,7 +185,7 @@ class Common
             $this->PI->db->where('id', $this->PI->config->item('tax'));
             $this->PI->db->where('type', 2);
             $this->PI->db->order_by('id', 'DESC');
-            $query = $this->PI->db->get('geopos_config');
+            $query = $this->PI->db->get('pos_config');
             $row1 = $query->row_array();
             $tax_f = $row1['val3'];
             $tax_name = '%';
@@ -231,13 +231,13 @@ class Common
     {
         if ($id) {
             $this->PI->db->select('lang');
-            $this->PI->db->from('geopos_locations');
+            $this->PI->db->from('pos_locations');
             $this->PI->db->where('id', $id);
             $query = $this->PI->db->get();
             $out = $query->row_array();
         } else {
             $this->PI->db->select('*');
-            $this->PI->db->from('geopos_system');
+            $this->PI->db->from('pos_system');
             $this->PI->db->where('id', 1);
             $query = $this->PI->db->get();
             $out = $query->row_array();
@@ -259,19 +259,19 @@ class Common
     {
         if ($this->PI->aauth->get_user()->loc) {
             $wr = '<option value="0">*' . $this->PI->lang->line('All') . '</option>';
-            $this->PI->db->select('geopos_locations.ware,geopos_warehouse.title');
-            $this->PI->db->from('geopos_locations');
-            $this->PI->db->join('geopos_warehouse', 'geopos_locations.ware=geopos_warehouse.id', 'left');
-            $this->PI->db->where('geopos_locations.id', $this->PI->aauth->get_user()->loc);
+            $this->PI->db->select('pos_locations.ware,pos_warehouse.title');
+            $this->PI->db->from('pos_locations');
+            $this->PI->db->join('pos_warehouse', 'pos_locations.ware=pos_warehouse.id', 'left');
+            $this->PI->db->where('pos_locations.id', $this->PI->aauth->get_user()->loc);
             $query = $this->PI->db->get();
             $result = $query->row_array();
             if ($result['ware']) $wr = '<option value="' . $result['ware'] . '">' . $result['title'] . '</option>';
             return $wr;
         } else {
             $wr = '<option value="0">*' . $this->PI->lang->line('All') . '</option>';
-            $this->PI->db->select('univarsal_api.key1,geopos_warehouse.title');
+            $this->PI->db->select('univarsal_api.key1,pos_warehouse.title');
             $this->PI->db->from('univarsal_api');
-            $this->PI->db->join('geopos_warehouse', 'univarsal_api.key1=geopos_warehouse.id', 'left');
+            $this->PI->db->join('pos_warehouse', 'univarsal_api.key1=pos_warehouse.id', 'left');
             $this->PI->db->where('univarsal_api.id', 60);
             $query = $this->PI->db->get();
             $result = $query->row_array();

@@ -21,7 +21,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Printer_model extends CI_Model
 {
-    var $table = 'geopos_config';
+    var $table = 'pos_config';
 
     public function __construct()
     {
@@ -31,7 +31,7 @@ class Printer_model extends CI_Model
     public function printers_list()
     {
         $this->db->select('*');
-        $this->db->from('geopos_config');
+        $this->db->from('pos_config');
         $this->db->where('type', 1);
         $query = $this->db->get();
         return $query->result_array();
@@ -40,7 +40,7 @@ class Printer_model extends CI_Model
     public function printer_details($id)
     {
         $this->db->select('*');
-        $this->db->from('geopos_config');
+        $this->db->from('pos_config');
         $this->db->where('id', $id);
         $this->db->where('type', 1);
         $query = $this->db->get();
@@ -58,7 +58,7 @@ class Printer_model extends CI_Model
             'val4' => $lid,
             'other' => $mode
         );
-        if ($this->db->insert('geopos_config', $data)) {
+        if ($this->db->insert('pos_config', $data)) {
             echo json_encode(array('status' => 'Success', 'message' =>
                 $this->lang->line('ADDED')));
         } else {
@@ -82,7 +82,7 @@ class Printer_model extends CI_Model
         $this->db->set($data);
         $this->db->where('id', $id);
 
-        if ($this->db->update('geopos_config')) {
+        if ($this->db->update('pos_config')) {
             echo json_encode(array('status' => 'Success', 'message' =>
                 $this->lang->line('UPDATED')));
         } else {
