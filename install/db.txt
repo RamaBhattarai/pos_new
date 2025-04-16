@@ -222,7 +222,7 @@
         PRIMARY KEY (`id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-        CREATE TABLE `geopos_events` (
+        CREATE TABLE `pos_events` (
         `id` int(11) NOT NULL AUTO_INCREMENT,
         `title` varchar(255) NOT NULL,
         `description` text NOT NULL,
@@ -449,7 +449,7 @@
         `product_des` text,
         `alert` int(11) DEFAULT NULL,
         `unit` varchar(4) DEFAULT NULL,
-        `image` varchar(120) DEFAULT 'default.png',
+        `image` varchar(120) DEFAULT 'deskgoo.png',
         `barcode` varchar(16) DEFAULT NULL,
         `merge` int(2) NOT NULL,
         `sub` int(11) NOT NULL,

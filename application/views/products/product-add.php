@@ -372,7 +372,7 @@
                 </div>
 
 
-                <input type="hidden" name="image" id="image" value="default.png">
+                <input type="hidden" name="image" id="image" value="deskgoo.png">
 
             </form>
         </div>
@@ -395,7 +395,7 @@
             dataType: 'json',
             formData: {'<?=$this->security->get_csrf_token_name()?>': crsf_hash},
             done: function (e, data) {
-                var img = 'default.png';
+                var img = 'deskgoo.png';
                 $.each(data.result.files, function (index, file) {
 
                 	if(file.error) {

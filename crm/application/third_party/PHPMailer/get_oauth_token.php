@@ -8,7 +8,7 @@
  * * Set up an app in your Google developer console
  * * Set the script address as the app's redirect URL
  * If no refresh token is obtained when running this file, revoke access to your app
- * using link: https://geopos_accounts.google.com/b/0/IssuedAuthSubTokens and run the script again.
+ * using link: https://pos_accounts.google.com/b/0/IssuedAuthSubTokens and run the script again.
  * This script requires PHP 5.4 or later
  * PHP Version 5.4
  */

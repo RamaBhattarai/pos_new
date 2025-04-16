@@ -290,7 +290,7 @@ class Pos_invoices extends CI_Controller
             $promo_flag = false;
             if ($coupon) {
                 $this->db->select('*');
-                $this->db->from('geopos_promo');
+                $this->db->from('pos_promo');
                 $this->db->where('code', $coupon);
                 $query = $this->db->get();
                 $result_c = $query->row_array();
@@ -493,7 +493,7 @@ class Pos_invoices extends CI_Controller
                     $amount = $result_c['amount'];
                     $this->db->set($data);
                     $this->db->where('id', $result_c['id']);
-                    $this->db->update('geopos_promo');
+                    $this->db->update('pos_promo');
 
                     if ($result_c['reflect'] > 0) {
                         $data = array(
@@ -553,7 +553,7 @@ class Pos_invoices extends CI_Controller
             $promo_flag = false;
             if ($coupon) {
                 $this->db->select('*');
-                $this->db->from('geopos_promo');
+                $this->db->from('pos_promo');
                 $this->db->where('code', $coupon);
                 $query = $this->db->get();
                 $result_c = $query->row_array();
@@ -655,7 +655,7 @@ class Pos_invoices extends CI_Controller
 
                     $this->db->set($data);
                     $this->db->where('id', $result_c['id']);
-                    $this->db->update('geopos_promo');
+                    $this->db->update('pos_promo');
 
                     if ($result_c['reflect'] > 0) {
                         $data = array(
@@ -1116,7 +1116,7 @@ class Pos_invoices extends CI_Controller
             $promo_flag = false;
             if ($coupon) {
                 $this->db->select('*');
-                $this->db->from('geopos_promo');
+                $this->db->from('pos_promo');
                 $this->db->where('code', $coupon);
                 $query = $this->db->get();
                 $result_c = $query->row_array();
@@ -1239,7 +1239,7 @@ class Pos_invoices extends CI_Controller
                     $amount = $result_c['amount'];
                     $this->db->set($data);
                     $this->db->where('id', $result_c['id']);
-                    $this->db->update('geopos_promo');
+                    $this->db->update('pos_promo');
 
                     if ($result_c['reflect'] > 0) {
                         $data = array(
@@ -1719,7 +1719,7 @@ echo 6;
         $id = $this->input->post('coupon');
         if ($id) {
             $this->db->select('*');
-            $this->db->from('geopos_promo');
+            $this->db->from('pos_promo');
             $this->db->where('code', $id);
             $query = $this->db->get();
             $promo = $query->row_array();

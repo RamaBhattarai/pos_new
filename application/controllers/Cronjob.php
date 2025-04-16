@@ -299,7 +299,7 @@ class Cronjob extends CI_Controller
             $this->db->where('valid<', date('Y-m-d'));
 
 
-            $this->db->update('geopos_promo');
+            $this->db->update('pos_promo');
 
 
             echo "---------------Success! Process Done! -------------------------\n";

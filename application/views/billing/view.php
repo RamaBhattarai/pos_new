@@ -17,8 +17,10 @@
                             <div class="row">
 
 
-                                <div class="col-md-8">
-                                    <div class="form-group mt-2"><?php echo $this->lang->line('Payment') ?>:
+                                <!-- <div class="col-md-8">
+                                    <div class="form-group mt-2">
+                                        
+                                        <?php echo $this->lang->line('Payment') ?>:
                                         <?php if ($online_pay['enable'] == 1) {
                                             echo '<a class="btn btn-success btn-min-width mr-1" href="#' . base_url('billing/card?id=' . $invoice['iid'] . '&itype=inv&token=' . $token) . '" data-toggle="modal" data-target="#paymentCard"><i class="fa fa-cc"></i> Credit Card</a> ';
                                         }
@@ -35,9 +37,10 @@
                                                         class="fa fa-backward" ></i > </a >';
                                         }
                                         ?>
+                                        
 
                                     </div>
-                                </div>
+                                </div> -->
 
 
                                 <div class="col-md-4 text-right">

@@ -125,9 +125,9 @@ class Manager_model extends CI_Model
         $data = array('name' => $name, 'status' => $status, 'priority' => $priority, 'progress' => $progress, 'cid' => $customer, 'sdate' => $sdate, 'edate' => $edate, 'tag' => $tag, 'phase' => $phase, 'note' => $content, 'worth' => $budget, 'ptype' => $ptype);
         $this->db->set($data);
         $this->db->where('id', $id);
-        $out = $this->db->update('geopos_projects');
+        $out = $this->db->update('pos_projects');
 
-        $this->db->delete('geopos_events', array('rel' => 1, 'rid' => $id));
+        $this->db->delete('pos_events', array('rel' => 1, 'rid' => $id));
         if ($link_to_cal > 0) {
             if ($link_to_cal == 1) {
                 $sdate = $edate;

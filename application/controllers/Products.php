@@ -92,7 +92,21 @@ class Products extends CI_Controller
             $row = array();
             $row[] = $no;
             $pid = $prd->pid;
-            $row[] = '<a href="#" data-object-id="' . $pid . '" class="view-object"><span class="avatar-lg align-baseline"><img style="max-width: 200px" src="' . base_url() . 'userfiles/product/thumbnail/' . $prd->image . '" ></span>&nbsp;' . $prd->product_name . '</a>';
+
+// // If image is default.png, use deskgoo.png instead
+// $image = ($prd->image === 'default.png') ? 'deskgoo.png' : $prd->image;
+
+// $imageUrl = base_url() . 'userfiles/product/thumbnail/' . $image;
+
+// $row[] = '<a href="#" data-object-id="' . $pid . '" class="view-object">
+//     <span class="avatar-lg align-baseline">
+//         <img style="max-width: 100px" src="' . $imageUrl . '" alt="Product Image">
+//     </span>&nbsp;' . $prd->product_name . '
+// </a>';
+
+//             // Replace default.png with deskgoo.png
+// $image = ($prd->image === 'default.png') ? 'deskgoo.png' : $prd->image;
+            $row[] = '<a href="#" data-object-id="' . $pid . '" class="view-object"><span class="avatar-lg align-baseline"><img style="max-width: 90px" src="' . base_url() . 'userfiles/product/thumbnail/' . $prd->image . '" ></span>&nbsp;' . $prd->product_name . '</a>';
             $row[] = +$prd->qty;
             $row[] = $prd->product_code;
             $row[] = $prd->c_title;

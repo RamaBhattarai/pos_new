@@ -20,10 +20,10 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Productgroups_model extends CI_Model
 {
-    var $table = 'geopos_product_groups';
-    var $column_order = array(null, 'geopos_product_groups.id', null); //set column field database for datatable orderable
-    var $column_search = array(null, 'geopos_product_groups.name', null);  //set column field database for datatable searchable
-    var $order = array('geopos_product_groups.id' => 'desc'); // default order
+    var $table = 'pos_product_groups';
+    var $column_order = array(null, 'pos_product_groups.id', null); //set column field database for datatable orderable
+    var $column_search = array(null, 'pos_product_groups.name', null);  //set column field database for datatable searchable
+    var $order = array('pos_product_groups.id' => 'desc'); // default order
 
     public function __construct()
     {
@@ -131,7 +131,7 @@ class Productgroups_model extends CI_Model
 
 
             $this->db->trans_start();
-            if ($this->db->insert('geopos_product_groups', $data)) {
+            if ($this->db->insert('pos_product_groups', $data)) {
                 $pid = $this->db->insert_id();
 
                 $this->aauth->applog("[New Product Group] -$group_name ID " . $pid, $this->aauth->get_user()->username);
@@ -149,7 +149,7 @@ class Productgroups_model extends CI_Model
                         $data['group_id'] = $pid;
                         $data['qty'] = numberClean($v_stock[$key]);
                         $data['rid'] = $value;
-                        $this->db->insert('geopos_group_relation', $data);
+                        $this->db->insert('pos_group_relation', $data);
                     }
                 }
             }

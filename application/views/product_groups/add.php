@@ -159,7 +159,7 @@
                         <p class="mt-3"><?php echo $this->lang->line('EditNotAllowed') ?></p>
                     </div>
                 </div>
-                <input type="hidden" name="image" id="image" value="default.png">
+                <input type="hidden" name="image" id="image" value="deskgoo.png">
 
             </form>
         </div>
@@ -179,7 +179,7 @@
             dataType: 'json',
             formData: {'<?=$this->security->get_csrf_token_name()?>': crsf_hash},
             done: function (e, data) {
-                var img = 'default.png';
+                var img = 'deskgoo.png';
                 $.each(data.result.files, function (index, file) {
                     $('#files').html('<tr><td><a data-url="<?php echo base_url() ?>productgroups/file_handling?op=delete&name=' + file.name + '" class="aj_delete"><i class="btn-danger btn-sm icon-trash-a"></i> ' + file.name + ' </a><img style="max-height:200px;" src="<?php echo base_url() ?>userfiles/groups/' + file.name + '"></td></tr>');
                     img = file.name;

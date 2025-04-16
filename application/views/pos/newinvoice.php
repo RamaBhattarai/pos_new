@@ -1058,12 +1058,40 @@
     })
     $(document).ready(function () {
 
-        if (localStorage.bar_only && localStorage.bar_only != '') {
-            $('#bar_only').attr('checked', 'checked');
+        // if (localStorage.bar_only && localStorage.bar_only != '') {
+        //     $('#bar_only').attr('checked', 'checked');
 
-        } else {
-            $('#bar_only').removeAttr('checked');
-        }
+        // } else {
+        //     $('#bar_only').removeAttr('checked');
+        // }
+        // 1. Restore the warehouse and category selections from localStorage on page load
+    var savedWarehouse = localStorage.getItem('selectedWarehouse');
+    var savedCategory = localStorage.getItem('selectedCategory');
+
+    if (savedWarehouse) {
+        $('#v2_warehouses').val(savedWarehouse).change();
+    }
+
+    if (savedCategory) {
+        $('#v2_categories').val(savedCategory).change();
+    }
+
+    // 2. Save the warehouse selection to localStorage
+    $('#v2_warehouses').on('change', function () {
+        localStorage.setItem('selectedWarehouse', $(this).val());
+    });
+
+    // 3. Save the category selection to localStorage
+    $('#v2_categories').on('change', function () {
+        localStorage.setItem('selectedCategory', $(this).val());
+    });
+
+    // 4. Restore the state of the barcode checkbox
+    if (localStorage.bar_only && localStorage.bar_only != '') {
+        $('#bar_only').attr('checked', 'checked');
+    } else {
+        $('#bar_only').removeAttr('checked');
+    }
 
         $('#bar_only').click(function () {
 
@@ -1115,10 +1143,10 @@
 
             if (!$(this).attr('readonly')) {
                 //$('#v2_search_bar').keyup(function () {
-                // alert('here');
+                // alert('hello');
                 var whr = $('#v2_warehouses option:selected').val();
                 var cat = $('#v2_categories option:selected').val();
-                if (this.value.length > 2) {
+                if (this.value.length === 0 || this.value.length > 2) {
                     $.ajax({
                         type: "POST",
                         url: baseurl + 'search_products/v2_pos_search',
@@ -1138,25 +1166,31 @@
             if (event.keyCode == 13 && !$('#v2_search_bar').attr('readonly')) {
                 // alert('here')
                 $('#v2_search_bar').attr('readonly', true);
-                var barcode = $(this).val() || 0;
+                var barcode = $('#v2_search_bar').val().trim();
+
+    if (barcode.length === 13) {
+        barcode = barcode.substring(0, 12); 
+        $(this).val(barcode); 
+    }
+
+
+        // if (barcode.length === 13) {
+        //     $(this).val(barcode);  // Update input value with the 13-digit barcode
+        // } else if (barcode.length === 12) {
+        //     $(this).val(barcode);  // Update input value with the 12-digit barcode
+        // }
 
                 $.ajax({
                     type: "POST",
                     url: baseurl + 'search_products/get_id_from_barcode',
                     data: {name: barcode},
                     success: function(data) {
-                        // alert('here');
-                        // console.log(data); // The PID will be logged here (or can be used as needed)
                         var globalPid = data;
                         wait = false;
-               
                     // alert(globalPid);
                     $('#posp'+globalPid).click();
 
-                  
-
-
-                        var whr = $('#v2_warehouses option:selected').val();
+                       var whr = $('#v2_warehouses option:selected').val();
                         var cat = $('#v2_categories option:selected').val();
                         $.ajax({
                             type: "POST",
@@ -1166,6 +1200,8 @@
                                 $("#customer-box").css("background", "#FFF url(" + baseurl + "assets/custom/load-ring.gif) no-repeat 165px");
                             },
                             success: function (data) {
+                                alert('Got response!');
+                                console.log(data); // Add this!
                                 $("#pos_item").html(data);
                                 $('#v2_search_bar').attr('readonly', false);
                                 $('#v2_search_bar').val('');

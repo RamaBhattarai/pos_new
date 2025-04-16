@@ -20,7 +20,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Promo_model extends CI_Model
 {
-    var $table = 'geopos_promo';
+    var $table = 'pos_promo';
     var $column_order = array(null, 'code', 'valid', 'amount', null);
     var $column_search = array('code', 'valid', 'amount');
     var $order = array('id' => 'desc');
@@ -149,7 +149,7 @@ class Promo_model extends CI_Model
             'location' => $this->aauth->get_user()->loc
         );
 
-        if ($this->db->insert('geopos_promo', $data)) {
+        if ($this->db->insert('pos_promo', $data)) {
             //$cid = $this->db->insert_id();
             if ($pay_acc > 0) {
                 $amount = $amount * $qty;
@@ -202,7 +202,7 @@ class Promo_model extends CI_Model
 				COUNT(IF( active = '0', id, NULL)) AS Active,
 				COUNT(IF( active = '1', id, NULL)) AS Used,
 				COUNT(IF( active = '2', id, NULL)) AS Expired
-				FROM geopos_promo $whr");
+				FROM pos_promo $whr");
         echo json_encode($query->result_array());
 
     }
@@ -229,7 +229,7 @@ class Promo_model extends CI_Model
         $data = array('active' => $stat);
         $this->db->set($data);
         $this->db->where('id', $id);
-        return $this->db->update('geopos_promo');
+        return $this->db->update('pos_promo');
     }
 
 

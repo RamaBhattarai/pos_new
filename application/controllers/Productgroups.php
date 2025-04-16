@@ -87,7 +87,7 @@ class Productgroups extends CI_Controller
         if ($this->aauth->premission(11)) {
             $id = $this->input->post('deleteid');
             if ($id) {
-                $this->db->delete('geopos_product_groups', array('id' => $id));
+                $this->db->delete('pos_product_groups', array('id' => $id));
 
                 echo json_encode(array('status' => 'Success', 'message' => $this->lang->line('DELETED')));
             } else {

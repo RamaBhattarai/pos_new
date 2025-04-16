@@ -232,7 +232,7 @@
             dataType: 'json',
             formData: {'<?=$this->security->get_csrf_token_name()?>': crsf_hash},
             done: function (e, data) {
-                var img = 'default.png';
+                var img = 'defaut.png';
                 $.each(data.result.files, function (index, file) {
                     $('#files').html('<tr><td><a data-url="<?php echo base_url() ?>locations/file_handling?op=delete&name=' + file.name + '" class="aj_delete"><i class="btn-danger btn-sm icon-trash-a"></i> ' + file.name + ' </a><img style="max-height:200px;" src="<?php echo base_url() ?>userfiles/company/' + file.name + '"></td></tr>');
                     img = file.name;

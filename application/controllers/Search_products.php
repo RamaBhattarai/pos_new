@@ -318,30 +318,88 @@ class Search_products extends CI_Controller
 
 	}
 
-	public function get_id_from_barcode() {
-		$barcode = trim($this->input->post('name')); // Trim spaces from barcode
-        $barcode = (string)$barcode; // Ensure it's a string
-		
-        if ($barcode) {
-			$this->db->select('pid');
-			$this->db->from('pos_products');
-			$this->db->where('barcode', $barcode); // Handle case sensitivity if needed
-			
-			// Debugging the query
-			$query = $this->db->get()->row();
-			// print_r($query);exit;
-			// echo $this->db->last_query(); // Show the last executed query for debugging
-			
-			if ($query->pid) {
-				
-				echo $query->pid; // Output the product ID
-			} else {
-				echo "Product not found";
-			}
-        } else {
-            echo "Invalid barcode"; // If no barcode provided
+	// public function get_id_from_barcode() {
+	// 	$barcode = trim($this->input->post('name')); // Trim spaces
+	// 	$barcode = (string)$barcode; // Ensure it's a string
+
+	// 	if (strlen($barcode) === 13) {
+	// 		$barcode = substr($barcode, 0, 12); // Remove check digit
+	// 	}
+	
+	// 	if ($barcode) {
+	// 		// Try exact match first
+	// 		$this->db->select('pid');
+	// 		$this->db->from('pos_products');
+	// 		$this->db->where('barcode', $barcode); // ONLY exact match
+	// 		$query = $this->db->get()->row();
+	
+	// 		if (!empty($query)) {
+	// 			echo $query->pid;
+	// 		} else {
+	// 			// Try fuzzy match: barcode starting with the scanned input
+	// 			$this->db->select('pid');
+	// 			$this->db->from('pos_products');
+	// 			$this->db->like('barcode', $barcode, 'after');
+	// 			$query = $this->db->get()->row();
+	
+	// 			if (!empty($query)) {
+	// 				echo $query->pid;
+	// 			} else {
+	// 				echo "Product not found";
+	// 			}
+	// 		}
+	// 	} else {
+	// 		echo "Invalid barcode";
+	// 	}
+	// }
+
+	public function get_id_from_barcode()
+{
+    $barcode = trim($this->input->post('name')); // Trim input
+    $barcode = (string)$barcode;
+
+    $barcode12 = strlen($barcode) === 13 ? substr($barcode, 0, 12) : $barcode;
+
+    if ($barcode12) {
+        // Try exact match on 12-digit barcode
+        $this->db->select('pid');
+        $this->db->from('pos_products');
+        $this->db->where('barcode', $barcode12);
+        $query = $this->db->get()->row();
+
+        if (!empty($query)) {
+            echo $query->pid;
+            return;
         }
+
+        // Try exact match on full input (in case DB has 13 digits)
+        $this->db->select('pid');
+        $this->db->from('pos_products');
+        $this->db->where('barcode', $barcode);
+        $query = $this->db->get()->row();
+
+        if (!empty($query)) {
+            echo $query->pid;
+            return;
+        }
+
+        // Fallback: fuzzy match
+        $this->db->select('pid');
+        $this->db->from('pos_products');
+        $this->db->like('barcode', $barcode12, 'after');
+        $query = $this->db->get()->row();
+
+        if (!empty($query)) {
+            echo $query->pid;
+        } else {
+            echo "Product not found";
+        }
+    } else {
+        echo "Invalid barcode";
     }
+}
+
+
 
 
 	public function v2_pos_search()
@@ -386,12 +444,15 @@ class Search_products extends CI_Controller
 		$p_class = 'v2_select_pos_item';
 		if ($enable_bar == 'true' and is_numeric($name) and strlen($name) >= 8) {
 			$flag_p = true;
+			// $bar = " (pos_products.barcode = '" . $name . "' OR pos_products.barcode LIKE '" . $name . "%')";   //added new
 			$bar = " (pos_products.barcode = '" . (substr($name, 0, -1)) . "' OR pos_products.barcode LIKE '" . $name . "%')";
 
-			$query = "SELECT pos_products.*  FROM pos_products $join WHERE " . $qw . "$bar AND (pos_products.qty>0) ORDER BY pos_products.product_name LIMIT 6";
+
+			$query = "SELECT pos_products.*  FROM pos_products $join WHERE " . $qw . "$bar AND (pos_products.qty>0) ORDER BY pos_products.product_name";
 			$p_class = 'v2_select_pos_item_bar';
 
-		} elseif ($enable_bar == 'false' or !$enable_bar) {
+		} 
+		elseif ($enable_bar == 'false' or !$enable_bar) {
 			$flag_p = true;
 			if ($billing_settings['key1'] == 2) {
 
@@ -404,6 +465,13 @@ class Search_products extends CI_Controller
 
 
 		}
+	 
+	elseif (trim($name) === '') {
+		$flag_p = true;
+		$query = "SELECT pos_products.* $e FROM pos_products $join WHERE " . $qw . 
+				 "(pos_products.qty>0) ORDER BY pos_products.product_name LIMIT 30";
+	}
+	
 
 		if ($flag_p) {
 			$query = $this->db->query($query);
@@ -414,6 +482,7 @@ class Search_products extends CI_Controller
 			foreach ($result as $row) {
 				// print_r($row);exit;
 				if ($bar) $bar = $row['barcode'];
+				
 				$out .= '    <div class="col-2 border mb-1"  ><div class=" rounded" >
                                  <a  id="posp' . $row['pid'] . '"  class="' . $p_class . ' round"   data-name="' . $row['product_name'] . '"  data-price="' . amountExchange_s($row['product_price'], 0, $this->aauth->get_user()->loc) . '"  data-tax="' . amountFormat_general($row['taxrate']) . '"  data-discount="' . amountFormat_general($row['disrate']) . '" data-pcode="' . $row['product_code'] . '"   data-pid="' . $row['pid'] . '"  data-stock="' . amountFormat_general($row['qty']) . '" data-unit="' . $row['unit'] . '" data-serial="' . @$row['serial'] . '" data-bar="' . $bar . '">
                                         <img class="round"
@@ -501,8 +570,9 @@ class Search_products extends CI_Controller
 		$i = 0;
 		echo '<div class="row match-height">';
 		foreach ($result as $row) {
+			
 
-			$out .= '    <div class="col-2 border mb-1"  ><div class=" rounded" >
+					$out .= '    <div class="col-2 border mb-1"  ><div class=" rounded" >
                                  <a  id="posp' . $i . '"  class="v2_select_pos_item round"   data-name="' . $row['product_name'] . '"  data-price="' . amountExchange_s($row['product_price'], 0, $this->aauth->get_user()->loc) . '"  data-tax="' . amountFormat_general($row['taxrate']) . '"  data-discount="' . amountFormat_general($row['disrate']) . '" data-pcode="' . $row['product_code'] . '"   data-pid="' . $row['pid'] . '"  data-stock="' . amountFormat_general($row['qty']) . '" data-unit="' . $row['unit'] . '" data-serial="' . @$row['serial'] . '">
                                         <img class="round"
                                              src="' . base_url('userfiles/product/' . $row['image']) . '"  style="max-height: 100%;max-width: 100%">

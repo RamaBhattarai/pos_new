@@ -186,7 +186,7 @@ class Projects_model extends CI_Model
                 'rel' => 1,
                 'rid' => $last
             );
-            $this->db->insert('geopos_events', $data);
+            $this->db->insert('pos_events', $data);
         }
 
         return $last;
@@ -201,7 +201,7 @@ class Projects_model extends CI_Model
         $this->db->where('id', $id);
         $out = $this->db->update('pos_projects');
 
-        $this->db->delete('geopos_events', array('rel' => 1, 'rid' => $id));
+        $this->db->delete('pos_events', array('rel' => 1, 'rid' => $id));
         if ($link_to_cal > 0) {
             if ($link_to_cal == 1) {
                 $sdate = $edate;
@@ -214,7 +214,7 @@ class Projects_model extends CI_Model
                 'rel' => 1,
                 'rid' => $id
             );
-            $this->db->insert('geopos_events', $data);
+            $this->db->insert('pos_events', $data);
         }
         if ($employee) {
             $this->db->delete('pos_project_meta', array('pid' => $id, 'meta_key' => 19));
