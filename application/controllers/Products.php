@@ -106,7 +106,7 @@ class Products extends CI_Controller
 
 //             // Replace default.png with deskgoo.png
 // $image = ($prd->image === 'default.png') ? 'deskgoo.png' : $prd->image;
-            $row[] = '<a href="#" data-object-id="' . $pid . '" class="view-object"><span class="avatar-lg align-baseline"><img style="max-width: 90px" src="' . base_url() . 'userfiles/product/thumbnail/' . $prd->image . '" ></span>&nbsp;' . $prd->product_name . '</a>';
+            $row[] = '<a href="#" data-object-id="' . $pid . '" class="view-object"><span class="avatar-lg align-baseline"><img style="max-width: 80px" src="' . base_url() . 'userfiles/product/thumbnail/' . $prd->image . '" ></span>&nbsp;' . $prd->product_name . '</a>';
             $row[] = +$prd->qty;
             $row[] = $prd->product_code;
             $row[] = $prd->c_title;
@@ -611,7 +611,8 @@ class Products extends CI_Controller
             $products = array();
             if(!$this->input->post('products_l')) exit('No Product Selected!');
             foreach ($this->input->post('products_l') as $row) {
-                $this->db->select('pos_products.product_name,pos_products.product_price,pos_products.product_code,pos_products.barcode,pos_products.expiry,pos_products.code_type,pos_warehouse.title,pos_warehouse.loc');
+                // $this->db->select('pos_products.product_name,pos_products.product_price,pos_products.product_code,pos_products.barcode,pos_products.expiry,pos_products.code_type,pos_warehouse.title,pos_warehouse.loc');
+                $this->db->select('pos_products.product_name,pos_products.product_price,pos_products.product_code,pos_products.barcode,pos_products.code_type,pos_warehouse.title,pos_warehouse.loc');
                 $this->db->from('pos_products');
                 $this->db->join('pos_warehouse', 'pos_warehouse.id = pos_products.warehouse', 'left');
 

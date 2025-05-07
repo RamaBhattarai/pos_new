@@ -32,6 +32,7 @@
                                 <div class="dropdown-menu">
 
 
+
                                     <a class="dropdown-item"
                                        href="<?php echo 'thermal_pdf?id=' . $invoice['iid']; ?>"><?php echo $this->lang->line('PDF Print') ?></a>
                                     <div class="dropdown-divider"></div>
@@ -189,14 +190,18 @@
                 <!--/ Invoice Company Details -->
 
                 <!-- Invoice Customer Details -->
+                <p><strong>VAT Registration No:</strong></p>
+        <p><strong>Seller’s PAN
+        :</strong></p>  
                 <div id="invoice-customer-details" class="row pt-2">
                     <div class="col-sm-12 text-xs-center text-md-left">
                         <p class="text-muted"><?php echo $this->lang->line('Bill To') ?></p>
                     </div>
+                    
                     <div class="col-md-6 col-sm-12 text-xs-center text-md-left">
                         <ul class="px-0 list-unstyled">
 
-
+                        
                             <li class="text-bold-800"><a
                                         href="<?php echo base_url('customers/view?id=' . $invoice['cid']) ?>"><strong
                                             class="invoice_a"><?php echo $invoice['name'] . '</strong></a></li><li>' . $invoice['company'] . '</li><li>' . $invoice['address'] . '</li><li>' . $invoice['city'] . ',' . $invoice['country'] . '</li><li>' . $this->lang->line('Phone') . ': ' . $invoice['phone'] . '</li><li>' . $this->lang->line('Email') . ': ' . $invoice['email'] . '</li>';
@@ -311,7 +316,8 @@
                                         <th><?php echo $this->lang->line('Description') ?></th>
                                         <th class="text-xs-left"><?php echo $this->lang->line('Rate') ?></th>
                                         <th class="text-xs-left"><?php echo $this->lang->line('Qty') ?></th>
-                                        <th class="text-xs-left"><?php echo $this->lang->line('Tax') ?></th>
+                                        <!-- <th class="text-xs-left"><?php echo $this->lang->line('Tax') ?></th> -->
+                                        <th class="text-xs-left">VAT</th>
                                         <th class="text-xs-left"><?php echo $this->lang->line('Discount') ?></th>
                                         <th class="text-xs-left"><?php echo $this->lang->line('Amount') ?></th>
                                     </tr>
@@ -365,6 +371,9 @@
                         </div>
                         <div class="col-md-5 col-sm-12">
                             <p class="lead"><?php echo $this->lang->line('Summary') ?></p>
+                         
+        
+   
                             <div class="table-responsive">
                                 <table class="table">
                                     <tbody>
@@ -373,7 +382,8 @@
                                         <td class="text-xs-right"> <?php echo amountExchange($sub_t, 0, $this->aauth->get_user()->loc) ?></td>
                                     </tr>
                                     <tr>
-                                        <td><?php echo $this->lang->line('Tax') ?></td>
+                                        <!-- <td><?php echo $this->lang->line('Tax') ?></td> -->
+                                         <td>VAT</td>
                                         <td class="text-xs-right"><?php echo amountExchange($invoice['tax'], 0, $this->aauth->get_user()->loc) ?></td>
                                     </tr>
                                     <tr>

@@ -130,15 +130,26 @@
                         <label class="col-sm-2 control-label"
                                for="taxid"><?php echo $this->lang->line('Default') ?><?php echo $this->lang->line('Warehouse') ?></label>
                         <div class="col-sm-8">
-                            <select name="wid"
-                                    class="selectpicker form-control round">
-                                <?php echo '<option value="' . $ware . '" selected>' . $this->lang->line('Do not change') . '</option>';
-                                echo $this->common->default_warehouse();
-                                echo '<option value="0">' . $this->lang->line('All') ?></option><?php foreach ($warehouse as $row) {
-                                    echo '<option value="' . $row['id'] . '">' . $row['title'] . '</option>';
-                                } ?>
+                        <select name="wid" class="selectpicker form-control round">
+            <?php
+            if (empty($ware)) {
+                // If warehouse is not set, show "Do not change" by default
+                echo '<option value="' . $ware . '" selected>' . $this->lang->line('Do not change') . '</option>';
+            }
 
-                            </select>
+            // Show the default warehouse option
+            echo $this->common->default_warehouse();
+            
+            // Show the "All" option
+            echo '<option value="0" ' . ($ware == '0' ? 'selected' : '') . '>' . $this->lang->line('All') . '</option>';
+
+            // Loop through the warehouse options
+            foreach ($warehouse as $row) {
+                $selected = ($ware == $row['id']) ? 'selected' : ''; // Pre-select the warehouse if it matches
+                echo '<option value="' . $row['id'] . '" ' . $selected . '>' . $row['title'] . '</option>';
+            }
+            ?>
+        </select>
                         </div>
                     </div>
                     <div class="form-group row">

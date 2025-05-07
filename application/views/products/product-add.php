@@ -177,7 +177,8 @@
                             foreach ($units as $row) {
                                 $cid = $row['code'];
                                 $title = $row['name'];
-                                echo "<option value='$cid'>$title - $cid</option>";
+                                $selected = (isset($product['unit']) && $product['unit'] == $cid) ? 'selected' : '';
+                                echo "<option value='$cid' $selected>$title - $cid</option>";
                             }
                             ?>
                         </select>

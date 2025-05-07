@@ -635,7 +635,7 @@
                                 <label for="cardNumber"><?php echo $this->lang->line('Payment Method') ?></label>
                                 <select class="form-control" name="p_method" id="p_method">
                                     <option value='Cash'><?php echo $this->lang->line('Cash') ?></option>
-                                    <option value='Card Swipe'><?php echo $this->lang->line('Card Swipe') ?></option>
+                                    <!-- <option value='Card Swipe'><?php echo $this->lang->line('Card Swipe') ?></option> -->
                                     <option value='Bank'><?php echo $this->lang->line('Bank') ?></option>
 
                                 </select></div>

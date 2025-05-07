@@ -161,10 +161,10 @@
                                                                href="<?php echo base_url(); ?>settings/misc_automail"><i
                                                                         class="ft-chevron-right"></i><?php echo $this->lang->line('EmailAlert') ?>
                                                             </a></li>
-                                                        <li><a class="dropdown-item"
+                                                        <!-- <li><a class="dropdown-item"
                                                                href="<?php echo base_url(); ?>settings/about"><i
                                                                         class="ft-chevron-right"></i> <?php echo $this->lang->line('About') ?>
-                                                            </a></li>
+                                                            </a></li> -->
                                                     </ul>
                                                 </div>
                                             </div>
@@ -177,12 +177,12 @@
 
                                     <div id="accordionWrap1" role="tablist" aria-multiselectable="true">
                                         <div class="card border-0 box-shadow-0 collapse-icon accordion-icon-rotate">
-                                            <div class="card-header p-0 pb-1 border-0 mt-1" id="heading4" role="tab">
+                                            <!-- <div class="card-header p-0 pb-1 border-0 mt-1" id="heading4" role="tab">
                                                 <a class=" text-uppercase black" data-toggle="collapse"
                                                    data-parent="#accordionWrap1" href="#accordion4"
                                                    aria-controls="accordion4"><i
                                                             class="fa fa-fire"></i><?php echo $this->lang->line('AdvancedSettings') ?>
-                                                </a></div>
+                                                </a></div> -->
                                             <div class="card-collapse collapse mb-1 " id="accordion4" role="tabpanel"
                                                  aria-labelledby="heading4" aria-expanded="true">
                                                 <div class="card-content">
@@ -195,10 +195,10 @@
                                                                href="<?php echo base_url(); ?>cronjob"><i
                                                                         class="ft-chevron-right"></i><?php echo $this->lang->line('Automatic Corn Job') ?>
                                                             </a></li>
-                                                        <li><a class="dropdown-item"
+                                                        <!-- <li><a class="dropdown-item"
                                                                href="<?php echo base_url(); ?>settings/custom_fields"><i
                                                                         class="ft-chevron-right"></i> <?php echo $this->lang->line('CustomFields') ?>
-                                                            </a></li>
+                                                            </a></li> -->
                                                         <li><a class="dropdown-item"
                                                                href="<?php echo base_url(); ?>settings/dual_entry"><i
                                                                         class="ft-chevron-right"></i> <?php echo $this->lang->line('DualEntryAccounting') ?>

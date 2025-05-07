@@ -188,13 +188,14 @@
 
                         <div class="col-sm-4">
                             <select name="unit" class="form-control">
+                            <option value='' <?php echo empty($product['unit']) ? 'selected' : ''; ?>>None</option>
                                 <?php
-                                echo "<option value='" . $product['unit'] . "'>" . $this->lang->line('Do not change') . "</option><option value=''>None</option>";
-                                foreach ($units as $row) {
-                                    $cid = $row['code'];
-                                    $title = $row['name'];
-                                    echo "<option value='$cid'>$title</option>";
-                                }
+                               foreach ($units as $row) {
+                                $cid = $row['code'];
+                                $title = $row['name'];
+                                $selected = ($product['unit'] == $cid) ? 'selected' : '';
+                                echo "<option value='$cid' $selected>$title</option>";
+                            }
                                 ?>
                             </select>
 

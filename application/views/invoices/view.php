@@ -353,6 +353,7 @@
                         </div>
                         <div class="col-md-5 col-sm-12">
                             <p class="lead"><?php echo $this->lang->line('Summary') ?></p>
+                            
                             <div class="table-responsive">
                                 <table class="table">
                                     <tbody>
@@ -372,6 +373,7 @@
                                         <td><?php echo $this->lang->line('Shipping') ?></td>
                                         <td class="text-xs-right"><?php echo amountExchange($invoice['shipping'], 0, $this->aauth->get_user()->loc) ?></td>
                                     </tr>
+                                    
                                     <tr>
                                         <td class="text-bold-800"><?php echo $this->lang->line('Total') ?></td>
                                         <td class="text-bold-800 text-xs-right"> <?php echo amountExchange($invoice['total'], 0, $this->aauth->get_user()->loc) ?></td>

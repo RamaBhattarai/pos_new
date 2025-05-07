@@ -145,9 +145,11 @@
                                     <option value="0"><?php echo $this->lang->line('Default') ?></option>
                                     <?php $loc = locations();
 
-                                    foreach ($loc as $row) {
-                                        echo ' <option value="' . $row['id'] . '"> ' . $row['cname'] . '</option>';
-                                    }
+foreach ($loc as $row) {
+    // Check if the current location matches the saved location
+    $selected = ($row['id'] == $user['loc']) ? 'selected' : '';
+    echo '<option value="' . $row['id'] . '" ' . $selected . '> ' . $row['cname'] . '</option>';
+}
 
                                     ?>
                                 </select>
@@ -182,17 +184,18 @@
                                    for="name"><?php echo $this->lang->line('Department') ?></label>
 
                             <div class="col-sm-5">
-                                <select name="department" class="form-control margin-bottom">
-                                    <option value="<?php echo $user['dept'] ?>"><?php echo $this->lang->line('Do not change') ?></option>
-                                    <option value="0"><?php echo $this->lang->line('Default') . ' - ' . $this->lang->line('No') ?></option>
-                                    <?php
+                            <select name="department" class="form-control margin-bottom">
+    <option value=""><?php echo $this->lang->line('Do not change') ?></option>
+    <option value="0" <?php if ($user['dept'] == 0) echo 'selected'; ?>>
+        <?php echo $this->lang->line('Default') . ' - ' . $this->lang->line('No') ?>
+    </option>
+    <?php foreach ($dept as $row): ?>
+        <option value="<?php echo $row['id']; ?>" <?php if ($user['dept'] == $row['id']) echo 'selected'; ?>>
+            <?php echo $row['val1']; ?>
+        </option>
+    <?php endforeach; ?>
+</select>
 
-                                    foreach ($dept as $row) {
-                                        echo ' <option value="' . $row['id'] . '"> ' . $row['val1'] . '</option>';
-                                    }
-
-                                    ?>
-                                </select>
                             </div>
                         </div>
 

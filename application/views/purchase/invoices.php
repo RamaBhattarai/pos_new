@@ -72,6 +72,40 @@
 
 
     </div>
+    <!-- cancel -->
+<div id="cancel_bill" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+
+                <h4 class="modal-title"><?php echo $this->lang->line('Cancel Invoice'); ?></h4>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form class="cancelbill">
+
+
+                    <?php echo $this->lang->line('You can not revert'); ?>
+
+
+            </div>
+
+
+            <div class="modal-footer">
+                <input type="hidden" class="form-control"
+                       name="tid" value="<?php echo $invoice['iid'] ?>">
+                <button type="button" class="btn btn-default"
+                        data-dismiss="modal"><?php echo $this->lang->line('Close'); ?></button>
+                <button type="button" class="btn btn-danger"
+                        id="send"><?php echo $this->lang->line('Cancel Invoice'); ?></button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+<!-- delete -->
     <div id="delete_model" class="modal fade">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -144,5 +178,75 @@
                     alert("Date range is Required");
                 }
             });
+
+    //         $(document).on('click', ".cancel-bill-btn", function (e) {
+    //     e.preventDefault();
+
+    //     $('#cancel_bill').modal({backdrop: 'static', keyboard: false}).one('click', '#send', function () {
+    //         var acturl = 'transactions/cancelpurchase';
+    //         cancelBill(acturl);
+
+    //     });
+    // });
+
+    //////////////cancel
+
+
+//////////////cancel
+// Open Cancel Modal
+$(document).on('click', ".cancel-bill-btn", function (e) {
+    e.preventDefault();
+    const tid = $(this).data('id'); // Get invoice TID from button
+    $('input[name="tid"]').val(tid); // Set it in modal form hidden input
+    $('#cancel_bill').modal({ backdrop: 'static', keyboard: false });
+});
+
+// Handle Confirm Cancel Click
+$(document).on('click', "#send", function (e) {
+    e.preventDefault();
+    var acturl = 'transactions/cancelpurchase';
+    cancelBill(acturl);
+});
+
+// Ajax call to cancel
+function cancelBill(acturl) {
+    var errorNum = farmCheck();
+    $("#cancel_bill").modal('hide');
+    if (errorNum > 0) {
+        $("#notify").removeClass("alert-success").addClass("alert-warning").fadeIn();
+        $("#notify .message").html("<strong>Error</strong>");
+        $("html, body").animate({ scrollTop: $('#notify').offset().bottom }, 1000);
+    } else {
+        jQuery.ajax({
+            url: baseurl + acturl,
+            type: 'POST',
+            data: $('form.cancelbill').serialize() + '&' + crsf_token + '=' + crsf_hash,
+            dataType: 'json',
+            success: function (data) {
+                if (data.status == "Success") {
+                    $("#notify .message").html("<strong>" + data.status + "</strong>: " + data.message);
+                    $("#notify").removeClass("alert-danger").addClass("alert-success").fadeIn();
+                    $("html, body").scrollTop($("body").offset().top);
+                } else {
+                    $("#notify .message").html("<strong>" + data.status + "</strong>: " + data.message);
+                    $("#notify").removeClass("alert-success").addClass("alert-danger").fadeIn();
+                    $("html, body").scrollTop($("body").offset().top);
+                }
+                setTimeout(function () {
+                    location.reload();
+                }, 2000);
+            },
+            error: function (data) {
+                $("#notify .message").html("<strong>" + data.status + "</strong>: " + data.message);
+                $("#notify").removeClass("alert-success").addClass("alert-danger").fadeIn();
+                $("html, body").scrollTop($("body").offset().top);
+            }
+        });
+    }
+}
+
+
+
+
         });
     </script>

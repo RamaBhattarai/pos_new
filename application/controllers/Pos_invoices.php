@@ -908,7 +908,11 @@ class Pos_invoices extends CI_Controller
             $row[] = dateformat($invoices->invoicedate);
             $row[] = amountExchange($invoices->total, 0, $this->aauth->get_user()->loc);
             $row[] = '<span class="st-' . $invoices->status . '">' . $this->lang->line(ucwords($invoices->status)) . '</span>';
-            $row[] = '<a href="' . base_url("pos_invoices/view?id=$invoices->id") . '" class="btn btn-success btn-sm" title="View"><i class="fa fa-eye"></i></a>&nbsp;<a href="' . base_url("pos_invoices/thermal_pdf?id=$invoices->id") . '&d=1" class="btn btn-info btn-sm"  title="Download"><span class="fa fa-download"></span></a>&nbsp;<a href="#" data-object-id="' . $invoices->id . '" class="btn btn-danger btn-sm delete-object"><span class="fa fa-trash"></span></a>';
+            // $row[] = '<a href="' . base_url("pos_invoices/view?id=$invoices->id") . '" class="btn btn-success btn-sm" title="View"><i class="fa fa-eye"></i></a>&nbsp;<a href="' . base_url("pos_invoices/thermal_pdf?id=$invoices->id") . '&d=1" class="btn btn-info btn-sm"  title="Download"><span class="fa fa-download"></span></a>&nbsp;<a href="#" data-object-id="' . $invoices->id . '" class="btn btn-danger btn-sm delete-object"><span class="fa fa-trash"></span></a>';
+//cancel--------button-------added-------
+$row[] = '<a href="' . base_url("pos_invoices/view?id=$invoices->id") . '" class="btn btn-success btn-sm" title="View"><i class="fa fa-eye"></i></a>&nbsp;
+<a href="' . base_url("pos_invoices/thermal_pdf?id=$invoices->id") . '&d=1" class="btn btn-info btn-sm" title="Download"><span class="fa fa-download"></span></a>&nbsp;
+<a href="#" data-id="' . $invoices->id . '" class="btn btn-danger btn-sm cancel-bill" title="Cancel"><i class="fa fa-minus-circle"></i> ' . $this->lang->line('Cancel') . '</a>';
 
             $data[] = $row;
         }
@@ -925,6 +929,8 @@ class Pos_invoices extends CI_Controller
         echo json_encode($output);
 
     }
+
+
 
     public function extended_ajax_list()
     {
@@ -1005,6 +1011,11 @@ class Pos_invoices extends CI_Controller
         $data['invoice'] = $this->invocies->invoice_details($tid, $this->limited);
         if ($data['invoice']['id']) $data['products'] = $this->invocies->invoice_products($tid);
         if ($data['invoice']['id']) $data['employee'] = $this->invocies->employee($data['invoice']['eid']);
+        
+              // Check if the invoice has been printed more than once (print_count > 1)
+              $data['copy_of_original'] = $data['invoice']['print_count'] > 1 ? "Copy of Original" : "";
+
+
         if (CUSTOM) $data['c_custom_fields'] = $this->custom->view_fields_data($data['invoice']['cid'], 1, 1);
         if ($data['invoice']['i_class'] == 1) {
             $pref = prefix(7);
@@ -1018,6 +1029,8 @@ class Pos_invoices extends CI_Controller
         } else {
             $html = $this->load->view('print_files/invoice-a4_v' . INVV, $data, true);
         }
+         
+
         //PDF Rendering
         $this->load->library('pdf');
         if (INVV == 1) {
@@ -1030,6 +1043,11 @@ class Pos_invoices extends CI_Controller
         }
         $pdf->SetHTMLFooter('<div style="text-align: right;font-family: serif; font-size: 8pt; color: #5C5C5C; font-style: italic;margin-top:-6pt;">{PAGENO}/{nbpg} #' . $data['invoice']['tid'] . '</div>');
         $pdf->WriteHTML($html);
+        // ✅ Now update the print_count AFTER PDF generation
+    $this->db->set('print_count', 'print_count + 1', FALSE);
+    $this->db->where('id', $tid);
+    $this->db->update('pos_invoices');
+
         if ($this->input->get('d')) {
             $pdf->Output('Invoice_pos' . $data['invoice']['tid'] . '.pdf', 'D');
         } else {
@@ -1052,6 +1070,7 @@ class Pos_invoices extends CI_Controller
             echo json_encode(array('status' => 'Error', 'message' =>
                 $this->lang->line('ERROR')));
         }
+        
     }
 
     public function editaction()

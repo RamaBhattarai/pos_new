@@ -12,7 +12,7 @@
     <link rel="apple-touch-icon" sizes="120x120" href="<?php echo assets_url(); ?>crm-assets/images/ico/apple-icon-120.png">
     <link rel="apple-touch-icon" sizes="152x152" href="<?php echo assets_url(); ?>crm-assets/images/ico/apple-icon-152.png">
     <link rel="shortcut icon" type="image/x-icon" href="<?php echo assets_url(); ?>crm-assets/images/ico/favicon.ico">
-    <link rel="shortcut icon" type="image/png" href="<?php echo assets_url(); ?>crm-assets/images/ico/favicon-32.png">
+    <link rel="shortcut icon" type="image/png" href="<?php echo assets_url(); ?>crm-assets/images/ico/favicon-deskgoo.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-touch-fullscreen" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">

@@ -1,5 +1,6 @@
 <div class="content-body">
     <div class="card">
+
         <div class="card-content">
             <div id="notify" class="alert alert-success" style="display:none;">
                 <a href="#" class="close" data-dismiss="alert">&times;</a>
@@ -110,7 +111,9 @@
                     </div>
                 </div>
                 <!--/ Invoice Company Details -->
-
+                <p><strong>VAT Registration No:</strong></p>
+        <p><strong>Seller’s PAN
+        :</strong></p>  
                 <!-- Invoice Customer Details -->
                 <div id="invoice-customer-details" class="row pt-2">
                     <div class="col-sm-12 text-xs-center text-md-left">

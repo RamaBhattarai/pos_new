@@ -175,6 +175,20 @@
     </style>
 </head>
 <body dir="<?= LTR ?>">
+
+
+<?php if (!empty($copy_of_original)) : ?>
+    <div style="font-size: 12pt; font-weight: bold; color: red; text-align: center;">
+        <?php echo $copy_of_original; ?>
+    </div>
+<?php endif; ?>
+
+
+<!-- <?php if ($invoice['print_count'] > 1): ?>
+    <h4 style="color:red; text-align:center;">*** Copy of Original ***</h4>
+<?php endif; ?> -->
+
+
 <div class="invoice-box">
     <br>
     <table class="party">
@@ -182,6 +196,7 @@
         <tr class="heading">
             <td> <?php echo $this->lang->line('Our Info') ?>:</td>
             <td><?= $general['person'] ?>:</td>
+        
         </tr>
         </thead>
         <tbody>
@@ -211,6 +226,8 @@
                     }
                 }
                 ?>
+                <p>VAT Registration No: 101101</p>
+        <p>Seller’s PAN:1010101 </p>  
                 </ul>
             </td>
         </tr><?php if (@$invoice['name_s']) { ?>

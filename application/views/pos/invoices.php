@@ -1,5 +1,9 @@
 <div class="content-body">
+   
     <div class="card">
+    <input type="hidden" id="csrf_token_name" value="<?= $this->security->get_csrf_token_name(); ?>">
+<input type="hidden" id="csrf_token_value" value="<?= $this->security->get_csrf_hash(); ?>">
+
         <div class="card-header">
             <h4 class="card-title"><?php echo $this->lang->line('Manage POS Invoices') ?> <a
                         href="<?php echo base_url('pos_invoices/create') ?>"
@@ -54,6 +58,7 @@
                     </tr>
                     </thead>
                     <tbody>
+                    
                     </tbody>
 
                     <tfoot>
@@ -76,6 +81,64 @@
 </div>
 
 
+
+
+
+<!-- End of Modal -->
+<div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="messageModalLabel">Message</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="modal-message">
+                <!-- Dynamic message will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- cancel -->
+<div id="cancel_bill" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+
+                <h4 class="modal-title"><?php echo $this->lang->line('Cancel Invoice'); ?></h4>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form class="cancelbill">
+
+
+                    <?php echo $this->lang->line('You can not revert'); ?>
+
+
+            </div>
+
+
+            <div class="modal-footer">
+                <input type="hidden" class="form-control"
+                       name="tid" value="<?php echo $invoice['iid'] ?>">
+                <button type="button" class="btn btn-default"
+                        data-dismiss="modal"><?php echo $this->lang->line('Close'); ?></button>
+                <button type="button" class="btn btn-danger"
+                        id="send"><?php echo $this->lang->line('Cancel Invoice'); ?></button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+
+
 <div id="delete_model" class="modal fade">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -95,11 +158,18 @@
                         id="delete-confirm"><?php echo $this->lang->line('Delete') ?></button>
                 <button type="button" data-dismiss="modal"
                         class="btn"><?php echo $this->lang->line('Cancel') ?></button>
+                 
+              
+
             </div>
         </div>
     </div>
 </div>
 <script type="text/javascript">
+    var csrf_token_name = $('#csrf_token_name').val();
+var csrf_token_value = $('#csrf_token_value').val();
+
+
     $(document).ready(function () {
         draw_data();
 
@@ -125,6 +195,8 @@
                         'targets': [0],
                         'orderable': false,
                     },
+
+
                 ],
                 dom: 'Blfrtip',
                 buttons: [
@@ -149,5 +221,64 @@
                 alert("Date range is Required");
             }
         });
+
+
+
+//////////////cancel
+// Open Cancel Modal
+$(document).on('click', ".cancel-bill", function (e) {
+    e.preventDefault();
+    const tid = $(this).data('id'); // Get invoice TID from button
+    $('input[name="tid"]').val(tid); // Set it in modal form hidden input
+    $('#cancel_bill').modal({ backdrop: 'static', keyboard: false });
+});
+
+// Handle Confirm Cancel Click
+$(document).on('click', "#send", function (e) {
+    e.preventDefault();
+    var acturl = 'transactions/cancelinvoice';
+    cancelBill(acturl);
+});
+
+// Ajax call to cancel
+function cancelBill(acturl) {
+    var errorNum = farmCheck();
+    $("#cancel_bill").modal('hide');
+    if (errorNum > 0) {
+        $("#notify").removeClass("alert-success").addClass("alert-warning").fadeIn();
+        $("#notify .message").html("<strong>Error</strong>");
+        $("html, body").animate({ scrollTop: $('#notify').offset().bottom }, 1000);
+    } else {
+        jQuery.ajax({
+            url: baseurl + acturl,
+            type: 'POST',
+            data: $('form.cancelbill').serialize() + '&' + crsf_token + '=' + crsf_hash,
+            dataType: 'json',
+            success: function (data) {
+                if (data.status == "Success") {
+                    $("#notify .message").html("<strong>" + data.status + "</strong>: " + data.message);
+                    $("#notify").removeClass("alert-danger").addClass("alert-success").fadeIn();
+                    $("html, body").scrollTop($("body").offset().top);
+                } else {
+                    $("#notify .message").html("<strong>" + data.status + "</strong>: " + data.message);
+                    $("#notify").removeClass("alert-success").addClass("alert-danger").fadeIn();
+                    $("html, body").scrollTop($("body").offset().top);
+                }
+                setTimeout(function () {
+                    location.reload();
+                }, 2000);
+            },
+            error: function (data) {
+                $("#notify .message").html("<strong>" + data.status + "</strong>: " + data.message);
+                $("#notify").removeClass("alert-success").addClass("alert-danger").fadeIn();
+                $("html, body").scrollTop($("body").offset().top);
+            }
+        });
+    }
+}
+
+
+
+       
     });
 </script>

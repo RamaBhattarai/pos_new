@@ -356,7 +356,9 @@ class Search_products extends CI_Controller
 	public function get_id_from_barcode()
 {
     $barcode = trim($this->input->post('name')); // Trim input
+	
     $barcode = (string)$barcode;
+	$warehouse = $this->input->post('warehouse');  //  Get warehouse from POST
 
     $barcode12 = strlen($barcode) === 13 ? substr($barcode, 0, 12) : $barcode;
 
@@ -365,6 +367,7 @@ class Search_products extends CI_Controller
         $this->db->select('pid');
         $this->db->from('pos_products');
         $this->db->where('barcode', $barcode12);
+		$this->db->where('warehouse', $warehouse);  // Add warehouse condition
         $query = $this->db->get()->row();
 
         if (!empty($query)) {
@@ -376,6 +379,7 @@ class Search_products extends CI_Controller
         $this->db->select('pid');
         $this->db->from('pos_products');
         $this->db->where('barcode', $barcode);
+		$this->db->where('warehouse', $warehouse);  //  Add warehouse condition
         $query = $this->db->get()->row();
 
         if (!empty($query)) {
@@ -387,6 +391,7 @@ class Search_products extends CI_Controller
         $this->db->select('pid');
         $this->db->from('pos_products');
         $this->db->like('barcode', $barcode12, 'after');
+		$this->db->where('warehouse', $warehouse);  //  Add warehouse condition
         $query = $this->db->get()->row();
 
         if (!empty($query)) {
@@ -476,7 +481,7 @@ class Search_products extends CI_Controller
 		if ($flag_p) {
 			$query = $this->db->query($query);
 			$result = $query->result_array();
-			
+
 			$i = 0;
 			$out = '<div class="row match-height">';
 			foreach ($result as $row) {

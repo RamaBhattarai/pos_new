@@ -364,30 +364,36 @@
                     </div>
                 </section>
                 <section class="chat-app-form">
-                    <div class="form-group text-center">
-                        <!-- Button Group with Icons in different sizes -->
-                        <div class="btn-group btn-group-lg" role="group">
-                            <button type="button" class="possubmit btn btn-warning"><i
-                                        class="fa fa-save"></i> <?php echo $this->lang->line('Draft') ?> </button>
-                            <button type="button" class="btn btn-success possubmit3" data-type="6" data-toggle="modal"
-                                    data-target="#basicPay"><i
-                                        class="fa fa-money"></i> <?php echo $this->lang->line('Payment') ?>
-                            </button> <?php
+    <div class="form-group text-center">
+        <!-- Button Group with Icons in different sizes -->
+        <div class="btn-group btn-group-lg" role="group">
+            <button type="button" class="possubmit btn btn-warning">
+                <i class="fa fa-save"></i> <?php echo $this->lang->line('Draft') ?>
+            </button>
 
-                            if ($enable_card['url']) { ?>
-                                <button type="button" class="btn btn-primary possubmit2" data-type="4"
-                                        data-toggle="modal" data-target="#cardPay"><i
-                                            class="fa fa-credit-card"></i> <?php echo $this->lang->line('Card') ?>
-                                </button>     <?php } ?>
+            <button type="button" class="btn btn-success possubmit3" data-type="6" data-toggle="modal"
+                    data-target="#basicPay">
+                <i class="fa fa-money"></i> <?php echo $this->lang->line('Payment') ?>
+            </button>
 
+            <?php
+            /*
+            if ($enable_card['url']) { ?>
+                <button type="button" class="btn btn-primary possubmit2" data-type="4"
+                        data-toggle="modal" data-target="#cardPay">
+                    <i class="fa fa-credit-card"></i> <?php echo $this->lang->line('Card') ?>
+                </button>
+            <?php }
+            */
+            ?>
+        </div>
 
-                        </div>
-                        <a href="<?= base_url('stockreturn/create_client') ?>" class="red float-right"><i
-                                    class="fa fa-reply-all"></i></a>
-                    </div>
+        <a href="<?= base_url('stockreturn/create_client') ?>" class="red float-right">
+            <i class="fa fa-reply-all"></i>
+        </a>
+    </div>
+</section>
 
-
-                </section>
             </div>
         </div>
     </div>
@@ -1137,6 +1143,8 @@
 
 
         $('#v2_search_bar').keyup(function (event) {
+            
+           
             // alert('here');
            
             // var globalPid = null;
@@ -1164,6 +1172,7 @@
             }
 
             if (event.keyCode == 13 && !$('#v2_search_bar').attr('readonly')) {
+                
                 // alert('here')
                 $('#v2_search_bar').attr('readonly', true);
                 var barcode = $('#v2_search_bar').val().trim();
@@ -1183,9 +1192,15 @@
                 $.ajax({
                     type: "POST",
                     url: baseurl + 'search_products/get_id_from_barcode',
-                    data: {name: barcode},
+                    data: {name: barcode, 
+                        warehouse: whr  // Send warehouse with barcode
+                    },
                     success: function(data) {
                         var globalPid = data;
+                        console.log('Product ID from barcode:', globalPid);
+                        console.log($("#pos_item").html()); // Log the entire product list HTML
+
+
                         wait = false;
                     // alert(globalPid);
                     $('#posp'+globalPid).click();

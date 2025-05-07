@@ -204,6 +204,11 @@ class Billing extends CI_Controller
             $data['title'] = "Invoice " . $data['invoice']['tid'];
             $data['products'] = $this->invocies->invoice_products($tid);
             $data['employee'] = $this->invocies->employee($data['invoice']['eid']);
+
+             // Check if the invoice has been printed more than once (print_count > 1)
+        $data['copy_of_original'] = $data['invoice']['print_count'] > 1 ? "Copy of Original" : "";
+
+        
             if (CUSTOM) {
                 $data['c_custom_fields'] = $this->custom->view_fields_data($data['invoice']['cid'], 1, 1);
                 $data['i_custom_fields'] = $this->custom->view_fields_data($tid, 2, 1);
@@ -227,6 +232,7 @@ class Billing extends CI_Controller
                 //    $html=str_replace("strong","span",$html);
                 //     $html=str_replace("<h","<span",$html);
             }
+            
             //PDF Rendering
             $this->load->library('pdf');
             if (INVV == 1) {
@@ -240,6 +246,12 @@ class Billing extends CI_Controller
             }
             $pdf->SetHTMLFooter('<div style="text-align: right;font-family: serif; font-size: 8pt; color: #5C5C5C; font-style: italic;margin-top:-6pt;">{PAGENO}/{nbpg} #' . $data['invoice']['tid'] . '</div>');
             $pdf->WriteHTML($html);
+
+            // ✅ Now update the print_count AFTER PDF generation
+    $this->db->set('print_count', 'print_count + 1', FALSE);
+    $this->db->where('id', $tid);
+    $this->db->update('pos_invoices');
+    
             if ($this->input->get('d')) {
                 $pdf->Output('Invoice_#' . $data['invoice']['tid'] . '.pdf', 'D');
             } else {
