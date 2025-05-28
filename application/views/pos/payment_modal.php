@@ -23,6 +23,7 @@
 						<div class="col-6">
 							<div class="card-title">
 								<label for="cardNumber"><?php echo $this->lang->line('Amount') ?></label>
+								
 								<div class="input-group">
 									<input
 										type="text"
@@ -76,7 +77,7 @@
 							<div class="form-group text-bold-600 text-g">
 								<label for="account_p"><?php echo $this->lang->line('Account') ?></label>
 
-								<select name="p_account" id="p_account" class="form-control">
+								<select name="p_account" id="p_account" class="form-control" required>
 									<?php foreach ($acc_list as $row) {
 										echo '<option value="' . $row['id'] . '">' . $row['holder'] . ' / ' . $row['acn'] . '</option>';
 									}

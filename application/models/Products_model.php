@@ -194,7 +194,8 @@ class Products_model extends CI_Model
                         'expiry' => $wdate,
                         'code_type' => $code_type,
                         'sub_id' => $sub_cat,
-                        'b_id' => $b_id
+                        'b_id' => $b_id,
+                        'expiry_alert_seen' => 0
                     );
 
                 } else {
@@ -219,7 +220,8 @@ class Products_model extends CI_Model
                         'expiry' => $wdate,
                         'code_type' => 'EAN13',
                         'sub_id' => $sub_cat,
-                        'b_id' => $b_id
+                        'b_id' => $b_id,
+                        'expiry_alert_seen' => 0
                     );
                 }
                 $this->db->trans_start();
@@ -271,6 +273,7 @@ class Products_model extends CI_Model
                             $data['merge'] = 2;
                             $data['sub'] = $pid;
                             $data['vb'] = $w_type[$key];
+                            $data['expiry_alert_seen'] = 0;
                             $this->db->insert('pos_products', $data);
                             $pidv = $this->db->insert_id();
                             $this->movers(1, $pidv, $data['qty'], 0, 'Stock Initialized');
@@ -303,7 +306,8 @@ class Products_model extends CI_Model
                     'expiry' => $wdate,
                     'code_type' => $code_type,
                     'sub_id' => $sub_cat,
-                    'b_id' => $b_id
+                    'b_id' => $b_id,
+                    'expiry_alert_seen' => 0
                 );
             } else {
                 $barcode = rand(100, 999) . rand(0, 9) . rand(1000000, 9999999) . rand(0, 9);
@@ -325,7 +329,8 @@ class Products_model extends CI_Model
                     'expiry' => $wdate,
                     'code_type' => 'EAN13',
                     'sub_id' => $sub_cat,
-                    'b_id' => $b_id
+                    'b_id' => $b_id,
+                    'expiry_alert_seen' => 0
                 );
             }
             $this->db->trans_start();
@@ -378,7 +383,8 @@ class Products_model extends CI_Model
                         $data['alert'] = numberClean($w_alert[$key]);
                         $data['merge'] = 2;
                         $data['sub'] = $pid;
-                        $data['vb'] = $w_type[$key];
+                        
+                        
                         $this->db->insert('pos_products', $data);
                         $pidv = $this->db->insert_id();
                         $this->movers(1, $pidv, $data['qty'], 0, 'Stock Initialized');
@@ -422,7 +428,8 @@ class Products_model extends CI_Model
                     'barcode' => $barcode,
                     'code_type' => $code_type,
                     'sub_id' => $sub_cat,
-                    'b_id' => $b_id
+                    'b_id' => $b_id,
+                    'expiry_alert_seen' => 0
                 );
 
 
@@ -473,7 +480,8 @@ class Products_model extends CI_Model
                 'barcode' => $barcode,
                 'code_type' => $code_type,
                 'sub_id' => $sub_cat,
-                'b_id' => $b_id
+                'b_id' => $b_id,
+                'expiry_alert_seen' => 0
             );
 
 			$datetime1 = new DateTime(date('Y-m-d'));
@@ -558,6 +566,7 @@ class Products_model extends CI_Model
                     $data['merge'] = 2;
                     $data['sub'] = $pid;
                     $data['vb'] = $w_type[$key];
+                    $data['expiry_alert_seen'] = 0;
                     $this->db->insert('pos_products', $data);
                     $pidv = $this->db->insert_id();
                     $this->movers(1, $pidv, $data['qty'], 0, 'Stock Initialized');
@@ -568,6 +577,73 @@ class Products_model extends CI_Model
         $this->db->trans_complete();
 
     }
+
+ // Get all products
+    public function get_all_products() {
+        return $this->db->get('pos_products')->result_array();
+    }
+
+    // Get product by ID
+    public function get_product($product_id) {
+        return $this->db->get_where('pos_products', ['pid' => $product_id])->row();
+    }
+
+    // Update stock quantity
+    // public function update_stock($product_id, $new_qty) {
+    //     $this->db->where('pid', $product_id);
+    //     return $this->db->update('pos_products', ['product_qty' => $new_qty]);
+    // }
+
+    // Update stock with warehouse-aware logic
+public function update_stock($product_id, $new_qty, $warehouse_id = null) {
+    $this->db->where('pid', $product_id);
+    if ($warehouse_id !== null) {
+        $this->db->where('warehouse', $warehouse_id);
+    }
+    return $this->db->update('pos_products', ['product_qty' => $new_qty]);
+}
+
+// Get categories by warehouse with names
+
+// Get categories by warehouse
+public function get_categories_by_warehouse($warehouse_id) {
+    $this->db->distinct();
+    $this->db->select('c.id, c.title');
+    $this->db->from('pos_products p');
+    $this->db->join('pos_product_cat c', 'p.pcat = c.id');
+    $this->db->where('p.warehouse', $warehouse_id);
+    return $this->db->get()->result_array();
+}
+
+// Get subcategories by category and warehouse
+public function get_subcategories_by_category_warehouse($category_id, $warehouse_id) {
+    $this->db->distinct();
+    $this->db->select('c.id, c.title');
+    $this->db->from('pos_products p');
+    $this->db->join('pos_product_cat c', 'p.sub_id = c.id');
+    $this->db->where('p.pcat', $category_id);
+    $this->db->where('p.warehouse', $warehouse_id);
+    $this->db->where('p.sub_id !=', 0);
+    return $this->db->get()->result_array();
+}
+
+// Get products by subcategory and warehouse
+public function get_products_by_subcategory_warehouse($sub_category_id, $warehouse_id) {
+    $this->db->where('sub_id', $sub_category_id);
+    $this->db->where('warehouse', $warehouse_id);
+    return $this->db->get('pos_products')->result_array();
+}
+
+// Get products by category and warehouse (optional)
+
+
+public function get_products_by_category_warehouse($category_id, $warehouse_id) {
+    $this->db->where('pcat', $category_id);
+    $this->db->where('warehouse', $warehouse_id);
+    // Do NOT filter by sub_id here!
+    return $this->db->get('pos_products')->result_array();
+}
+
 
 
 
@@ -726,6 +802,7 @@ FROM pos_products $whr");
                 $data['merge'] = 2;
                 $data['sub'] = $row;
                 $data['vb'] = $to_warehouse;
+                $data['expiry_alert_seen'] = 0;
                 if ($pr['merge'] == 2) {
                     $this->db->select('pid,product_name');
                     $this->db->from('pos_products');
@@ -801,11 +878,6 @@ FROM pos_products $whr");
         $row = $query->row_array();
         return $row;
     }
-
-
-
-
-   
 
 
 

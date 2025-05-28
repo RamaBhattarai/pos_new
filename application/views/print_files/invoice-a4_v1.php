@@ -178,7 +178,7 @@
 
 
 <?php if (!empty($copy_of_original)) : ?>
-    <div style="font-size: 12pt; font-weight: bold; color: red; text-align: center;">
+    <div style="font-size: 9pt; font-weight: bold; color: black; text-align: center;">
         <?php echo $copy_of_original; ?>
     </div>
 <?php endif; ?>
@@ -227,7 +227,7 @@
                 }
                 ?>
                 <p>VAT Registration No: 101101</p>
-        <p>Seller’s PAN:1010101 </p>  
+        <p>Seller’s PAN:101010100 </p>  
                 </ul>
             </td>
         </tr><?php if (@$invoice['name_s']) { ?>

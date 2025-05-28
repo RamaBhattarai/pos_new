@@ -62,16 +62,20 @@
 
                             <div class="col-sm-6">
                                 <select name="cat_rel" class="form-control">
-                                    <?php
-                                    echo "<option value='" . $productcat['rel_id'] . "'>--" . $this->lang->line('Do not change') . "--</option>";
+    <?php
+    echo "<option value='" . $productcat['rel_id'] . "' selected>--" . $this->lang->line('Do not change') . "--</option>";
 
-                                    foreach ($cat as $row) {
-                                        $cid = $row['id'];
-                                        $title = $row['title'];
-                                        echo "<option value='$cid'>$title</option>";
-                                    }
-                                    ?>
-                                </select>
+    foreach ($cat as $row) {
+        $cid = $row['id'];
+        $title = $row['title'];
+
+        // Check if this option is the currently selected one
+        $selected = ($cid == $productcat['rel_id']) ? 'selected' : '';
+
+        echo "<option value='$cid' $selected>$title</option>";
+    }
+    ?>
+</select>
 
 
                             </div>

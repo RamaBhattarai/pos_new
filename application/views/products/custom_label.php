@@ -74,26 +74,26 @@
 
                     <div class="col-sm-2"><label class="col-form-label"
                                                  for="width">Sheet Width</label>
-                        <input name="width" class="form-control required" type="number" value="100">
+                        <input name="width" class="form-control required" type="number" value="100" step="0.01">
                         <small>in MM</small>
 
                     </div>
                     <div class="col-sm-2"><label class="col-form-label"
                                                  for="width">Sheet Height</label>
-                        <input name="height" class="form-control required" type="number" value="109">
+                        <input name="height" class="form-control required" type="number" value="109" step="0.01">
                         <small>in MM</small>
 
                     </div>
 
                     <div class="col-sm-2"><label class="col-form-label"
                                                  for="width">Label Width</label>
-                        <input name="label_width" class="form-control required" type="number" value="33">
+                        <input name="label_width" class="form-control required" type="number" value="33" step="0.01">
                         <small>in MM</small>
 
                     </div>
                     <div class="col-sm-2"><label class="col-form-label"
                                                  for="width">Label Height</label>
-                        <input name="label_height" class="form-control required" type="number" value="15">
+                        <input name="label_height" class="form-control required" type="number" value="15" step="0.01">
                         <small>in MM</small>
 
                     </div>
@@ -143,11 +143,11 @@
 
     <div class="col-sm-2"><label class="col-form-label"
                                                  for="width">BarCode Width</label>
-               <input name="bar_width" class="form-control required" type="number" value="25">
+               <input name="bar_width" class="form-control required" type="number" value="25" step="0.01">
                     </div>                     <div class="col-sm-2"><label class="col-form-label"
                                                  for="width">BarCode height</label>
 
-                                              <input name="bar_height" class="form-control required" type="number" value="4">
+                                              <input name="bar_height" class="form-control required" type="number" value="4" step="0.01">
                     </div>  <div class="col-sm-2"><label class="col-form-label"
                                                  for="font_size">Font Size</label>
                         <select class="form-control" name="font_size">

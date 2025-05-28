@@ -299,6 +299,9 @@ class Purchase extends CI_Controller
         $data['employee'] = $this->purchase->employee($data['invoice']['eid']);
         $data['invoice']['multi'] = 0;
 
+        // 👇 Add this: show "Copy of Original" if print_count > 1
+    $data['copy_of_original'] = $data['invoice']['print_count'] > 1 ? "Copy of Original" : "";
+
         $data['general'] = array('title' => $this->lang->line('Purchase Order'), 'person' => $this->lang->line('Supplier'), 'prefix' => prefix(2), 't_type' => 0);
 
 
@@ -323,6 +326,11 @@ class Purchase extends CI_Controller
         $pdf->SetHTMLFooter('<div style="text-align: right;font-family: serif; font-size: 8pt; color: #5C5C5C; font-style: italic;margin-top:-6pt;">{PAGENO}/{nbpg} #' . $data['invoice']['tid'] . '</div>');
 
         $pdf->WriteHTML($html);
+        
+        // ✅ Now update the print_count AFTER PDF generation
+    $this->db->set('print_count', 'print_count + 1', FALSE);
+    $this->db->where('id', $tid);
+    $this->db->update('pos_purchase');
 
         if ($this->input->get('d')) {
 

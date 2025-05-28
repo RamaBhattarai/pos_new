@@ -337,6 +337,10 @@ class Billing extends CI_Controller
             $data['employee'] = $this->purchase->employee($data['invoice']['eid']);
             $data['round_off'] = $this->custom->api_config(4);
             $data['general'] = array('title' => $this->lang->line('Purchase Order'), 'person' => $this->lang->line('Supplier'), 'prefix' => prefix(2), 't_type' => 0);
+
+             // ✅ Add this line to control "Copy of Original" display
+        $data['copy_of_original'] = ($data['invoice']['print_count'] > 0) ? "Copy of Original" : "";
+
             ini_set('memory_limit', '64M');
             if ($data['invoice']['taxstatus'] == 'cgst' || $data['invoice']['taxstatus'] == 'igst') {
                 $html = $this->load->view('print_files/invoice-a4-gst_v' . INVV, $data, true);
@@ -357,6 +361,11 @@ class Billing extends CI_Controller
             $pdf->SetHTMLFooter('<div style="text-align: right;font-family: serif; font-size: 8pt; color: #5C5C5C; font-style: italic;margin-top:-6pt;">{PAGENO}/{nbpg} #' . $data['invoice']['tid'] . '</div>');
 
             $pdf->WriteHTML($html);
+            
+              // ✅ Now update the print_count AFTER PDF generation
+    $this->db->set('print_count', 'print_count + 1', FALSE);
+    $this->db->where('id', $tid);
+    $this->db->update('pos_purchase');
 
             if ($this->input->get('d')) {
 

@@ -20,10 +20,15 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Products extends CI_Controller
 {
+    
+    
+    
     public function __construct()
     {
         parent::__construct();
+        
         $this->load->library("Aauth");
+
         if (!$this->aauth->is_loggedin()) {
             redirect('/user/', 'refresh');
         }
@@ -665,6 +670,131 @@ class Products extends CI_Controller
             $this->load->view('fixed/footer');
         }
     }
+
+   
+public function expiry_alerts() {
+    $today = date('Y-m-d');
+    $expiry_limit = date('Y-m-d', strtotime('+2 days'));
+
+    $this->db->select('pos_products.pid, pos_products.product_name, pos_products.expiry, pos_warehouse.title as warehouse_name');
+    $this->db->from('pos_products');
+    $this->db->join('pos_warehouse', 'pos_products.warehouse = pos_warehouse.id', 'left');
+    $this->db->where('pos_products.expiry >=', $today);
+    $this->db->where('pos_products.expiry <=', $expiry_limit);
+    $this->db->where('pos_products.expiry_alert_seen', 0); // NEW: only unseen alerts
+
+    $products = $this->db->get()->result_array();
+
+    foreach ($products as &$product) {
+        $product['wdate'] = $product['expiry'];
+        $product['name'] = $product['product_name']; 
+    }
+
+    echo json_encode($products);
+}
+
+public function mark_seen_and_edit() {
+    $pid = $this->input->get('pid');
+    
+    // Mark the alert as seen
+    $this->db->where('pid', $pid);
+    $this->db->update('pos_products', ['expiry_alert_seen' => 1]);
+
+    // Redirect to the edit page
+    redirect('products/edit?id=' . $pid);
+}
+
+public function mark_seen_ajax() {
+    $pid = $this->input->get('pid');
+    $this->db->where('pid', $pid);
+    $this->db->update('pos_products', ['expiry_alert_seen' => 1]);
+
+    echo json_encode(['status' => 'success']);
+}
+
+
+
+
+
+public function manage_expiry()
+{
+    // Pagination setup
+    $limit = 10;
+    $start = $this->uri->segment(3, 0); 
+
+    // Count total rows
+    $today = date('Y-m-d');
+    $expiry_limit = date('Y-m-d', strtotime('+3 days'));
+
+    // Count total matching products
+    $this->db->from('pos_products');
+    $this->db->where('expiry >=', $today);
+    $this->db->where('expiry <=', $expiry_limit);
+    $total_rows = $this->db->count_all_results();
+
+    // Fetch paginated products
+    $this->db->select('pos_products.pid, pos_products.product_name, pos_products.expiry, pos_warehouse.title as warehouse_name, pos_products.expiry_alert_seen');
+    $this->db->from('pos_products');
+    $this->db->join('pos_warehouse', 'pos_products.warehouse = pos_warehouse.id', 'left');
+    $this->db->where('pos_products.expiry >=', $today);
+    $this->db->where('pos_products.expiry <=', $expiry_limit);
+    $this->db->limit($limit, $start);
+    $products = $this->db->get()->result_array();
+
+    // Pagination config
+    $this->load->library('pagination');
+    $config['base_url'] = base_url('products/manage_expiry');
+    $config['total_rows'] = $total_rows;
+    $config['per_page'] = $limit;
+    $config['uri_segment'] = 3;
+    $config['full_tag_open'] = '<ul class="pagination">';
+    $config['full_tag_close'] = '</ul>';
+    $config['num_tag_open'] = '<li class="page-item">';
+    $config['num_tag_close'] = '</li>';
+    $config['cur_tag_open'] = '<li class="page-item active"><span class="page-link">';
+    $config['cur_tag_close'] = '</span></li>';
+    $config['next_tag_open'] = '<li class="page-item">';
+    $config['next_tag_close'] = '</li>';
+    $config['prev_tag_open'] = '<li class="page-item">';
+    $config['prev_tag_close'] = '</li>';
+    $config['first_tag_open'] = '<li class="page-item">';
+    $config['first_tag_close'] = '</li>';
+    $config['last_tag_open'] = '<li class="page-item">';
+    $config['last_tag_close'] = '</li>';
+    $config['attributes'] = ['class' => 'page-link'];
+
+    $this->pagination->initialize($config);
+
+    $head['title'] = 'Expiring Products Notifications';
+    $head['usernm'] = $this->aauth->get_user()->username;
+    $data['products'] = $products;
+    $data['pagination'] = $this->pagination->create_links();
+
+    $this->load->view('fixed/header', $head);
+    $this->load->view('products/manage_expiry', $data);
+    $this->load->view('fixed/footer');
+}
+
+
+
+
+
+public function check_product_name()
+{
+    $product_name = $this->input->post('product_name');
+    // $warehouse = $this->input->post('product_warehouse'); // Optional: check by warehouse too
+
+    $this->db->where('LOWER(product_name)', strtolower($product_name));
+    // if ($warehouse) {
+    //     $this->db->where('warehouse', $warehouse);
+    // }
+    $exists = $this->db->get('pos_products')->num_rows() > 0;
+
+    echo json_encode(['exists' => $exists]);
+}
+
+
+
 
     public function custom_label_old()
     {

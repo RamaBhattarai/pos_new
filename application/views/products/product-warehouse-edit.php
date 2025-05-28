@@ -47,17 +47,19 @@
 
                     <div class="col-sm-6">
                         <select name="lid" class="form-control">
-                            <option value='<?php echo $warehouse['loc'] ?>'><?php echo $this->lang->line('Do not change') ?></option>
-                            <option value='0'><?php echo $this->lang->line('All') ?></option>
-                            <?php
-                            foreach ($locations as $row) {
-                                $cid = $row['id'];
-                                $acn = $row['cname'];
-                                $holder = $row['address'];
-                                echo "<option value='$cid'>$acn - $holder</option>";
-                            }
-                            ?>
-                        </select>
+    <option value=""><?php echo $this->lang->line('Choose...'); ?></option>
+    <option value="0" <?php if ($warehouse['loc'] == '0') echo 'selected'; ?>>
+        <?php echo $this->lang->line('All'); ?>
+    </option>
+    <?php foreach ($locations as $row): ?>
+        <option value="<?= $row['id']; ?>"
+                <?= ($row['id'] == $warehouse['loc']) ? 'selected' : ''; ?>>
+            <?= $row['cname']; ?> – <?= $row['address']; ?>
+        </option>
+    <?php endforeach; ?>
+</select>
+
+ 
 
 
                     </div>

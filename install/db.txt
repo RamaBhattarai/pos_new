@@ -726,6 +726,19 @@
         KEY `invoice` (`tid`) KEY_BLOCK_SIZE=1024 USING BTREE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+        CREATE TABLE `pos_stock_adjustments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `adjustment_no` varchar(50) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `adjustment_type` enum('increment', 'decrement') NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `reason` varchar(255) DEFAULT NULL,
+  `adjustment_date` date NOT NULL,
+  `status` varchar(20) DEFAULT 'Active',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
         CREATE TABLE `pos_supplier` (
         `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
         `name` varchar(50) NOT NULL,

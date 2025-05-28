@@ -54,7 +54,7 @@
 
                             </div>
 
-
+             
 
                             <div class="btn-group ">
                                 <button type="button" class="btn btn-success btn-min-width dropdown-toggle"
@@ -111,9 +111,9 @@
                     </div>
                 </div>
                 <!--/ Invoice Company Details -->
-                <p><strong>VAT Registration No:</strong></p>
+                <p><strong>VAT Registration No:101010</strong></p>
         <p><strong>Seller’s PAN
-        :</strong></p>  
+        : 1010101</strong></p>  
                 <!-- Invoice Customer Details -->
                 <div id="invoice-customer-details" class="row pt-2">
                     <div class="col-sm-12 text-xs-center text-md-left">

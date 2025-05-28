@@ -471,11 +471,44 @@
 
                             </ul>
                         </li>       <?php } ?>
-                    <li class="dropdown dropdown-notification nav-item"><a class="nav-link nav-link-label" href="#"
-                                                                           data-toggle="dropdown"><i
-                                    class="ficon ft-bell"></i><span
+                        <li class="dropdown dropdown-notification nav-item">
+    <a class="nav-link nav-link-label" href="#" data-toggle="dropdown">
+        <i class="ficon ft-bell"></i> <!-- Expiry Alert Icon -->
+        <span class="badge badge-pill badge-default badge-danger badge-up" id="expirycount">0</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-media dropdown-menu-right">
+        <li class="dropdown-menu-header">
+            <h6 class="dropdown-header m-0">
+                <span class="grey darken-2">Expiry Alerts</span>
+                <!-- <span class="notification-tag badge badge-default badge-danger float-right m-0" id="expirycount">0</span> -->
+            </h6>
+        </li>
+        <li class="scrollable-container media-list" id="expirylist">
+            <!-- JS will insert expiry items here -->
+        </li>
+        <li class="dropdown-menu-footer">
+           <a class="dropdown-item text-muted text-center" href="<?= base_url('products/manage_expiry') ?>">
+    Manage Expiry Products
+</a>
+
+        </li>
+    </ul>
+</li>
+
+                        
+                        
+                    <li class="dropdown dropdown-notification nav-item">
+                        
+                        
+                        <a class="nav-link nav-link-label" href="#"
+                                                                           data-toggle="dropdown"><i class="ficon ft-check-square"></i> <!-- Task Manager Icon -->
+<span
                                     class="badge badge-pill badge-default badge-danger badge-default badge-up"
                                     id="taskcount">0</span></a>
+                                    
+                                   
+                         
+                                    
                         <ul class="dropdown-menu dropdown-menu-media dropdown-menu-right">
                             <li class="dropdown-menu-header">
                                 <h6 class="dropdown-header m-0"><span
@@ -483,6 +516,8 @@
                                             class="notification-tag badge badge-default badge-danger float-right m-0"><?=$this->lang->line('New') ?></span>
                                 </h6>
                             </li>
+                            
+                            
                             <li class="scrollable-container media-list" id="tasklist"></li>
                             <li class="dropdown-menu-footer"><a class="dropdown-item text-muted text-center"
                                                                 href="<?php echo base_url('manager/todo') ?>"><?php echo $this->lang->line('Manage tasks') ?></a>
@@ -723,6 +758,12 @@
 
                             </ul>
                         </li>
+                        <!-- 🔽 ADD THIS NEW MENU ITEM BELOW -->
+        <li><a href="<?= base_url('StockAdjustment/index') ?>"><i class="fa fa-sliders"></i>
+ Stock Adjustment</a></li>
+        <!-- 🔼 -->
+
+
                         <li class="menu-item"><a href="#"><i
                                         class="ft-target"></i><?php echo $this->lang->line('Suppliers') ?></a>
                             <ul class="menu-content">
@@ -1021,11 +1062,16 @@
                             <a href="<?php echo base_url(); ?>tools/documents"><i
                                         class="icon-doc"></i> <?php echo $this->lang->line('Documents'); ?></a>
                         </li>
+                         <!-- ✅ Your new Logs menu item -->
+            <li class="menu-item">
+                <a href="<?php echo base_url(); ?>logs"><i class="icon-list"></i> Logs</a>
+            </li>
 
 
                     </ul>
                 </li>
             <?php }
+
             if ($this->aauth->premission(9)) {
                 ?>
                 <li class="menu-item  has-sub <?php if ($this->li_a == "emp") {
@@ -1123,3 +1169,61 @@
         <div class="content-header row">
         </div>
         <div class="content-body">
+
+ <script>
+document.addEventListener('DOMContentLoaded', function () {
+    fetch('<?= base_url('products/expiry_alerts') ?>')
+        .then(response => response.json())
+        .then(data => {
+            const expiryList = document.getElementById('expirylist');
+            const expiryCount = document.getElementById('expirycount');
+
+            expiryList.innerHTML = ''; // Clear old items
+
+            if (data.length > 0) {
+                expiryCount.textContent = data.length;
+
+                data.forEach(product => {
+                    const item = document.createElement('a');
+                    item.className = 'dropdown-item';
+                    item.addEventListener('click', function (e) {
+    e.preventDefault();
+
+    fetch(`<?= base_url('products/mark_seen_ajax') ?>?pid=${product.pid}`)
+        .then(() => {
+            //  Reduce count
+            const countElem = document.getElementById('expirycount');
+            let count = parseInt(countElem.textContent);
+            countElem.textContent = count - 1;
+
+            // Go to edit page
+            window.location.href = `<?= base_url('products/edit?id=') ?>${product.pid}`;
+        });
+});
+
+
+                    item.innerHTML = `
+                        <div class="media">
+                            <div class="media-left align-self-center">
+                                <i class="ft-alert-circle icon-bg-circle bg-danger"></i>
+                            </div>
+                            <div class="media-body">
+                                <h6 class="media-heading">${product.name} <span class="badge badge-info">${product.warehouse_name}</span></h6>
+                                <p class="notification-text">Expiring on: ${product.wdate}</p>
+                            </div>
+                        </div>
+                    `;
+                    expiryList.appendChild(item);
+                });
+            } else {
+                expiryCount.textContent = '0';
+                expiryList.innerHTML = `<p class="dropdown-item text-center">No expiry alerts</p>`;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading expiry alerts:', error);
+        });
+});
+</script>
+
+       

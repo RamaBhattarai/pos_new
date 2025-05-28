@@ -33,6 +33,7 @@
                             *</label>
                         <input type="text" placeholder="Product Name"
                                class="form-control margin-bottom required" name="product_name">
+                               <small id="product-name-feedback" style="color:red; display:none;"></small>
                     </div>
 
 
@@ -488,6 +489,35 @@
             },
         }}
     );
+    $('input[name="product_name"]').on('blur', function () {
+    var productName = $(this).val();
+    var warehouse = $('select[name="product_warehouse"]').val();
+    $.ajax({
+        url: '<?= base_url('products/check_product_name') ?>',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            product_name: productName,
+            product_warehouse: warehouse,
+            '<?=$this->security->get_csrf_token_name()?>': crsf_hash // CSRF token
+        },
+        success: function (data) {
+            if (data.exists) {
+                $('#product-name-feedback').text('Product already exists!').show();
+                $('input[name="product_name"]').addClass('is-invalid');
+            } else {
+                $('#product-name-feedback').hide();
+                $('input[name="product_name"]').removeClass('is-invalid');
+            }
+        }
+    });
+});
+// Hide error as soon as user types or erases
+$('input[name="product_name"]').on('input', function () {
+    $('#product-name-feedback').hide();
+    $(this).removeClass('is-invalid');
+});
+
     $("#product_cat").on('change', function () {
         $("#sub_cat").val('').trigger('change');
         var tips = $('#product_cat').val();

@@ -37,6 +37,7 @@
 
                     <label class="col-sm-2 col-form-label"
                            for="product_cat"><?php echo $this->lang->line('Category') ?></label>
+                           
 
                     <div class="col-sm-6">
                         <select name="cat_rel" class="form-control">

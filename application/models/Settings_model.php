@@ -451,15 +451,24 @@ class Settings_model extends CI_Model
         }
     }
 
-    public function logs()
+    // public function logs()
+    // {
+    //     $this->db->select('*');
+    //     $this->db->from('pos_log');
+    //     $this->db->order_by('id', 'DESC');
+    //     $this->db->limit(150, 'DESC');
+    //     $query = $this->db->get();
+    //     return $query->result_array();
+    // }
+
+    public function logs($limit, $start)
     {
-        $this->db->select('*');
-        $this->db->from('pos_log');
+        $this->db->limit($limit, $start);
         $this->db->order_by('id', 'DESC');
-        $this->db->limit(150, 'DESC');
-        $query = $this->db->get();
+        $query = $this->db->get('pos_log');
         return $query->result_array();
     }
+    
 
     public function posstyle($posvs)
     {
