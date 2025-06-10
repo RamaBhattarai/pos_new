@@ -179,9 +179,9 @@
                     <div class="col-sm-2"><label class="col-form-label"
                                                  for="store_name"><?php echo $this->lang->line('Business') . ' ' . $this->lang->line('Location'); ?></label>
                         <select class="form-control" name="store_name">
-                            <option value="1">Yes</option>
-                            <option value="0">No</option>
-                        </select>
+    <option value="0" selected>No</option>
+    <option value="1">Yes</option>
+</select>
                     </div>
 
                     <div class="col-sm-2"><label class="col-form-label"

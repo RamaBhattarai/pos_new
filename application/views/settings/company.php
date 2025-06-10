@@ -202,7 +202,7 @@
 
                                     <input type="hidden" name="id" value="<?php echo $company['id'] ?>">
                                     <div class="ibox-content no-padding border-left-right">
-                                        <img alt="image" id="dpic" class="col" style="max-width: 200px"
+                                        <img alt="image" id="dpic" class="col" style="max-width: 600px"
                                              src="<?php echo base_url('userfiles/company/') . $company['logo'] . '?t=' . rand(5, 99); ?>">
 										<div id="errorImg"></div>
                                     </div>

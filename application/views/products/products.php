@@ -60,12 +60,15 @@
                         href="<?php echo base_url('products/add') ?>"
                         class="btn btn-primary btn-sm rounded">
                     <?php echo $this->lang->line('Add new') ?>
-                </a>  <a
+                </a> 
+                
+                 <a
                         href="<?php echo base_url('products') ?>?group=yes"
                         class="btn btn-purple btn-sm rounded"><i class="ft-grid"></i></a> <a
                         href="<?php echo base_url('products') ?>"
                         class="btn btn-purple btn-sm rounded"><i class="ft-list"></i></a></h5>
             <a class="heading-elements-toggle"><i class="fa fa-ellipsis-v font-medium-3"></i></a>
+            
             <div class="heading-elements">
                 <ul class="list-inline mb-0">
                     <li><a data-action="collapse"><i class="ft-minus"></i></a></li>
@@ -182,6 +185,8 @@
                     });
 
                 });
+
+   
             });
         </script>
         <div id="delete_model" class="modal fade">

@@ -9,7 +9,7 @@
             <hr>
             <div class="form-group row">
                 <div class="col-sm-12 text-center">
-                    <h3>Geo POS</h3><h5><?php $url = file_get_contents(FCPATH . '/version.json');
+                    <h3> POS</h3><h5><?php $url = file_get_contents(FCPATH . '/version.json');
                         $version = json_decode($url, true);
                         echo 'V ' . $version['version'] . ' (b' . $version['build'] . ')'; ?></h5> <h6>
                         Copyright <?= date('Y') ?> <a

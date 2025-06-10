@@ -135,17 +135,17 @@
         font-size: 15px;
     }
 
-    .ultimate.geopos {
+    .ultimate.pos {
         background-color: #525f7f;
     }
 
-    .ultimate.geopos * {
+    .ultimate.pos * {
         font-family: Quicksand, Open Sans, Segoe UI, sans-serif;
         font-size: 16px;
         font-weight: 600;
     }
 
-    .ultimate.geopos .fieldset {
+    .ultimate.pos .fieldset {
         margin: 0 15px 30px;
         padding: 0;
         border-style: none;
@@ -157,55 +157,55 @@
         justify-content: space-between;
     }
 
-    .ultimate.geopos .field {
+    .ultimate.pos .field {
         padding: 10px 20px 11px;
         background-color: #7488aa;
         border-radius: 20px;
         width: 100%;
     }
 
-    .ultimate.geopos .field.half-width {
+    .ultimate.pos .field.half-width {
         width: calc(50% - (5px / 2));
     }
 
-    .ultimate.geopos .field.third-width {
+    .ultimate.pos .field.third-width {
         width: calc(33% - (5px / 3));
     }
 
-    .ultimate.geopos .field + .field {
+    .ultimate.pos .field + .field {
         margin-top: 6px;
     }
 
-    .ultimate.geopos .field.focus,
-    .ultimate.geopos .field:focus {
+    .ultimate.pos .field.focus,
+    .ultimate.pos .field:focus {
         color: #424770;
         background-color: #f6f9fc;
     }
 
-    .ultimate.geopos .field.invalid {
+    .ultimate.pos .field.invalid {
         background-color: #fa755a;
     }
 
-    .ultimate.geopos .field.invalid.focus {
+    .ultimate.pos .field.invalid.focus {
         background-color: #f6f9fc;
     }
 
-    .ultimate.geopos .field.focus::-webkit-input-placeholder,
-    .ultimate.geopos .field:focus::-webkit-input-placeholder {
+    .ultimate.pos .field.focus::-webkit-input-placeholder,
+    .ultimate.pos .field:focus::-webkit-input-placeholder {
         color: #cfd7df;
     }
 
-    .ultimate.geopos .field.focus::-moz-placeholder,
-    .ultimate.geopos .field:focus::-moz-placeholder {
+    .ultimate.pos .field.focus::-moz-placeholder,
+    .ultimate.pos .field:focus::-moz-placeholder {
         color: #cfd7df;
     }
 
-    .ultimate.geopos .field.focus:-ms-input-placeholder,
-    .ultimate.geopos .field:focus:-ms-input-placeholder {
+    .ultimate.pos .field.focus:-ms-input-placeholder,
+    .ultimate.pos .field:focus:-ms-input-placeholder {
         color: #cfd7df;
     }
 
-    .ultimate.geopos input, .ultimate.geopos button {
+    .ultimate.pos input, .ultimate.pos button {
         -webkit-appearance: none;
         -moz-appearance: none;
         appearance: none;
@@ -213,23 +213,23 @@
         border-style: none;
     }
 
-    .ultimate.geopos input {
+    .ultimate.pos input {
         color: #fff;
     }
 
-    .ultimate.geopos input::-webkit-input-placeholder {
+    .ultimate.pos input::-webkit-input-placeholder {
         color: #9bacc8;
     }
 
-    .ultimate.geopos input::-moz-placeholder {
+    .ultimate.pos input::-moz-placeholder {
         color: #9bacc8;
     }
 
-    .ultimate.geopos input:-ms-input-placeholder {
+    .ultimate.pos input:-ms-input-placeholder {
         color: #9bacc8;
     }
 
-    .ultimate.geopos button {
+    .ultimate.pos button {
         display: block;
         width: calc(100% - 30px);
         height: 40px;
@@ -242,39 +242,39 @@
         cursor: pointer;
     }
 
-    .ultimate.geopos button:active {
+    .ultimate.pos button:active {
         background-color: #f5be58;
     }
 
-    .ultimate.geopos .error svg .base {
+    .ultimate.pos .error svg .base {
         fill: #fa755a;
     }
 
-    .ultimate.geopos .error svg .glyph {
+    .ultimate.pos .error svg .glyph {
         fill: #fff;
     }
 
-    .ultimate.geopos .error .message {
+    .ultimate.pos .error .message {
         color: #fff;
     }
 
-    .ultimate.geopos .success .icon .border {
+    .ultimate.pos .success .icon .border {
         stroke: #fcd669;
     }
 
-    .ultimate.geopos .success .icon .checkmark {
+    .ultimate.pos .success .icon .checkmark {
         stroke: #fff;
     }
 
-    .ultimate.geopos .success .title {
+    .ultimate.pos .success .title {
         color: #fff;
     }
 
-    .ultimate.geopos .success .message {
+    .ultimate.pos .success .message {
         color: #9cabc8;
     }
 
-    .ultimate.geopos .success .reset path {
+    .ultimate.pos .success .reset path {
         fill: #fff;
     }
 </style>
@@ -330,7 +330,7 @@ if ($row['surcharge'] > 0) {
                     <div id="p_form" class="col-md-6 ">
 
 
-                        <div class="cell ultimate geopos round" id="ultimate-3">
+                        <div class="cell ultimate pos round" id="ultimate-3">
                             <form id="payment_form">
                                 <?php echo '<input type="hidden" class="form-control" name="id" value="' . $id . '"/>'; ?>
                                 <?= '<input type="hidden" class="form-control" name="gateway" value="' . $gid . '"/>
@@ -338,9 +338,9 @@ if ($row['surcharge'] > 0) {
                                 <div class="white text-xs-center mb-2">  <?= $title . ' ' . $fee ?></div>
                                 <div class="fieldset">
 
-                                    <div id="geopos-card-number" class="field empty"></div>
-                                    <div id="geopos-card-expiry" class="field empty third-width"></div>
-                                    <div id="geopos-card-cvc" class="field empty third-width"></div>
+                                    <div id="pos-card-number" class="field empty"></div>
+                                    <div id="pos-card-expiry" class="field empty third-width"></div>
+                                    <div id="pos-card-cvc" class="field empty third-width"></div>
                                     <div class="empty"><p
                                                 class="mt-1 white  half-width"><?php echo $this->lang->line('Amount') ?></p>
                                         <input class="field half-width" type="number"
@@ -676,21 +676,21 @@ THE SOFTWARE.
                 style: elementStyles,
                 classes: elementClasses,
             });
-            cardNumber.mount('#geopos-card-number');
+            cardNumber.mount('#pos-card-number');
 
             var cardExpiry = elements.create('cardExpiry', {
                 style: elementStyles,
                 classes: elementClasses,
             });
-            cardExpiry.mount('#geopos-card-expiry');
+            cardExpiry.mount('#pos-card-expiry');
 
             var cardCvc = elements.create('cardCvc', {
                 style: elementStyles,
                 classes: elementClasses,
             });
-            cardCvc.mount('#geopos-card-cvc');
+            cardCvc.mount('#pos-card-cvc');
 
-            registerElements([cardNumber, cardExpiry, cardCvc], 'geopos');
+            registerElements([cardNumber, cardExpiry, cardCvc], 'pos');
         })();
 
     </script>

@@ -1,6 +1,6 @@
 <?php
 /**
- * Geo POS -  Accounting,  Invoicing  and CRM Application
+ *  POS -  Accounting,  Invoicing  and CRM Application
  * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *

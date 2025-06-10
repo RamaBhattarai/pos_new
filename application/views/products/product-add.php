@@ -227,9 +227,15 @@
                         )</label>
 
                     <div class="col-sm-2">
-                        <input type="text" class="form-control required"
+                        <!-- <input type="text" class="form-control required"
                                placeholder="Expiry Date" name="wdate"
-                               data-toggle="datepicker" autocomplete="false">
+                               data-toggle="datepicker" autocomplete="false"> -->
+
+                               <input type="text" class="form-control required"
+       placeholder="Expiry Date" name="wdate"
+       data-toggle="datepicker" autocomplete="false"
+       value="<?= isset($wdate) ? htmlspecialchars($wdate) : '' ?>">
+
                     </div>
                     <small>Do not change if not applicable</small>
                 </div>

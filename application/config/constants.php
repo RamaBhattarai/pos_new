@@ -28,7 +28,7 @@ define('LTR', 'ltr');
 define('GST_INCL', 'yes');
 define('POSV', '1');
 define('INVV', '1');
-define('BDATA', '0');
+define('BDATA', '1');
 define('CUSTOM', '1');
 define('MENU', '1');
 define('PAC', '1');

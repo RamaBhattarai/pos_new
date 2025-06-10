@@ -12,7 +12,7 @@
                    value="settings/activate">
             <div class="card-body">
 
-                <h5>Activate Geo POS</h5>
+                <h5>Activate  POS</h5>
                 <hr>
 
 

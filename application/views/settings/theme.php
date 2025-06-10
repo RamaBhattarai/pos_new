@@ -84,7 +84,7 @@
 
 
                 <div class="ibox-content no-padding border-left-right">
-                    <img alt="image" id="dpic" class="col-4" style="max-width: 100px"
+                    <img alt="image" id="dpic" class="col-4" style="max-width: 200px"
                          src="<?php echo base_url('userfiles/theme/logo-header.png') . '?t=' . rand(5, 999) ?>">
                 </div>
 <div id="errorImg"></div>
