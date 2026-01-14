@@ -121,7 +121,7 @@
                            class="form-control margin-bottom" name="city">
                 </div>
             </div>
-            <div class="form-group row">
+            <!-- <div class="form-group row">
 
                 <label class="col-sm-2 col-form-label"
                        for="city"><?php echo $this->lang->line('Region') ?></label>
@@ -130,8 +130,8 @@
                     <input type="text" placeholder="Region"
                            class="form-control margin-bottom" name="region">
                 </div>
-            </div>
-            <div class="form-group row">
+            </div> -->
+            <!-- <div class="form-group row">
 
                 <label class="col-sm-2 col-form-label"
                        for="country"><?php echo $this->lang->line('Country') ?></label>
@@ -140,9 +140,9 @@
                     <input type="text" placeholder="Country"
                            class="form-control margin-bottom" name="country">
                 </div>
-            </div>
+            </div> -->
 
-            <div class="form-group row">
+            <!-- <div class="form-group row">
 
                 <label class="col-sm-2 col-form-label"
                        for="postbox"><?php echo $this->lang->line('Postbox') ?></label>
@@ -151,7 +151,7 @@
                     <input type="text" placeholder="Postbox"
                            class="form-control margin-bottom" name="postbox">
                 </div>
-            </div>
+            </div> -->
             <div class="form-group row">
 
                 <label class="col-sm-2 col-form-label"
@@ -203,6 +203,23 @@
                             echo ' <option value="' . $row['id'] . '"> ' . $row['val1'] . '</option>';
                         }
 
+                        ?>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group row">
+
+                <label class="col-sm-2 col-form-label"
+                       for="name"><?php echo $this->lang->line('Warehouse') ?></label>
+
+                <div class="col-sm-5">
+                    <select name="warehouse" class="form-control margin-bottom">
+                        <option value="0"><?php echo $this->lang->line('All') ?></option>
+                        <?php
+                        foreach ($warehouse as $row) {
+                            echo ' <option value="' . $row['id'] . '"> ' . $row['title'] . '</option>';
+                        }
                         ?>
                     </select>
                 </div>

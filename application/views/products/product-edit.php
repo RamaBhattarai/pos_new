@@ -94,14 +94,26 @@
                         </div>
                     </div>
                     <div class="form-group row">
-
+                        <?php
+                        // For variations, get parent product code for display
+                        $display_code = $product['product_code'];
+                        if ($product['merge'] == 1 && $product['sub'] > 0 && empty($product['product_code'])) {
+                            // This is a variation with no code, get parent code
+                            $this->db->select('product_code');
+                            $this->db->where('pid', $product['sub']);
+                            $parent = $this->db->get('pos_products')->row_array();
+                            if ($parent && !empty($parent['product_code'])) {
+                                $display_code = $parent['product_code'] . ' (inherited)';
+                            }
+                        }
+                        ?>
                         <label class="col-sm-2 col-form-label"
                                for="product_code"><?php echo $this->lang->line('Product Code') ?></label>
 
                         <div class="col-sm-6">
                             <input type="text" placeholder="Product Code"
                                    class="form-control" name="product_code"
-                                   value="<?php echo $product['product_code'] ?>">
+                                   value="<?php echo $display_code ?>">
                         </div>
                     </div>
                     <div class="form-group row">
@@ -348,13 +360,78 @@
 
 
                     if ($product['merge'] == 0) { ?>
+                        <div id="accordionWrapaNew1" role="tablist" aria-multiselectable="true">
+
+                            <div id="coupon4new" class="card-header">
+                                <a data-toggle="collapse" data-parent="#accordionWrapaNew1" href="#accordion41new"
+                                   aria-expanded="true" aria-controls="accordion41new"
+                                   class="card-title lead collapsed"><i class="fa fa-plus-circle"></i>
+                                    New Product Variations (Variant + Price)</a>
+                            </div>
+                            <div id="accordion41new" role="tabpanel" aria-labelledby="coupon4new"
+                                 class="card-collapse collapse" aria-expanded="false" style="height: 0px;">
+                                <div class="row p-1">
+                                    <div class="col">
+                                        <button type="button" class="btn btn-blue" id="add_new_variation_row_edit">Add Variation</button>
+                                        <hr>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered" id="new_variations_table_edit">
+                                                <thead>
+                                                    <tr>
+                                                        <th width="40%">Variant</th>
+                                                        <th width="25%">Price</th>
+                                                        <th width="25%">Stock</th>
+                                                        <th width="10%">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr class="variation-row">
+                                                        <td>
+                                                            <select name="variation_id[]" class="form-control variation-select">
+                                                                <option value="">Select Variant</option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" name="variation_price[]" class="form-control" placeholder="Price" step="0.01">
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" name="variation_stock[]" class="form-control" placeholder="Stock" min="0">
+                                                        </td>
+                                                        <td>
+                                                            <button type="button" class="btn btn-red btn-sm remove_variation_row_edit">Remove</button>
+                                                        </td>
+                                                    </tr>
+                                                    <tr id="variation_template_row_edit" style="display:none;">
+                                                        <td>
+                                                            <select name="variation_id[]" class="form-control variation-select">
+                                                                <option value="">Select Variant</option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" name="variation_price[]" class="form-control" placeholder="Price" step="0.01">
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" name="variation_stock[]" class="form-control" placeholder="Stock" min="0">
+                                                        </td>
+                                                        <td>
+                                                            <button type="button" class="btn btn-red btn-sm remove_variation_row_edit">Remove</button>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div id="accordionWrapa1" role="tablist" aria-multiselectable="true">
 
                             <div id="coupon4" class="card-header">
                                 <a data-toggle="collapse" data-parent="#accordionWrapa1" href="#accordion41"
                                    aria-expanded="true" aria-controls="accordion41"
                                    class="card-title lead collapsed"><i class="fa fa-plus-circle"></i>
-                                    <?php echo $this->lang->line('Products') . ' ' . $this->lang->line('Variations') ?>
+                                    Old <?php echo $this->lang->line('Products') . ' ' . $this->lang->line('Variations') ?>
                                 </a>
                             </div>
                             <div id="accordion41" role="tabpanel" aria-labelledby="coupon4"
@@ -367,12 +444,14 @@
                                             <tr>
                                                 <td><select name="v_type[]" class="form-control">
                                                         <?php
-                                                        foreach ($variables as $row) {
-                                                            $cid = $row['id'];
-                                                            $title = $row['name'];
-                                                            $title = $row['name'];
-                                                            $variation = $row['variation'];
-                                                            echo "<option value='$cid'>$variation - $title </option>";
+                                                        if (isset($variables)) {
+                                                            foreach ($variables as $row) {
+                                                                $cid = $row['id'];
+                                                                $title = $row['name'];
+                                                                $title = $row['name'];
+                                                                $variation = isset($row['option_name']) ? $row['option_name'] : 'No Option';
+                                                                echo "<option value='$cid'>$variation - $title </option>";
+                                                            }
                                                         }
                                                         ?>
                                                     </select></td>
@@ -574,4 +653,52 @@
 				autoHide: true,
 				format: '<?php echo $this->config->item('dformat2'); ?>'
 			});
+			
+			// New Variation System JavaScript for Edit Form
+            $(document).ready(function() {
+                // Load variants on page load for the initial row
+                loadVariantsForSelectEdit($('.variation-select').first());
+                
+                // Add new variation row for edit
+                $('#add_new_variation_row_edit').click(function() {
+                    var template = $('#variation_template_row_edit').clone();
+                    template.removeAttr('id').show().addClass('variation-row');
+                    template.find('select, input').val('');
+                    loadVariantsForSelectEdit(template.find('.variation-select'));
+                    $('#new_variations_table_edit tbody').append(template);
+                });
+                
+                // Remove variation row for edit (but keep at least one)
+                $(document).on('click', '.remove_variation_row_edit', function() {
+                    var totalRows = $('.variation-row').length;
+                    if (totalRows > 1) {
+                        $(this).closest('tr').remove();
+                    } else {
+                        alert('At least one variation row must remain.');
+                    }
+                });
+            });
+
+            // Load variants for a select (Edit form)
+            function loadVariantsForSelectEdit(selectElement) {
+                $.ajax({
+                    url: '<?php echo base_url(); ?>units/get_variations_ajax',
+                    type: 'POST',
+                    data: {
+                        '<?=$this->security->get_csrf_token_name()?>': crsf_hash
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        selectElement.html('<option value="">Select Variant</option>');
+                        if (data && data.length > 0) {
+                            $.each(data, function(key, value) {
+                                selectElement.append('<option value="' + value.id + '">' + value.name + '</option>');
+                            });
+                        }
+                    },
+                    error: function() {
+                        console.log('Error loading variations');
+                    }
+                });
+            }
         </script>

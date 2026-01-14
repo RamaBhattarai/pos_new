@@ -24,7 +24,17 @@
                     <td><?= $index + 1 ?></td>
                     <td><?= htmlspecialchars($row['adjustment_no']) ?></td>
                     <td><?= htmlspecialchars($row['reason']) ?></td>
-                    <td><?= date('jS M, Y', strtotime($row['adjustment_date'])) ?></td>
+                    <td>
+                        <?php 
+                        // Check if format information is available
+                        $originalFormat = $row['adjustment_date_format'] ?? 'english';
+                        $rawDate = $row['adjustment_date'];
+                        ?>
+                        <span class="date-display" data-raw="<?= $rawDate ?>" data-format="<?= $originalFormat ?>">
+                            <?= date('Y-m-d', strtotime($rawDate)) ?>
+                        </span>
+                        <span class="english-date" style="display:none; color:#666; font-size:0.9em;"></span>
+                    </td>
                     <td><?= htmlspecialchars($row['status']) ?></td>
                    <td class="action-links">
     <a href="<?= base_url('StockAdjustment/view/' . $row['adjustment_no']) ?>" title="View" class="action-btn view">

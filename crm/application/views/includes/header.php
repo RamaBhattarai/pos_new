@@ -127,29 +127,29 @@
             <li class="nav-item <?php if ($this->uri->segment(1) == "rec_invoices") {
                 echo 'active';
             } ?>">
-                <a href="<?php echo base_url(); ?>subscriptions/"> <i class="icon-android-calendar"></i><span class="menu-title"> <?php echo $this->lang->line('Subscriptions'); ?> </span></a>
+                <!-- <a href="<?php echo base_url(); ?>subscriptions/"> <i class="icon-android-calendar"></i><span class="menu-title"> <?php echo $this->lang->line('Subscriptions'); ?> </span></a> -->
             </li>
             <li class="nav-item <?php if ($this->uri->segment(1) == "quote") {
                 echo 'active';
             } ?>">
-                <a href="<?php echo base_url(); ?>quote/"> <i class="icon-file"></i><span class="menu-title"> <?php echo $this->lang->line('Quotes'); ?> </span></a>
+                <!-- <a href="<?php echo base_url(); ?>quote/"> <i class="icon-file"></i><span class="menu-title"> <?php echo $this->lang->line('Quotes'); ?> </span></a> -->
             </li>
-            <li class="nav-item <?php if($this->uri->segment(2) == "recharge") echo "active"; ?>">
+            <!-- <li class="nav-item <?php if($this->uri->segment(2) == "recharge") echo "active"; ?>">
                 <a href="<?php echo base_url("payments/recharge"); ?>"><i class="icon-credit-card2"></i>
                     <span><?php echo $this->lang->line('Recharge Account'); ?></span></a>
-            </li>
-            <li class="nav-item <?php if($this->uri->segment(1) == "payments") echo "active"; ?>">
+            </li> -->
+            <!-- <li class="nav-item <?php if($this->uri->segment(1) == "payments") echo "active"; ?>">
                 <a href="<?php echo base_url("payments"); ?>"><i class="icon-cash"></i>
                     <span><?php echo $this->lang->line('Payment History'); ?></span></a>
-            </li>
+            </li> -->
             <li class="nav-item <?php if($this->uri->segment(1) == "tickets") echo "active"; ?>">
                 <a href="<?php echo base_url("tickets"); ?>"><i class="icon-ticket"></i>
                     <span><?php echo $this->lang->line('Support Tickets') ?></span></a>
             </li>
-            <li class="nav-item <?php if($this->uri->segment(1) == "projects") echo "active"; ?>">
+            <!-- <li class="nav-item <?php if($this->uri->segment(1) == "projects") echo "active"; ?>">
                 <a href="<?php echo base_url("projects"); ?>"><i class="icon-stack"></i>
                     <span><?php echo $this->lang->line('Project'); ?></span></a>
-            </li>
+            </li> -->
             <li class="nav-item <?php if ($this->uri->segment(2) == "profile") {
                 echo 'active';
             } ?>">

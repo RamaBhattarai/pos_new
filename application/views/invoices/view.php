@@ -198,7 +198,21 @@
 
                     </div>
                     <div class="offset-md-3 col-md-3 col-sm-12 text-xs-center text-md-left">
-                        <?php echo '<p><span class="text-muted">' . $this->lang->line('Invoice Date') . '  :</span> ' . dateformat($invoice['invoicedate']) . '</p> <p><span class="text-muted">' . $this->lang->line('Due Date') . ' :</span> ' . dateformat($invoice['invoiceduedate']) . '</p>  <p><span class="text-muted">' . $this->lang->line('Terms') . ' :</span> ' . $invoice['termtit'] . '</p>';
+                        <?php 
+                        // Dual date display for Invoice Date and Due Date
+                        $invoiceDate = dateformat($invoice['invoicedate']);
+                        $dueDate = dateformat($invoice['invoiceduedate']);
+                        
+                        // Add Nepali dates in parentheses
+                        echo '<p><span class="text-muted">' . $this->lang->line('Invoice Date') . '  :</span> ';
+                        echo '<span class="dual-date-display" data-english-date="' . $invoice['invoicedate'] . '">' . $invoiceDate . '</span>';
+                        echo ' <span class="english-date" style="color:#666; font-size:0.9em; display:none;"></span></p>';
+                        
+                        echo '<p><span class="text-muted">' . $this->lang->line('Due Date') . ' :</span> ';
+                        echo '<span class="dual-date-display" data-english-date="' . $invoice['invoiceduedate'] . '">' . $dueDate . '</span>';
+                        echo ' <span class="english-date" style="color:#666; font-size:0.9em; display:none;"></span></p>';
+                        
+                        echo '<p><span class="text-muted">' . $this->lang->line('Terms') . ' :</span> ' . $invoice['termtit'] . '</p>';
                         ?>
                     </div>
                 </div>
@@ -446,7 +460,7 @@
                         <?php foreach ($activity as $row) {
 
                             echo '<tr>
-                            <td><a href="view_payslip?id=' . $row['id'] . '&inv=' . $invoice['iid'] . '" class="btn btn-blue btn-sm"><span class="icon-print" aria-hidden="true"></span> ' . $this->lang->line('Print') . '  </a> ' . $row['date'] . '</td>
+                            <td><a href="view_payslip?id=' . $row['id'] . '&inv=' . $invoice['iid'] . '" class="btn btn-blue btn-sm"><span class="icon-print" aria-hidden="true"></span> ' . $this->lang->line('Print') . '  </a> <span class="date-display" data-raw="' . $row['date'] . '" data-format="english">' . dateformat($row['date']) . '</span><span class="english-date" style="display:none; color:#666; font-size:0.9em;"></span></td>
                             <td>' . $this->lang->line($row['method']) . '</td>
                             
                               <td>' . amountExchange($row['debit'], 0, $this->aauth->get_user()->loc) . '</td>
@@ -590,31 +604,21 @@
                 <form class="payment">
                     <div class="row">
                         <div class="col">
-                            <fieldset class="form-group position-relative has-icon-left">
+                            <div class="input-group">
+                                <div class="input-group-addon"><?php echo $this->config->item('currency') ?></div>
                                 <input type="text" class="form-control" placeholder="Total Amount" name="amount"
-                                       id="rmpay"
-                                       value="<?= amountExchange_s($rming, 0, $this->aauth->get_user()->loc) ?>">
-                                <div class="form-control-position">
-                                    <?php echo $this->config->item('currency') ?>
-                                </div>
-
-                            </fieldset>
-
+                                       id="rmpay" value="<?php echo $rming ?>">
+                            </div>
 
                         </div>
                         <div class="col">
-                            <fieldset class="form-group position-relative has-icon-left">
-                                <input type="text" class="form-control required"
+                            <div class="input-group">
+                                <div class="input-group-addon"><span class="icon-calendar4"
+                                                                     aria-hidden="true"></span></div>
+                                <input type="date" class="form-control required critical-date" id="tsn_date"
                                        placeholder="Billing Date" name="paydate"
-                                       data-toggle="datepicker">
-                                <div class="form-control-position">
-                      <span class="fa fa-calendar"
-                            aria-hidden="true"></span>
-                                </div>
-
-                            </fieldset>
-
-
+                                       value="<?php echo date('Y-m-d'); ?>">
+                            </div>
                         </div>
                     </div>
 
@@ -626,6 +630,9 @@
                                 <option value="Card"><?php echo $this->lang->line('Card') ?></option>
                                 <option value="Balance"><?php echo $this->lang->line('Client Balance') ?></option>
                                 <option value="Bank"><?php echo $this->lang->line('Bank') ?></option>
+                                <option value="e-sewa">E-sewa</option>
+                                <option value="khalti">Khalti</option>
+                                <option value="courier">Courier</option>
                             </select><label for="account"><?php echo $this->lang->line('Account') ?></label>
 
                             <select name="account" class="form-control">
@@ -891,6 +898,18 @@
                 ['fullscreen', ['fullscreen']],
                 ['codeview', ['codeview']]
             ]
+        });
+
+        // Initialize date toggle for payment modal date field
+        $('#part_payment').on('shown.bs.modal', function() {
+            setTimeout(function() {
+                if (typeof createDateToggle === 'function') {
+                    var dateField = $('#tsn_date');
+                    if (!dateField.hasClass('date-toggle-input')) {
+                        createDateToggle(dateField[0]);
+                    }
+                }
+            }, 100);
         });
 
         $('#sendM').on('click', function (e) {

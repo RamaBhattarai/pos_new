@@ -19,8 +19,8 @@
             </div>
             <div class="card-body">
                 <?php
-                $attributes = array('class' => 'form-horizontal form-simple', 'id' => 'login_form');
-                echo form_open('products/custom_label');
+                $attributes = array('class' => 'form-horizontal form-simple', 'id' => 'login_form', 'target' => '_blank');
+                echo form_open('products/custom_label', $attributes);
                 ?>
                 <input type="hidden" name="act" value="add_product">
                 <div class="form-group row">
@@ -74,26 +74,26 @@
 
                     <div class="col-sm-2"><label class="col-form-label"
                                                  for="width">Sheet Width</label>
-                        <input name="width" class="form-control required" type="number" value="100" step="0.01">
+                        <input name="width" class="form-control required" type="number" value="106" step="0.01">
                         <small>in MM</small>
 
                     </div>
                     <div class="col-sm-2"><label class="col-form-label"
                                                  for="width">Sheet Height</label>
-                        <input name="height" class="form-control required" type="number" value="109" step="0.01">
+                        <input name="height" class="form-control required" type="number" value="15" step="0.01">
                         <small>in MM</small>
 
                     </div>
 
                     <div class="col-sm-2"><label class="col-form-label"
                                                  for="width">Label Width</label>
-                        <input name="label_width" class="form-control required" type="number" value="33" step="0.01">
+                        <input name="label_width" class="form-control required" type="number" value="55" step="0.01">
                         <small>in MM</small>
 
                     </div>
                     <div class="col-sm-2"><label class="col-form-label"
                                                  for="width">Label Height</label>
-                        <input name="label_height" class="form-control required" type="number" value="15" step="0.01">
+                        <input name="label_height" class="form-control required" type="number" value="20" step="0.01">
                         <small>in MM</small>
 
                     </div>
@@ -143,11 +143,11 @@
 
     <div class="col-sm-2"><label class="col-form-label"
                                                  for="width">BarCode Width</label>
-               <input name="bar_width" class="form-control required" type="number" value="25" step="0.01">
+               <input name="bar_width" class="form-control required" type="number" value="30" step="0.01">
                     </div>                     <div class="col-sm-2"><label class="col-form-label"
                                                  for="width">BarCode height</label>
 
-                                              <input name="bar_height" class="form-control required" type="number" value="4" step="0.01">
+                                              <input name="bar_height" class="form-control required" type="number" value="6" step="0.01">
                     </div>  <div class="col-sm-2"><label class="col-form-label"
                                                  for="font_size">Font Size</label>
                         <select class="form-control" name="font_size">
@@ -219,6 +219,9 @@
                         <input type="submit" class="btn btn-success margin-bottom"
                                value="<?php echo $this->lang->line('Print') ?>"
                                data-loading-text="Adding...">
+                        <button type="button" class="btn btn-primary margin-bottom ml-2" id="save-settings">
+                            Save Settings
+                        </button>
 
                     </div>
                 </div>
@@ -302,5 +305,120 @@ $(document).ready(function () {
     // Initial setup
     const selectedWarehouse = $warehouse.val();
     initProductSelect2(selectedWarehouse);
+
+    // Settings management using localStorage
+    const FORM_STORAGE_KEY = 'custom_label_form_data';
+
+    // Save form data to localStorage
+    function saveFormData() {
+        console.log('saveFormData function called');
+        const formData = {
+            from_warehouse: $('#wfrom').val(),
+            products_l: $('#products_l').val() || [],
+            b_type: $('select[name="b_type"]').val(),
+            width: $('input[name="width"]').val(),
+            height: $('input[name="height"]').val(),
+            label_width: $('input[name="label_width"]').val(),
+            label_height: $('input[name="label_height"]').val(),
+            total_rows: $('select[name="total_rows"]').val(),
+            items_per_row: $('select[name="items_per_row"]').val(),
+            bar_width: $('input[name="bar_width"]').val(),
+            bar_height: $('input[name="bar_height"]').val(),
+            font_size: $('select[name="font_size"]').val(),
+            product_name: $('select[name="product_name"]').val(),
+            store_name: $('select[name="store_name"]').val(),
+            warehouse_name: $('select[name="warehouse_name"]').val(),
+            product_price: $('select[name="product_price"]').val(),
+            product_code: $('select[name="product_code"]').val(),
+            max_char: $('input[name="max_char"]').val()
+        };
+        console.log('Form data to save:', formData);
+        localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(formData));
+
+        // Show success message
+        showMessage('Settings saved successfully!', 'success');
+    }
+
+    // Load form data from localStorage
+    function loadFormData() {
+        console.log('loadFormData function called');
+        const savedData = localStorage.getItem(FORM_STORAGE_KEY);
+        console.log('Saved data from localStorage:', savedData);
+        if (savedData) {
+            const formData = JSON.parse(savedData);
+            console.log('Parsed form data:', formData);
+
+            // Restore simple inputs and selects
+            $('#wfrom').val(formData.from_warehouse);
+            $('select[name="b_type"]').val(formData.b_type);
+            $('input[name="width"]').val(formData.width);
+            $('input[name="height"]').val(formData.height);
+            $('input[name="label_width"]').val(formData.label_width);
+            $('input[name="label_height"]').val(formData.label_height);
+            $('select[name="total_rows"]').val(formData.total_rows);
+            $('select[name="items_per_row"]').val(formData.items_per_row);
+            $('input[name="bar_width"]').val(formData.bar_width);
+            $('input[name="bar_height"]').val(formData.bar_height);
+            $('select[name="font_size"]').val(formData.font_size);
+            $('select[name="product_name"]').val(formData.product_name);
+            $('select[name="store_name"]').val(formData.store_name);
+            $('select[name="warehouse_name"]').val(formData.warehouse_name);
+            $('select[name="product_price"]').val(formData.product_price);
+            $('select[name="product_code"]').val(formData.product_code);
+            $('input[name="max_char"]').val(formData.max_char);
+
+            // Restore products after select2 is initialized
+            if (formData.products_l && formData.products_l.length > 0) {
+                setTimeout(function() {
+                    $('#products_l').val(formData.products_l).trigger('change');
+                    console.log('Products restored:', formData.products_l);
+                }, 500);
+            }
+
+            // Re-initialize product select2 with the restored warehouse
+            if (formData.from_warehouse && formData.from_warehouse !== '0') {
+                setTimeout(function() {
+                    initProductSelect2(formData.from_warehouse);
+                    console.log('Product select2 re-initialized for warehouse:', formData.from_warehouse);
+                }, 100);
+            }
+            console.log('Form data loaded successfully');
+        } else {
+            console.log('No saved data found in localStorage');
+        }
+    }
+
+    // Show message function
+    function showMessage(message, type) {
+        // Remove existing alerts
+        $('.alert').remove();
+
+        // Create and show new alert
+        const alertClass = type === 'success' ? 'alert-success' :
+                          type === 'warning' ? 'alert-warning' :
+                          type === 'info' ? 'alert-info' : 'alert-danger';
+
+        const alertHtml = '<div class="alert ' + alertClass + ' alert-dismissible fade show" role="alert">' +
+                         '<strong>' + message + '</strong>' +
+                         '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                         '<span aria-hidden="true">&times;</span></button></div>';
+
+        // Insert before the card content
+        $('.card-content').prepend(alertHtml);
+
+        // Auto-hide after 5 seconds (increased from 3)
+        setTimeout(function() {
+            $('.alert').fadeOut();
+        }, 5000);
+    }
+
+    // Load saved settings on page load
+    loadFormData();
+
+    // Save settings button handler
+    $('#save-settings').on('click', function() {
+        console.log('Save Settings button clicked');
+        saveFormData();
+    });
 });
 </script>

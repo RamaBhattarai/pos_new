@@ -22,7 +22,7 @@
                                                                                             class="btn btn-primary btn-sm rounded"
                                                                                             data-toggle="modal"
                                                                                             data-target="#addCustomer">
-                                                <?php echo $this->lang->line('Add Supplier') ?>
+                                                <?php echo $this->lang->line('Add Suppliers') ?>
                                             </a>
                                     </div>
                                 </div>
@@ -172,173 +172,120 @@
 
 
                         <div id="saman-row">
-                            <table class="table-responsive tfr my_stripe">
+                           <table class="tfr my_stripe">
+                            <thead>
 
-                                <thead>
-                                <tr class="item_header bg-gradient-directional-amber">
-                                    <th width="30%"
-                                        class="text-center"><?php echo $this->lang->line('Item Name') ?></th>
-                                    <th width="8%" class="text-center"><?php echo $this->lang->line('Quantity') ?></th>
-                                    <th width="10%" class="text-center"><?php echo $this->lang->line('Rate') ?></th>
-                                    <th width="10%" class="text-center"><?php echo $this->lang->line('Tax') ?>(%)</th>
-                                    <th width="10%" class="text-center"><?php echo $this->lang->line('Tax') ?></th>
-                                    <th width="7%" class="text-center"><?php echo $this->lang->line('Discount') ?></th>
-                                    <th width="10%" class="text-center"><?php echo $this->lang->line('Amount') ?>
-                                        (<?php echo $this->config->item('currency'); ?>)
-                                    </th>
-                                    <th width="5%" class="text-center"><?php echo $this->lang->line('Action') ?></th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <?php $i = 0;
-                                foreach ($products as $row) {
-                                    echo '<tr >
-                        <td><input type="text" class="form-control" name="product_name[]" placeholder="Enter Product name or Code"  value="' . $row['product'] . '">
-                        </td>
-                        <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-' . $i . '"
-                                   onkeypress="return isNumber(event)" onkeyup="rowTotal(' . $i . '), billUpyog()"
-                                   autocomplete="off" value="' . amountFormat_general($row['qty']) . '" ><input type="hidden" name="old_product_qty[]" value="' . amountFormat_general($row['qty']) . '" ></td>
-                        <td><input type="text" class="form-control req prc" name="product_price[]" id="price-' . $i . '"
-                                   onkeypress="return isNumber(event)" onkeyup="rowTotal(' . $i . '), billUpyog()"
-                                   autocomplete="off" value="' . edit_amountExchange_s($row['price'], $invoice['multi'], $this->aauth->get_user()->loc) . '"></td>
-                        <td> <input type="text" class="form-control vat" name="product_tax[]" id="vat-' . $i . '"
-                                    onkeypress="return isNumber(event)" onkeyup="rowTotal(' . $i . '), billUpyog()"
-                                    autocomplete="off"  value="' . amountFormat_general($row['tax']) . '"></td>
-                        <td class="text-center" id="texttaxa-' . $i . '">' . edit_amountExchange_s($row['totaltax'], $invoice['multi'], $this->aauth->get_user()->loc) . '</td>
-                        <td><input type="text" class="form-control discount" name="product_discount[]"
-                                   onkeypress="return isNumber(event)" id="discount-' . $i . '"
-                                   onkeyup="rowTotal(' . $i . '), billUpyog()" autocomplete="off"  value="' . amountFormat_general($row['discount']) . '"></td>
-                        <td><span class="currenty">' . $this->config->item('currency') . '</span>
-                            <strong><span class="ttlText" id="result-' . $i . '">' . edit_amountExchange_s($row['subtotal'], $invoice['multi'], $this->aauth->get_user()->loc) . '</span></strong></td>
-                        <td class="text-center">
-<button type="button" data-rowid="' . $i . '" class="btn btn-danger removeProd" title="Remove"> <i class="fa fa-minus-square"></i> </button>
-                        </td>
-                        <input type="hidden" name="taxa[]" id="taxa-' . $i . '" value="' . edit_amountExchange_s($row['totaltax'], $invoice['multi'], $this->aauth->get_user()->loc) . '">
-                        <input type="hidden" name="disca[]" id="disca-' . $i . '" value="' . edit_amountExchange_s($row['totaldiscount'], $invoice['multi'], $this->aauth->get_user()->loc) . '">
-                        <input type="hidden" class="ttInput" name="product_subtotal[]" id="total-' . $i . '" value="' . edit_amountExchange_s($row['subtotal'], $invoice['multi'], $this->aauth->get_user()->loc) . '">
-                        <input type="hidden" class="pdIn" name="pid[]" id="pid-' . $i . '" value="' . $row['pid'] . '">
-                         <input type="hidden" name="unit[]" id="unit-' . $i . '" value="' . $row['unit'] . '">   <input type="hidden" name="hsn[]" id="unit-' . $i . '" value="' . $row['code'] . '">
-                    </tr><tr class="desc_p"><td colspan="8"><textarea id="dpid-' . $i . '" class="form-control" name="product_description[]" placeholder="Enter Product description" autocomplete="off">' . $row['product_des'] . '</textarea><br></td></tr>';
-                                    $i++;
-                                } ?>
-                                <tr class="last-item-row sub_c">
-                                    <td class="add-row">
-                                        <button type="button" class="btn btn-success" id="addproduct">
-                                            <i class="fa fa-plus-square"></i> <?php echo $this->lang->line('Add Row') ?>
-                                        </button>
-                                    </td>
-                                    <td colspan="7"></td>
-                                </tr>
+                            <tr class="item_header bg-gradient-directional-amber">
+                                <th width="35%" class="text-center"><?php echo $this->lang->line('Item Name') ?></th>
+                                <th width="12%" class="text-center">Batch No.</th>       
+                                <th width="12%" class="text-center">Expiry Date</th>     
+                                <th width="8%" class="text-center"><?php echo $this->lang->line('Quantity') ?></th>
+                                <th width="12%" class="text-center"><?php echo $this->lang->line('Rate') ?></th>
+                                <th width="12%" class="text-center">Selling Price</th>
+                                <th width="12%" class="text-center">Profit</th>
+                                <th width="12%" class="text-center">Profit Margin (%)</th>
+                                <th width="10%" class="text-center"><?php echo $this->lang->line('Tax') ?>(%)</th>
+                                <th width="10%" class="text-center"><?php echo $this->lang->line('Tax') ?></th>
+                                <th width="10%" class="text-center"><?php echo $this->lang->line('Discount') ?></th>
+                                <th width="12%" class="text-center">
+                                    <?php echo $this->lang->line('Amount') ?>
+                                    (<?php echo $this->config->item('currency'); ?>)
+                                </th>
+                                <!-- <th width="5%" class="text-center"><?php echo $this->lang->line('Action') ?></th> -->
+                            </tr>
+                            </thead>
+                            <tbody>
+<?php $i = 0; foreach ($products as $row) { ?>
+<tr>
+    <td>
+        <input type="text" class="form-control text-center"
+               name="product_name[]"
+               id="productname-<?= $i ?>"
+               value="<?= $row['product'] ?>">
+    </td>
 
-                                <tr class="sub_c" style="display: table-row;">
-                                    <td colspan="6" align="right">
-                                        <strong><?php echo $this->lang->line('Total Tax') ?></strong>
-                                    </td>
-                                    <td align="left" colspan="2"><span
-                                                class="currenty lightMode"><?php echo $this->config->item('currency'); ?></span>
-                                        <span id="taxr"
-                                              class="lightMode"><?= edit_amountExchange_s($invoice['tax'], $invoice['multi'], $this->aauth->get_user()->loc) ?></span>
-                                    </td>
-                                </tr>
-                                <tr class="sub_c" style="display: table-row;">
-                                    <td colspan="6" align="right">
-                                        <strong><?php echo $this->lang->line('Total Discount') ?></strong></td>
-                                    <td align="left" colspan="2"><span
-                                                class="currenty lightMode"><?php echo $this->config->item('currency'); ?></span>
-                                        <span id="discs"
-                                              class="lightMode"><?php echo edit_amountExchange_s($invoice['discount'], $invoice['multi'], $this->aauth->get_user()->loc) ?></span>
-                                    </td>
-                                </tr>
+    <td>
+        <input type="text" class="form-control batch_no_input"
+               name="batch_no[]"
+               id="batch_no-<?= $i ?>"
+               value="<?= $row['batch'] ?>">
+    </td>
 
-                                <tr class="sub_c" style="display: table-row;">
-                                    <td colspan="6" align="right"><input type="hidden"
-                                                                         value="<?php echo edit_amountExchange_s($invoice['subtotal'], $invoice['multi'], $this->aauth->get_user()->loc) ?>"
-                                                                         id="subttlform"
-                                                                         name="subtotal"><strong><?php echo $this->lang->line('Shipping') ?></strong>
-                                    </td>
-                                    <td align="left" colspan="2"><input type="text" class="form-control shipVal"
-                                                                        onkeypress="return isNumber(event)"
-                                                                        placeholder="Value"
-                                                                        name="shipping" autocomplete="off"
-                                                                        onkeyup="billUpyog()"
-                                                                        value="<?php if ($invoice['ship_tax_type'] == 'excl') {
-                                                                            $invoice['shipping'] = $invoice['shipping'] - $invoice['ship_tax'];
-                                                                        }
-                                                                        echo amountExchange_s($invoice['shipping'], $invoice['multi'], $this->aauth->get_user()->loc); ?>">( <?= $this->lang->line('Tax') ?> <?= $this->config->item('currency'); ?>
-                                        <span id="ship_final"><?= edit_amountExchange_s($invoice['ship_tax'], $invoice['multi'], $this->aauth->get_user()->loc) ?> </span>
-                                        )
-                                    </td>
-                                </tr>
+    <td>
+        <input type="date" class="form-control expiry_date"
+               name="expiry_date[]"
+               id="expiry_date-<?= $i ?>"
+               value="<?= date('Y-m-d', strtotime($row['expiry'])) ?>">
+    </td>
 
-                                <tr class="sub_c" style="display: table-row;">
-                                    <td colspan="2"><?php if ($exchange['active'] == 1){
-                                        echo $this->lang->line('Payment Currency client') . ' <small>' . $this->lang->line('based on live market') ?></small>
-                                        <select name="mcurrency"
-                                                class="selectpicker form-control">
+    <td>
+        <input type="number" class="form-control qty"
+               name="qty[]"
+               value="<?= $row['qty'] ?>">
+    </td>
 
-                                            <?php
-                                            echo '<option value="' . $invoice['multi'] . '">Do not change</option><option value="0">None</option>';
-                                            foreach ($currency as $row) {
+    <td>
+        <input type="number" class="form-control rate"
+               name="rate[]"
+               value="<?= $row['price'] ?>">
+    </td>
 
-                                                echo '<option value="' . $row['id'] . '">' . $row['symbol'] . ' (' . $row['code'] . ')</option>';
-                                            } ?>
+    <td>
+        <input type="number" class="form-control selling_price"
+               name="selling_price[]"
+               value="<?= $row['selling_price'] ?>">
+    </td>
 
-                                        </select><?php } ?></td>
-                                    <td colspan="4" align="right"><strong><?php echo $this->lang->line('Grand Total') ?>
-                                            (<span
-                                                    class="currenty lightMode"><?php echo $this->config->item('currency'); ?></span>)</strong>
-                                    </td>
-                                    <td align="left" colspan="2"><input type="text" name="total" class="form-control"
-                                                                        id="invoiceyoghtml"
-                                                                        value="<?= edit_amountExchange_s($invoice['total'], $invoice['multi'], $this->aauth->get_user()->loc); ?>"
-                                                                        readonly="">
+    <td>
+        <input type="text" class="form-control profit"
+               name="profit[]"
+               value="<?= $row['profit'] ?>"
+               readonly>
+    </td>
 
-                                    </td>
-                                </tr>
-                                <tr class="sub_c" style="display: table-row;">
-                                    <td colspan="2"><?php echo $this->lang->line('Payment Terms') ?> <select
-                                                name="pterms"
-                                                class="selectpicker form-control"><?php echo '<option value="' . $invoice['termid'] . '">*' . $invoice['termtit'] . '</option>';
-                                            foreach ($terms as $row) {
-                                                echo '<option value="' . $row['id'] . '">' . $row['title'] . '</option>';
-                                            } ?>
+    <td>
+        <input type="text" class="form-control profit_margin"
+               name="profit_margin[]"
+               value="<?= $row['profit_margin'] ?>"
+               readonly>
+    </td>
 
+    <td>
+        <input type="number" class="form-control tax"
+               name="tax[]"
+               value="<?= $row['tax'] ?>">
+    </td>
 
-                                        </select></td>
-                                    <td colspan="2">
-                                        <div>
-                                            <label><?php echo $this->lang->line('Update Stock') ?></label>
+    <td class="text-center tax_amount">0</td>
 
-                                            <fieldset class="right-radio">
-                                                <div class="custom-control custom-radio">
-                                                    <input type="radio" class="custom-control-input" name="update_stock"
-                                                           id="customRadioRight1" value="yes" checked="">
-                                                    <label class="custom-control-label"
-                                                           for="customRadioRight1"><?php echo $this->lang->line('Yes') ?></label>
-                                                </div>
-                                            </fieldset>
-                                            <fieldset class="right-radio">
-                                                <div class="custom-control custom-radio">
-                                                    <input type="radio" class="custom-control-input" name="update_stock"
-                                                           id="customRadioRight2" value="no">
-                                                    <label class="custom-control-label"
-                                                           for="customRadioRight2"><?php echo $this->lang->line('No') ?></label>
-                                                </div>
-                                            </fieldset>
+    <td>
+        <input type="number" class="form-control discount"
+               name="discount[]"
+               value="<?= $row['discount'] ?>">
+    </td>
 
-                                        </div>
-                                    </td>
-                                    <td align="right" colspan="4"><input type="submit" class="btn btn-success sub-btn"
-                                                                         value="<?php echo $this->lang->line('Update Order') ?>"
-                                                                         id="submit-data"
-                                                                         data-loading-text="Updating...">
-                                    </td>
-                                </tr>
+    <td>
+        <strong class="ttlText">0</strong>
+    </td>
 
+    <!-- Hidden values -->
+    <input type="hidden" name="pid[]" value="<?= $row['pid'] ?>">
+</tr>
+<?php $i++; } ?>
 
-                                </tbody>
-                            </table>
+<tr class="last-item-row">
+    <td class="add-row">
+        <button type="button" class="btn btn-success" id="addproduct">
+            <i class="fa fa-plus-square"></i> Add Row
+        </button>
+    </td>
+    <td colspan="11"></td>
+</tr>
+</tbody>
+
+                        </table>
                         </div>
+                    </div>
 
                         <input type="hidden" value="purchase/editaction" id="action-url">
                         <input type="hidden" value="puchase_search" id="billtype">
@@ -363,6 +310,16 @@
                                id="ship_taxtype">
                         <input type="hidden" value="<?= amountFormat_general($invoice['ship_tax']); ?>" name="ship_tax"
                                id="ship_tax">
+
+                               <div class="row mt-3">
+    <div class="col-sm-12 text-right">
+        <button type="submit"
+                class="btn btn-primary btn-lg"
+                id="submit-data">
+            <i class="fa fa-save"></i> Update Purchase
+        </button>
+    </div>
+</div>
 
 
                 </form>
@@ -478,3 +435,5 @@
         autoHide: true,
         format: '<?php echo $this->config->item('dformat2'); ?>'
     });</script>
+
+<script src="<?= base_url('assets/js/purchase-entry.js') ?>"></script>

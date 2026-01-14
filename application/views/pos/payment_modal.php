@@ -41,11 +41,23 @@
 							<div class="card-title">
 								<label for="cardNumber"><?php echo $this->lang->line('Payment Method') ?></label>
 								<select class="form-control" name="p_method" id="p_method">
-									<option value='Cash'><?php echo $this->lang->line('Cash') ?></option>
-									<!-- <option value='Card Swipe'><?php echo $this->lang->line('Card Swipe') ?></option> -->
-									<option value='Bank'><?php echo $this->lang->line('Bank') ?></option>
-
-								</select></div>
+									<?php if (!empty($payment_methods)): ?>
+										<?php foreach ($payment_methods as $method): ?>
+											<?php if ($method['account_name'] != 'Not Linked'): ?>
+												<option value="<?php echo htmlspecialchars($method['name']); ?>" 
+														data-balance="<?php echo $method['balance'] ?? 0; ?>" 
+														data-account-id="<?php echo $method['account_id']; ?>"
+														data-account-name="<?php echo htmlspecialchars($method['account_name']); ?>">
+													<?php echo htmlspecialchars($method['name']); ?>
+												</option>
+											<?php endif; ?>
+										<?php endforeach; ?>
+									<?php else: ?>
+										<option value="">No payment methods available</option>
+									<?php endif; ?>
+								</select>
+								<small class="text-muted mt-1" id="payment-method-info">Select a payment method to see account balance</small>
+							</div>
 						</div>
 
 
@@ -76,13 +88,11 @@
 						<div class="col">
 							<div class="form-group text-bold-600 text-g">
 								<label for="account_p"><?php echo $this->lang->line('Account') ?></label>
-
-								<select name="p_account" id="p_account" class="form-control" required>
-									<?php foreach ($acc_list as $row) {
-										echo '<option value="' . $row['id'] . '">' . $row['holder'] . ' / ' . $row['acn'] . '</option>';
-									}
-									?>
-								</select></div>
+								<div class="form-control-static" id="linked_account_display">
+									<span id="linked_account_info" class="text-info">Select a payment method to see linked account</span>
+								</div>
+								<input type="hidden" name="p_account" id="p_account" value="">
+							</div>
 						</div>
 					<?php } ?>
 
@@ -118,3 +128,38 @@
 		</div>
 	</div>
 </div>
+
+<script>
+$(document).ready(function() {
+    // Update account balance when payment method changes in modal
+    $('#basicPay #p_method').change(function() {
+        var selectedOption = $(this).find('option:selected');
+        var balance = selectedOption.data('balance') || 0;
+        var accountName = selectedOption.data('account-name') || '';
+        var accountId = selectedOption.data('account-id') || '';
+        
+        if (accountName) {
+            $('#basicPay #payment-method-info').text('Account: ' + accountName);
+            $('#basicPay #payment-method-info').removeClass('text-muted').addClass('text-info');
+            
+            // Update linked account display
+            $('#linked_account_info').text(accountName);
+            $('#p_account').val(accountId);
+        } else {
+            $('#basicPay #payment-method-info').text('Select a payment method to see linked account');
+            $('#basicPay #payment-method-info').removeClass('text-info').addClass('text-muted');
+            
+            // Clear linked account
+            $('#linked_account_info').text('Select a payment method to see linked account');
+            $('#p_account').val('');
+        }
+        
+        console.log('Payment method changed in modal - Account:', accountName, 'Account ID:', accountId);
+    });
+    
+    // Initialize payment method info on modal show
+    $('#basicPay').on('shown.bs.modal', function() {
+        $('#basicPay #p_method').trigger('change');
+    });
+});
+</script>

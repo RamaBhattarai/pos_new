@@ -86,10 +86,10 @@
                                                   <div class="form-group row">
                                             <label class="col-sm-3 col-form-label" for="pay_cat"></label>
 
-                                            <div class="col-sm-9">
+                                            <!-- <div class="col-sm-9">
                                                 <input type="checkbox" class="checkbox checkbox-inline" name="cz_tax"
                                                        value="1"> Export as Czech Republic Official Format
-                                            </div>
+                                            </div> -->
                                         </div>
 
                                     </form>

@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Extended_invoices_model extends CI_Model
 {
     var $table = 'pos_invoice_items';
-    var $column_order = array(null, 'pos_invoices.tid', 'pos_customers.name', 'pos_invoices.invoicedate', 'pos_invoice_items.subtotal', 'pos_invoice_items.qty', 'pos_invoice_items.discount','pos_invoice_items.tax');
+    var $column_order = array(null, 'pos_invoices.tid', 'pos_customers.name', 'pos_invoices.invoicedate', 'pos_invoice_items.subtotal', 'pos_invoice_items.qty', 'pos_invoice_items.totaldiscount','pos_invoice_items.totaltax');
     var $column_search = array('pos_invoices.tid', 'pos_customers.name', 'pos_invoices.invoicedate', 'pos_invoice_items.subtotal','pos_invoice_items.qty','pos_invoice_items.tax');
     var $order = array('pos_invoices.tid' => 'desc');
 
@@ -22,7 +22,7 @@ class Extended_invoices_model extends CI_Model
 
     private function _get_datatables_query($opt = '')
     {
-        $this->db->select('pos_invoices.id,pos_invoices.tid,pos_invoices.invoicedate,pos_invoices.invoiceduedate,pos_invoice_items.subtotal,pos_invoice_items.qty,pos_invoice_items.product,pos_invoice_items.discount,pos_invoice_items.tax,pos_customers.name');
+        $this->db->select('pos_invoices.id,pos_invoices.tid,pos_invoices.invoicedate,pos_invoices.invoiceduedate,pos_invoices.subtotal as invoice_subtotal,pos_invoices.discount as invoice_discount,pos_invoices.discount_rate,pos_invoices.format_discount,pos_invoice_items.subtotal,pos_invoice_items.qty,pos_invoice_items.product,pos_invoice_items.totaldiscount,pos_invoice_items.totaltax,pos_customers.name');
         $this->db->from($this->table);
         //$this->db->where('pos_invoices.i_class', 1);
           $this->db->where('pos_invoices.status !=', 'canceled');

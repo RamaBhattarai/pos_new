@@ -195,7 +195,11 @@ var deleteRow = function (num) {
 
 var updateTotal = function () {
 
-    var totalBillVal = deciFormat(parseFloat( samanYog()) + parseFloat(shipTot()));
+    var subtotal = parseFloat(samanYog());
+    var shipping = parseFloat(shipTot());
+    var extraDiscount = parseFloat(accounting.unformat($('#after_disc').val(), accounting.settings.number.decimal)) || 0;
+    
+    var totalBillVal = deciFormat(subtotal + shipping - extraDiscount);
 
     //refresh value
 

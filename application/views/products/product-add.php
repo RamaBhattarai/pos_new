@@ -48,7 +48,7 @@
                     <div class="col-sm-6"><label class="col-form-label"
                                                  for="product_cat"><?php echo $this->lang->line('Product Category') ?>
                             *</label>
-                        <select name="product_cat" id="product_cat" class="form-control">
+                        <select name="product_cat" id="product_cat" class="form-control required">
                             <?php
                             foreach ($cat as $row) {
                                 $cid = $row['id'];
@@ -62,7 +62,7 @@
 
                     <div class="col-sm-6"><label class="col-form-label"
                                                  for="sub_cat"><?php echo $this->lang->line('Sub') ?><?php echo $this->lang->line('Category') ?></label>
-                        <select id="sub_cat" name="sub_cat" class="form-control required select-box">
+                        <select id="sub_cat" name="sub_cat" class="form-control select-box">
 
                         </select>
 
@@ -76,7 +76,7 @@
                            for="product_cat"><?php echo $this->lang->line('Warehouse') ?>*</label>
 
                     <div class="col-sm-6">
-                        <select name="product_warehouse" class="form-control">
+                        <select name="product_warehouse" class="form-control required">
                             <?php
                             foreach ($warehouse as $row) {
                                 $cid = $row['id'];
@@ -172,8 +172,8 @@
                            for="product_cat"><?php echo $this->lang->line('Measurement Unit') ?>*</label>
 
                     <div class="col-sm-4">
-                        <select name="unit" class="form-control">
-                            <option value=''>None</option>
+                        <select name="unit" class="form-control required">
+                            <option value='none'>None</option>
                             <?php
                             foreach ($units as $row) {
                                 $cid = $row['code'];
@@ -231,7 +231,7 @@
                                placeholder="Expiry Date" name="wdate"
                                data-toggle="datepicker" autocomplete="false"> -->
 
-                               <input type="text" class="form-control required"
+                               <input type="text" class="form-control"
        placeholder="Expiry Date" name="wdate"
        data-toggle="datepicker" autocomplete="false"
        value="<?= isset($wdate) ? htmlspecialchars($wdate) : '' ?>">
@@ -297,39 +297,45 @@
                         <a data-toggle="collapse" data-parent="#accordionWrapa1" href="#accordion41"
                            aria-expanded="true" aria-controls="accordion41"
                            class="card-title lead collapsed"><i class="fa fa-plus-circle"></i>
-                            <?php echo $this->lang->line('Products') . ' ' . $this->lang->line('Variations') ?></a>
+                            <?php echo $this->lang->line('Products') . ' ' . $this->lang->line('Variations') ?> (Variant + Price)</a>
                     </div>
                     <div id="accordion41" role="tabpanel" aria-labelledby="coupon4"
                          class="card-collapse collapse" aria-expanded="false" style="height: 0px;">
                         <div class="row p-1">
                             <div class="col">
-                                <button class="btn btn-blue tr_clone_add"><?php echo $this->lang->line('add_row') ?></button>
+                                <button class="btn btn-blue" onclick="addVariationRow()" type="button">Add Variation Row</button>
 
                                 <hr>
-                                <table class="table" id="v_var">
-                                    <tr>
-                                        <td><select name="v_type[]" class="form-control">
-                                                <?php
-                                                foreach ($variables as $row) {
-                                                    $cid = $row['id'];
-                                                    $title = $row['name'];
-                                                    $title = $row['name'];
-                                                    $variation = $row['variation'];
-                                                    echo "<option value='$cid'>$variation - $title </option>";
-                                                }
-                                                ?>
-                                            </select></td>
-                                        <td><input value="" class="form-control" name="v_stock[]"
-                                                   placeholder="<?php echo $this->lang->line('Stock Units') ?>*">
-                                        </td>
-                                        <td><input value="" class="form-control" name="v_alert[]"
-                                                   placeholder="<?php echo $this->lang->line('Alert Quantity') ?>*">
-                                        </td>
-                                        <td>
-                                            <button class="btn btn-red tr_delete">Delete</button>
-                                        </td>
-                                    </tr>
-                                </table>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered" id="v_var_new">
+                                        <thead>
+                                            <tr>
+                                                <th width="40%">Variant</th>
+                                                <th width="25%">Price</th>
+                                                <th width="25%">Stock</th>
+                                                <th width="10%">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <select name="variant_id[]" class="form-control variant-select">
+                                                        <option value="">Select Variant</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <input type="number" name="variant_price[]" class="form-control" placeholder="Price" step="0.01">
+                                                </td>
+                                                <td>
+                                                    <input type="number" name="variant_stock[]" class="form-control" placeholder="Stock" min="0">
+                                                </td>
+                                                <td>
+                                                    <button type="button" class="btn btn-red btn-sm" onclick="removeVariationRow(this)">Remove</button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -566,4 +572,88 @@ $('input[name="product_name"]').on('input', function () {
             $('#added_product').append('<div class="form-group serial"><label for="field_s" class="col-lg-2 control-label"><?= $this->lang->line('serial') ?></label><div class="col-lg-10"><input class="form-control box-size" placeholder="<?= $this->lang->line('serial') ?>" name="product_serial[]" type="text"  value=""></div><button class="btn-sm btn-purple v_delete_serial m-1 align-content-end"><i class="fa fa-trash"></i> </button></div>');
 
         });
+
+// New Variation System Functions
+function addVariationRow() {
+    var table = document.getElementById('v_var_new').getElementsByTagName('tbody')[0];
+    var firstRow = table.rows[0];
+    var newRow = firstRow.cloneNode(true);
+    
+    // Clear values
+    newRow.querySelectorAll('select').forEach(function(select) {
+        select.selectedIndex = 0;
+    });
+    newRow.querySelectorAll('input').forEach(function(input) {
+        input.value = '';
+    });
+    
+    // Load variants for the new row
+    var variantSelect = newRow.querySelector('.variant-select');
+    loadVariantsForSelect(variantSelect);
+    
+    table.appendChild(newRow);
+}
+
+function removeVariationRow(button) {
+    var table = document.getElementById('v_var_new').getElementsByTagName('tbody')[0];
+    if (table.rows.length > 1) {
+        button.closest('tr').remove();
+    } else {
+        alert('At least one row must remain');
+    }
+}
+
+function loadVariantsForSelect(selectElement) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '<?php echo base_url(); ?>units/get_variations_ajax', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            try {
+                var data = JSON.parse(xhr.responseText);
+                selectElement.innerHTML = '<option value="">Select Variant</option>';
+                if (data && data.length > 0) {
+                    data.forEach(function(item) {
+                        var option = document.createElement('option');
+                        option.value = item.id;
+                        option.text = item.name;
+                        selectElement.appendChild(option);
+                    });
+                }
+            } catch (e) {
+                console.log('Error parsing variants response');
+            }
+        }
+    };
+    
+    var params = '<?=$this->security->get_csrf_token_name()?>=' + crsf_hash;
+    xhr.send(params);
+}
+
+// Load variants on page load for the initial row
+document.addEventListener('DOMContentLoaded', function() {
+    var initialVariantSelect = document.querySelector('.variant-select');
+    if (initialVariantSelect) {
+        loadVariantsForSelect(initialVariantSelect);
+    }
+});
+
+// Handle form validation for stock when variations are present
+$('#data_form').on('submit', function(e) {
+    var hasVariations = false;
+    $('#v_var_new tbody tr').each(function() {
+        var variant = $(this).find('select[name="variant_id[]"]').val();
+        var price = $(this).find('input[name="variant_price[]"]').val();
+        var stock = $(this).find('input[name="variant_stock[]"]').val();
+        if (variant && price && stock) {
+            hasVariations = true;
+        }
+    });
+    if (hasVariations) {
+        $('input[name="product_qty"]').removeClass('required');
+    } else {
+        $('input[name="product_qty"]').addClass('required');
+    }
+});
 </script>

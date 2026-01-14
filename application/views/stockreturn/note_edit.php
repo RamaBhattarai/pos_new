@@ -318,6 +318,7 @@
                         <input type="hidden" value="stockreturn/editaction" id="action-url">
                         <input type="hidden" value="2" name="person_type">
                         <input type="hidden" value="puchase_search" id="billtype">
+                        <input type="hidden" value="stock_return" id="page-type">
                         <input type="hidden" value="<?php echo $i; ?>" name="counter" id="ganak">
                         <input type="hidden" value="<?php echo $this->config->item('currency'); ?>" name="currency">
                         <input type="hidden" value="<?= $this->common->taxhandle_edit($invoice['taxstatus']) ?>"

@@ -32,7 +32,7 @@
 
                         <div class="col-sm-5">
                             <input type="text" placeholder="Income"
-                                   class="form-control margin-bottom  required" name="income"
+                                   class="form-control margin-bottom" name="income"
                                    value="<?php echo $goals['income'] ?>">
                         </div>
                     </div>
@@ -44,7 +44,7 @@
 
                         <div class="col-sm-5">
                             <input type="text" placeholder="Expenses"
-                                   class="form-control margin-bottom  required" name="expense"
+                                   class="form-control margin-bottom" name="expense"
                                    value="<?php echo $goals['expense'] ?>">
                         </div>
                     </div>
@@ -56,7 +56,7 @@
 
                         <div class="col-sm-5">
                             <input type="text" placeholder="Sales"
-                                   class="form-control margin-bottom  required" name="sales"
+                                   class="form-control margin-bottom" name="sales"
                                    value="<?php echo $goals['sales'] ?>">
                         </div>
                     </div>
@@ -68,7 +68,7 @@
 
                         <div class="col-sm-5">
                             <input type="text" placeholder="Net Income"
-                                   class="form-control margin-bottom  required" name="netincome"
+                                   class="form-control margin-bottom" name="netincome"
                                    value="<?php echo $goals['netincome'] ?>">
                         </div>
                     </div>

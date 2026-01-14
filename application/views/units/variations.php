@@ -5,12 +5,13 @@
         <div class="message"></div>
     </div>
     <div class="card-body">
-        <h5 class="title"> <?php echo $this->lang->line('Variations') ?> <a
-                    href="<?php echo base_url('units/create_va') ?>"
+        <h5 class="title"> Product Options 
+            <a href="<?php echo base_url('units/create_va') ?>"
                     class="btn btn-primary btn-sm rounded">
-                <?php echo $this->lang->line('Add new') ?>
+                Add New Option
             </a>
         </h5>
+        <p class="text-muted">Main categories like Color, Size, Material, Brand, etc.</p>
 
         <hr>
         <table id="catgtable" class="table table-striped table-bordered zero-configuration" cellspacing="0"
@@ -18,11 +19,8 @@
             <thead>
             <tr>
                 <th>#</th>
-                <th><?php echo $this->lang->line('Name') ?></th>
-
-                <th><?php echo $this->lang->line('Action') ?></th>
-
-
+                <th>Option Name</th>
+                <th>Action</th>
             </tr>
             </thead>
             <tbody>
@@ -33,10 +31,8 @@
 
                 echo "<tr>
                     <td>$i</td>
-                    <td>$name</td>
-                   
-                 
-                    <td><a href='" . base_url("units/edit_va?id=$cid") . "' class='btn btn-warning btn-xs'><i class='icon-pencil'></i> " . $this->lang->line('Edit') . "</a>&nbsp;<a href='#' data-object-id='" . $cid . "' class='btn btn-danger btn-xs delete-object' title='Delete'><i class='fa fa-trash'></i></a></td></tr>";
+                    <td><strong>$name</strong></td>
+                    <td><a href='" . base_url("units/edit_va?id=$cid") . "' class='btn btn-warning btn-xs'><i class='icon-pencil'></i> Edit</a>&nbsp;<a href='#' data-object-id='" . $cid . "' class='btn btn-danger btn-xs delete-object' title='Delete'><i class='fa fa-trash'></i> Delete</a></td></tr>";
                 $i++;
             }
             ?>
@@ -44,9 +40,8 @@
             <tfoot>
             <tr>
                 <th>#</th>
-                <th><?php echo $this->lang->line('Name') ?></th>
-
-                <th><?php echo $this->lang->line('Action') ?></th>
+                <th>Option Name</th>
+                <th>Action</th>
             </tr>
             </tfoot>
         </table>

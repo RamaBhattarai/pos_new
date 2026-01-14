@@ -175,7 +175,7 @@
                         <img src="<?php $loc = location($invoice['loc']);
                         echo base_url('userfiles/company/' . $loc['logo']) ?>"
                              class="img-responsive p-1 m-b-2" style="max-height: 120px;">
-                        <p class="ml-2"><?= $loc['cname'] ?></p>
+                        <p class="ml-2"><?php echo $warehouse_name ? $warehouse_name : 'Default Warehouse'; ?></p>
                     </div>
                     <div class="col-md-6 col-sm-12 text-xs-center text-md-right">
                         <h2><?php echo $this->lang->line('INVOICE') ?></h2>
@@ -190,9 +190,9 @@
                 <!--/ Invoice Company Details -->
 
                 <!-- Invoice Customer Details -->
-                <p><strong>VAT Registration No:</strong></p>
+                <!-- <p><strong>VAT Registration No:</strong></p>
         <p><strong>Seller’s PAN
-        :</strong></p>  
+        :</strong></p>   -->
                 <div id="invoice-customer-details" class="row pt-2">
                     <div class="col-sm-12 text-xs-center text-md-left">
                         <p class="text-muted"><?php echo $this->lang->line('Bill To') ?></p>
@@ -217,8 +217,26 @@
 
                     </div>
                     <div class="offset-md-3 col-md-3 col-sm-12 text-xs-center text-md-left">
-                        <?php echo '<p><span class="text-muted">' . $this->lang->line('Invoice Date') . '  :</span> ' . dateformat($invoice['invoicedate']) . '</p> <p><span class="text-muted">' . $this->lang->line('Due Date') . ' :</span> ' . dateformat($invoice['invoiceduedate']) . '</p>  <p><span class="text-muted">' . $this->lang->line('Terms') . ' :</span> ' . $invoice['termtit'] . '</p>';
+                        <?php 
+                        // Format for original format tracking (check if user originally entered Nepali or English)
+                        $invoiceDateFormat = $invoice['invoicedate_format'] ?? 'english';
+                        $dueDateFormat = $invoice['invoiceduedate_format'] ?? 'english';
                         ?>
+                        <p>
+                            <span class="text-muted"><?php echo $this->lang->line('Invoice Date') ?>  :</span> 
+                            <span class="date-display" data-raw="<?php echo $invoice['invoicedate'] ?>" data-format="<?php echo $invoiceDateFormat ?>">
+                                <?php echo dateformat($invoice['invoicedate']) ?>
+                            </span>
+                            <span class="english-date" style="display:none; color:#666; font-size:0.9em;"></span>
+                        </p> 
+                        <p>
+                            <span class="text-muted"><?php echo $this->lang->line('Due Date') ?> :</span> 
+                            <span class="date-display" data-raw="<?php echo $invoice['invoiceduedate'] ?>" data-format="<?php echo $dueDateFormat ?>">
+                                <?php echo dateformat($invoice['invoiceduedate']) ?>
+                            </span>
+                            <span class="english-date" style="display:none; color:#666; font-size:0.9em;"></span>
+                        </p>  
+                        <p><span class="text-muted"><?php echo $this->lang->line('Terms') ?> :</span> <?php echo $invoice['termtit'] ?></p>
                     </div>
                 </div>
                 <!--/ Invoice Customer Details -->
@@ -359,7 +377,7 @@
                                                     id="pstatus"><?php echo $this->lang->line(ucwords($invoice['status'])) ?></strong></u>
                                     </p>
                                     <p class="lead"><?php echo $this->lang->line('Payment Method') ?>: <u><strong
-                                                    id="pmethod"><?php echo $this->lang->line($invoice['pmethod']) ?></strong></u>
+                                                    id="pmethod"><?php echo $invoice['pmethod'] ?></strong></u>
                                     </p>
 
                                     <p class="lead mt-1"><br><?php echo $this->lang->line('Note') ?>:</p>
@@ -447,7 +465,7 @@
                         <?php foreach ($activity as $row) {
 
                             echo '<tr>
-                            <td><a href="view_payslip?id=' . $row['id'] . '&inv=' . $invoice['iid'] . '" class="btn btn-blue btn-sm"><span class="icon-print" aria-hidden="true"></span> ' . $this->lang->line('Print') . '  </a> ' . $row['date'] . '</td>
+                            <td><a href="view_payslip?id=' . $row['id'] . '&inv=' . $invoice['iid'] . '" class="btn btn-blue btn-sm"><span class="icon-print" aria-hidden="true"></span> ' . $this->lang->line('Print') . '  </a> <span class="date-display" data-raw="' . $row['date'] . '" data-format="english">' . dateformat($row['date']) . '</span><span class="english-date" style="display:none; color:#666; font-size:0.9em;"></span></td>
                             <td>' . $this->lang->line($row['method']) . '</td>
                           
                                       <td>' . amountExchange($row['debit'], 0, $this->aauth->get_user()->loc) . '</td>
@@ -591,31 +609,21 @@
                 <form class="payment">
                     <div class="row">
                         <div class="col">
-                            <fieldset class="form-group position-relative has-icon-left">
+                            <div class="input-group">
+                                <div class="input-group-addon"><?php echo $this->config->item('currency') ?></div>
                                 <input type="text" class="form-control" placeholder="Total Amount" name="amount"
-                                       id="rmpay"
-                                       value="<?= amountExchange_s($rming, 0, $this->aauth->get_user()->loc) ?>">
-                                <div class="form-control-position">
-                                    <?php echo $this->config->item('currency') ?>
-                                </div>
-
-                            </fieldset>
-
+                                       id="rmpay" value="<?php echo $rming ?>">
+                            </div>
 
                         </div>
                         <div class="col">
-                            <fieldset class="form-group position-relative has-icon-left">
-                                <input type="text" class="form-control required"
+                            <div class="input-group">
+                                <div class="input-group-addon"><span class="icon-calendar4"
+                                                                     aria-hidden="true"></span></div>
+                                <input type="date" class="form-control required critical-date" id="tsn_date"
                                        placeholder="Billing Date" name="paydate"
-                                       data-toggle="datepicker">
-                                <div class="form-control-position">
-                      <span class="fa fa-calendar"
-                            aria-hidden="true"></span>
-                                </div>
-
-                            </fieldset>
-
-
+                                       value="<?php echo date('Y-m-d'); ?>">
+                            </div>
                         </div>
                     </div>
 
@@ -627,6 +635,9 @@
                                 <option value="Card"><?php echo $this->lang->line('Card') ?></option>
                                 <option value="Balance"><?php echo $this->lang->line('Client Balance') ?></option>
                                 <option value="Bank"><?php echo $this->lang->line('Bank') ?></option>
+                                <option value="e-sewa">E-sewa</option>
+                                <option value="khalti">Khalti</option>
+                                <option value="courier">Courier</option>
                             </select><label for="account"><?php echo $this->lang->line('Account') ?></label>
 
                             <select name="account" class="form-control">
@@ -866,7 +877,7 @@
                                name="tid" id="invoiceid" value="<?php echo $invoice['iid'] ?>">
                         <button type="button" class="btn btn-default"
                                 data-dismiss="modal"><?php echo $this->lang->line('Close'); ?></button>
-                        <input type="hidden" id="action-url" value="invoices/update_status">
+                        <input type="hidden" id="action-url" value="pos_invoices/update_status">
                         <button type="button" class="btn btn-primary"
                                 id="submit_model"><?php echo $this->lang->line('Change Status'); ?></button>
                     </div>
@@ -891,6 +902,18 @@
                 ['fullscreen', ['fullscreen']],
                 ['codeview', ['codeview']]
             ]
+        });
+
+        // Initialize date toggle for payment modal date field
+        $('#part_payment').on('shown.bs.modal', function() {
+            setTimeout(function() {
+                if (typeof createDateToggle === 'function') {
+                    var dateField = $('#tsn_date');
+                    if (!dateField.hasClass('date-toggle-input')) {
+                        createDateToggle(dateField[0]);
+                    }
+                }
+            }, 100);
         });
 
         $('#sendM').on('click', function (e) {

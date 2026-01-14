@@ -300,8 +300,6 @@ class Reports_model extends CI_Model
 
     public function customprofitstatement($lid, $sdate, $edate)
     {
-
-
         $this->db->select_sum('pos_metadata.col1');
         $this->db->from('pos_metadata');
         $this->db->where('pos_metadata.type', 9);
@@ -309,22 +307,21 @@ class Reports_model extends CI_Model
         $this->db->where('DATE(pos_metadata.d_date) <=', $edate);
         $this->db->join('pos_invoices', 'pos_invoices.id = pos_metadata.rid', 'left');
 
+        // Warehouse-wise filtering
+        if ($lid != 'all' && is_numeric($lid) && $lid > 0) {
+            $this->db->where('pos_invoices.warehouse', $lid);
+        }
+
+        // User location filter if applicable
         if ($this->aauth->get_user()->loc) {
-            $this->db->where('pos_invoices.loc', $this->aauth->get_user()->loc);
-        } elseif (!BDATA) {
-            $this->db->where('pos_invoices.loc', $lid);
-        } else {
-            $this->db->group_start();
-            $this->db->where('pos_invoices.loc', $lid);
-            $this->db->or_where('pos_invoices.loc', 0);
-            $this->db->group_end();
+            $this->db->where('pos_invoices.warehouse', $this->aauth->get_user()->loc);
         }
 
         $query = $this->db->get();
         $result = $query->row_array();
-
         return $result;
     }
+
 
     public function customcommission($lid, $sdate, $edate)
     {
@@ -459,7 +456,7 @@ class Reports_model extends CI_Model
 
     //fetch data
 
-    public function fetchdata($page)
+     public function fetchdata($page, $warehouse = null)
     {
         switch ($page) {
             case 'products' :
@@ -467,7 +464,9 @@ class Reports_model extends CI_Model
                 $this->db->select_sum('pos_invoice_items.subtotal');
                 $this->db->from('pos_invoice_items');
                 $this->db->join('pos_invoices', 'pos_invoices.id = pos_invoice_items.tid', 'left');
-                if ($this->aauth->get_user()->loc) {
+                if ($warehouse) {
+                    $this->db->where('pos_invoices.loc', $warehouse);
+                } elseif ($this->aauth->get_user()->loc) {
                     $this->db->where('pos_invoices.loc', $this->aauth->get_user()->loc);
                 } elseif (!BDATA) {
                     $this->db->where('pos_invoices.loc', 0);
@@ -530,7 +529,9 @@ class Reports_model extends CI_Model
                 $this->db->from('pos_metadata');
                 $this->db->join('pos_invoices', 'pos_invoices.id = pos_metadata.rid', 'left');
                 $this->db->where('pos_metadata.type', 9);
-                if ($this->aauth->get_user()->loc) {
+                if ($warehouse) {
+                    $this->db->where('pos_invoices.loc', $warehouse);
+                } elseif ($this->aauth->get_user()->loc) {
                     $this->db->where('pos_invoices.loc', $this->aauth->get_user()->loc);
                 } elseif (!BDATA) {
                     $this->db->where('pos_invoices.loc', 0);
@@ -542,7 +543,9 @@ class Reports_model extends CI_Model
                 $this->db->from('pos_metadata');
                 $this->db->where('pos_metadata.type', 9);
                 $this->db->join('pos_invoices', 'pos_invoices.id = pos_metadata.rid', 'left');
-                if ($this->aauth->get_user()->loc) {
+                if ($warehouse) {
+                    $this->db->where('pos_invoices.loc', $warehouse);
+                } elseif ($this->aauth->get_user()->loc) {
                     $this->db->where('pos_invoices.loc', $this->aauth->get_user()->loc);
                 } elseif (!BDATA) {
                     $this->db->where('pos_invoices.loc', 0);
@@ -557,6 +560,7 @@ class Reports_model extends CI_Model
                 return array('p1' => amountExchange($lastbal, 0, $this->aauth->get_user()->loc), 'p2' => amountExchange($motnhbal, 0, $this->aauth->get_user()->loc), 'p3' => 0, 'p4' => 0);
         }
     }
+
 
 
         public function product_customer_statements($customer, $sdate, $edate)

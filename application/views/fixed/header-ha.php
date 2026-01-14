@@ -103,6 +103,10 @@
                                                                href="<?php echo base_url(); ?>tools/setgoals"><i
                                                                         class="ft-chevron-right"></i> <?php echo $this->lang->line('Set Goals') ?>
                                                             </a></li>
+                                                        <li><a class="dropdown-item"
+                                                               href="<?php echo base_url(); ?>paymentmethods"><i
+                                                                        class="ft-chevron-right"></i> Payment Methods
+                                                            </a></li>
                                                     </ul>
                                                 </div>
                                             </div>
@@ -300,14 +304,6 @@
                                                         <li><a class="dropdown-item"
                                                                href="<?php echo base_url(); ?>units"><i
                                                                         class="ft-chevron-right"></i><?php echo $this->lang->line('Measurement Unit') ?>
-                                                            </a></li>
-                                                        <li><a class="dropdown-item"
-                                                               href="<?php echo base_url(); ?>units/variations"><i
-                                                                        class="ft-chevron-right"></i> <?php echo $this->lang->line('ProductsVariations') ?>
-                                                            </a></li>
-                                                        <li><a class="dropdown-item"
-                                                               href="<?php echo base_url(); ?>units/variables"><i
-                                                                        class="ft-chevron-right"></i> <?php echo $this->lang->line('VariationsVariables') ?>
                                                             </a></li>
                                                     </ul>
                                                 </div>
@@ -681,8 +677,21 @@
                                 <li data-menu=""><a class="dropdown-item" href="<?php echo base_url(); ?>products"
                                                     data-toggle="dropdown"><?= $this->lang->line('Manage Products'); ?></a>
                                 </li>
-
-
+                            </ul>
+                        </li>
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a
+                                    class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i
+                                        class="ft-box"></i> Product Variations</a>
+                            <ul class="dropdown-menu">
+                                <li data-menu=""><a class="dropdown-item" href="<?php echo base_url(); ?>units/variations"
+                                                    data-toggle="dropdown"> <?php echo $this->lang->line('ProductsVariations') ?></a>
+                                </li>
+                                <li data-menu=""><a class="dropdown-item" href="<?php echo base_url(); ?>units/variation_options"
+                                                    data-toggle="dropdown"> <?php echo $this->lang->line('VariationsVariables') ?></a>
+                                </li>
+                                <li data-menu=""><a class="dropdown-item" href="<?php echo base_url(); ?>units/product_variations"
+                                                    data-toggle="dropdown"> Product Variations</a>
+                                </li>
                             </ul>
                         </li>
                         <li data-menu=""><a class="dropdown-item"
@@ -745,18 +754,19 @@
                                                     data-toggle="dropdown"><?php echo $this->lang->line('Manage Suppliers'); ?></a>
                             </ul>
                         </li>
-                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a
-                                    class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i
-                                        class="fa fa-barcode"></i><?php echo $this->lang->line('ProductsLabel'); ?></a>
-                            <ul class="dropdown-menu">
-
-
-                                <li data-menu=""><a class="dropdown-item" href="<?php echo base_url(); ?>products/custom_label"
-                                                    data-toggle="dropdown"><?php echo $this->lang->line('custom_label'); ?></a></li>
-                                  <li data-menu=""><a class="dropdown-item" href="<?php echo base_url(); ?>products/standard_label"
-                                                    data-toggle="dropdown"><?php echo $this->lang->line('standard_label'); ?></a></li>
-                            </ul>
-                        </li>
+                        <?php $package = $this->config->item('package'); ?>
+<?php if ($package != 'basic'): ?>
+<li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a
+    class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i
+        class="fa fa-barcode"></i><?php echo $this->lang->line('ProductsLabel'); ?></a>
+    <ul class="dropdown-menu">
+        <li data-menu=""><a class="dropdown-item" href="<?php echo base_url(); ?>products/custom_label"
+                            data-toggle="dropdown"><?php echo $this->lang->line('custom_label'); ?></a></li>
+        <li data-menu=""><a class="dropdown-item" href="<?php echo base_url(); ?>products/standard_label"
+                            data-toggle="dropdown"><?php echo $this->lang->line('standard_label'); ?></a></li>
+    </ul>
+</li>
+<?php endif; ?>
 
                     </ul>
                 </li>

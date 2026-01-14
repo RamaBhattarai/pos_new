@@ -40,6 +40,14 @@ class Billing_model extends CI_Model
         }
             $query = $this->db->get();
             $account = $query->row_array();
+            
+            // Debug logging
+            error_log("Paynow start: tid=$tid, amount=$amount, pmethod=$pmethod, account_d=$account_d");
+            if ($account) {
+                error_log("Account found: " . json_encode($account));
+            } else {
+                error_log("Account not found for account_d=$account_d");
+            }
         }
 
 

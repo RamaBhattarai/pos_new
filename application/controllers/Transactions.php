@@ -371,7 +371,92 @@ class Transactions extends CI_Controller
             $this->lang->line('Invoice canceled')));
     }
 
+public function cancelinvoiceentry()
+{
+    // Permission check
+    if (!$this->aauth->premission(2)) {
+        exit('<h3>Sorry! You have insufficient permissions</h3>');
+    }
 
+    $tid = intval($this->input->post('tid'));
+
+    if (!$tid) {
+        echo json_encode([
+            'status' => 'Error',
+            'message' => 'Invalid purchase entry ID'
+        ]);
+        return;
+    }
+
+    // Fetch invoice & ensure it's not already canceled
+    $invoice = $this->db
+        ->where('id', $tid)
+        ->where('status !=', 'canceled')
+        ->get('pos_purchase_entries') // <-- Uses pos_invoices table
+        ->row();
+
+    if (!$invoice) {
+        echo json_encode([
+            'status' => 'Error',
+            'message' => 'Purchase Entry not found or already canceled'
+        ]);
+        return;
+    }
+
+    // -------------------------------
+    // 1️⃣ Update invoice status
+    // -------------------------------
+    $this->db->where('id', $tid);
+    $this->db->update('pos_purchase_entries', [
+        'pamnt'    => 0.00,
+        'total'    => 0.00,
+        'subtotal' => 0.00,
+        'status'   => 'canceled'
+    ]);
+
+    // --------------------------------
+    // 2️⃣ Reverse account transactions
+    // --------------------------------
+    $transactions = $this->db
+        ->where(['tid' => $tid, 'ext' => 1])
+        ->get('pos_transactions')
+        ->result();
+
+    foreach ($transactions as $trans) {
+        $amt = $trans->debit - $trans->credit;
+
+        $this->db->set('lastbal', "lastbal+$amt", FALSE)
+                 ->where('id', $trans->acid)
+                 ->update('pos_accounts');
+    }
+
+    // ------------------------
+    // 3️⃣ Reverse product stock
+    // ------------------------
+    $items = $this->db
+        ->where('tid', $tid)
+        ->get('pos_invoice_items')
+        ->result();
+
+    foreach ($items as $item) {
+        $this->db->set('qty', "qty-$item->qty", FALSE)
+                 ->where('pid', $item->pid)
+                 ->update('pos_products');
+    }
+
+    // ---------------------------------
+    // 4️⃣ Delete related transactions
+    // ---------------------------------
+    $this->db->delete('pos_transactions', ['tid' => $tid]);
+
+    // ------------------------
+    // 5️⃣ Final response
+    // ------------------------
+    echo json_encode([
+        'status'  => 'Success',
+        'message' => 'Purchase Entry has been cancelled successfully!'
+    ]);
+}
     public function cancelpurchase()
     {
         if (!$this->aauth->premission(2)) {

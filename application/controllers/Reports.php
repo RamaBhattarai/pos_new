@@ -394,7 +394,7 @@ class Reports extends CI_Controller
     // profit section
 
 
-    public function profitstatement()
+     public function profitstatement()
 
     {
         $head['title'] = "Profit Statement";
@@ -402,7 +402,7 @@ class Reports extends CI_Controller
         $this->load->view('fixed/header', $head);
 
         $this->load->model('locations_model');
-        $data['locations'] = $this->locations_model->locations_list2();
+        $data['locations'] = $this->locations_model->locations_list();
         $data['income'] = $this->reports->profitstatement();
 
 
@@ -414,11 +414,14 @@ class Reports extends CI_Controller
     }
 
 
-    public function customprofit()
+     public function customprofit()
     {
 
         if ($this->input->post('check')) {
             $lid = $this->input->post('pay_acc');
+            if ($this->input->post('warehouse')) {
+                $lid = $this->input->post('warehouse');
+            }
             $sdate = datefordatabase($this->input->post('sdate'));
             $edate = datefordatabase($this->input->post('edate'));
 
@@ -433,13 +436,62 @@ class Reports extends CI_Controller
             if ($diff < 365) {
                 $income = $this->reports->customprofitstatement($lid, $sdate, $edate);
 
-                echo json_encode(array('status' => 'Success', 'message' => 'Calculated', 'param1' => '<hr> Profit between the dates is ' . amountExchange($income['col1'], 0, $this->aauth->get_user()->loc) . ' '));
+                // Get location/warehouse name dynamically
+                $this->load->model('locations_model');
+                $locations = $this->locations_model->locations_list();
+                $name = 'All Warehouses';
+                if ($lid && $lid != 0) {
+                    foreach ($locations as $loc) {
+                        if ($loc['id'] == $lid) {
+                            $name = $loc['cname'];
+                            break;
+                        }
+                    }
+                }
+
+                $profit_amount = $income['col1'] ? $income['col1'] : 0;
+                echo json_encode(array('status' => 'Success', 'message' => 'Calculated', 'param1' => '<hr> Profit for ' . $name . ' between the dates is ' . amountExchange($profit_amount, 0, $this->aauth->get_user()->loc) . ' '));
             } else {
                 echo json_encode(array('status' => 'Error', 'message' => 'Date range should be within 365 days', 'param1' => ''));
             }
 
         }
     }
+    
+    public function warehouseprofit()
+    {
+        $warehouse = $this->input->post('warehouse');
+        $sdate = datefordatabase($this->input->post('sdate'));
+        $edate = datefordatabase($this->input->post('edate'));
+
+        if ($this->aauth->get_user()->loc) {
+            $warehouse = $this->aauth->get_user()->loc;
+        }
+
+        $date1 = new DateTime($sdate);
+        $date2 = new DateTime($edate);
+
+        $diff = $date2->diff($date1)->format("%a");
+        if ($diff < 365) {
+            $income = $this->reports->customprofitstatement($warehouse, $sdate, $edate);
+
+            // Get warehouse name
+            $this->load->model('locations_model');
+            $locations = $this->locations_model->locations_list();
+            $warehouse_name = '';
+            foreach ($locations as $loc) {
+                if ($loc['id'] == $warehouse) {
+                    $warehouse_name = $loc['cname'];
+                    break;
+                }
+            }
+
+            echo json_encode(array('status' => 'Success', 'profit' => 'Profit for ' . $warehouse_name . ' between the dates is ' . amountExchange($income['col1'], 0, $this->aauth->get_user()->loc)));
+        } else {
+            echo json_encode(array('status' => 'Error', 'message' => 'Date range should be within 365 days'));
+        }
+    }
+
 
     // profit section
 
@@ -551,11 +603,11 @@ class Reports extends CI_Controller
         }
     }
 
-    public function fetch_data()
+     public function fetch_data()
     {
         if ($this->input->get('p')) {
-
-            $data = $this->reports->fetchdata($this->input->get('p'));
+            $warehouse = $this->input->get('warehouse');
+            $data = $this->reports->fetchdata($this->input->get('p'), $warehouse);
             echo json_encode(array('status' => 'Success', 'message' => 'Calculated', 'p1' => $data['p1'], 'p2' => $data['p2'], 'p3' => $data['p3'], 'p4' => $data['p4']));
         }
     }

@@ -44,13 +44,13 @@
                                 </a>
                                 <a href="<?php echo base_url('customers/transactions?id=' . $details['id']) ?>"
                                    class="btn btn-blue-grey btn-md mr-1 mb-1 btn-block  btn-lighten-1"><i
-                                            class="fa fa-money"></i> <?php echo $this->lang->line('View Transactions') ?>
+                                            class="fa fa-money"></i> <?php echo $this->lang->line('Client Ledger') ?>
                                 </a>
                                 <a href="<?php echo base_url('customers/statement?id=' . $details['id']) ?>"
                                    class="btn btn-primary btn-block btn-md mr-1 mb-1 btn-lighten-1"><i
                                             class="fa fa-briefcase"></i> <?php echo $this->lang->line('Account Statements') ?>
                                 </a>
-                                <a href="<?php echo base_url('customers/quotes?id=' . $details['id']) ?>"
+                                <!-- <a href="<?php echo base_url('customers/quotes?id=' . $details['id']) ?>"
                                    class="btn btn-purple btn-md mr-1 mb-1 btn-block btn-lighten-1"><i
                                             class="fa fa-quote-left"></i> <?php echo $this->lang->line('Quotes') ?>
                                 </a> <a href="<?php echo base_url('customers/projects?id=' . $details['id']) ?>"
@@ -70,7 +70,7 @@
                                 <a href="<?php echo base_url('customers/documents?id=' . $details['id']) ?>"
                                    class="btn btn-facebook btn-md mr-1 mb-1 btn-block btn-lighten-1"><i
                                             class="icon-folder"></i> <?php echo $this->lang->line('Documents') ?>
-                                </a>
+                                </a> -->
 
                             </div>
                         </div>
@@ -81,15 +81,15 @@
                         <div id="mybutton">
 
                             <div class="">
-                                <a href="<?php echo base_url('customers/balance?id=' . $details['id']) ?>"
+                                <!-- <a href="<?php echo base_url('customers/balance?id=' . $details['id']) ?>"
                                    class="btn btn-success btn-md"><i
                                             class="fa fa-briefcase"></i> <?php echo $this->lang->line('Wallet') ?>
-                                </a>
+                                </a> -->
 
-                                 <a href="<?php echo base_url('customers/bulkpayment?id=' . $details['id']) ?>"
+                                 <!-- <a href="<?php echo base_url('customers/bulkpayment?id=' . $details['id']) ?>"
                                    class="btn btn-grey-blue btn-md"><i
                                             class="fa fa-money"></i> <?php echo $this->lang->line('Bulk Payment') ?>
-                                </a>
+                                </a> -->
 
                                 <a href="#sendMail" data-toggle="modal" data-remote="false"
                                    class="btn btn-primary btn-md " data-type="reminder"><i
@@ -103,10 +103,10 @@
                                 </a>
 
 
-                                <a href="<?php echo base_url('customers/changepassword?id=' . $details['id']) ?>"
+                                <!-- <a href="<?php echo base_url('customers/changepassword?id=' . $details['id']) ?>"
                                    class="btn btn-danger btn-md"><i
                                             class="fa fa-key"></i> <?php echo $this->lang->line('Change Password') ?>
-                                </a>
+                                </a> -->
                             </div>
 
                         </div>

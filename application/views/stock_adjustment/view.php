@@ -31,8 +31,18 @@
             <td><?= $adjustment['adjustment_no'] ?></td>
             <td><?= $adjustment['reason'] ?></td>
             <td>
-        <?= !empty($adjustment['adjustment_date']) ? date('jS M, Y', strtotime($adjustment['adjustment_date'])) : '' ?>
-    </td>
+                <?php if (!empty($adjustment['adjustment_date'])): ?>
+                    <?php 
+                    // Check if format information is available
+                    $originalFormat = $adjustment['adjustment_date_format'] ?? 'english';
+                    $rawDate = $adjustment['adjustment_date'];
+                    ?>
+                    <span class="date-display" data-raw="<?= $rawDate ?>" data-format="<?= $originalFormat ?>">
+                        <?= date('Y-m-d', strtotime($rawDate)) ?>
+                    </span>
+                    <span class="english-date" style="display:none; color:#666; font-size:0.9em;"></span>
+                <?php endif; ?>
+            </td>
             <td><?= $adjustment['note'] ?></td>
             <td><?= ucfirst($adjustment['status']) ?></td>
             

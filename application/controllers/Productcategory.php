@@ -349,7 +349,7 @@ class Productcategory extends CI_Controller
 
             switch ($r_type) {
                 case 1 :
-                    $query = $this->db->query("SELECT pos_invoices.tid,pos_invoice_items.qty,pos_invoice_items.price,pos_invoices.invoicedate FROM pos_invoice_items LEFT JOIN pos_invoices ON pos_invoices.id=pos_invoice_items.tid LEFT JOIN pos_products ON pos_products.pid=pos_invoice_items.pid $qj WHERE pos_invoices.status!='canceled'  AND (DATE(pos_invoices.invoicedate) BETWEEN DATE('$s_date') AND DATE('$e_date')) AND pos_products.warehouse='$pid' $wr");
+                    $query = $this->db->query("SELECT pos_invoices.tid,pos_invoice_items.qty, (pos_invoice_items.price * (pos_invoices.total / pos_invoices.subtotal)) as price,pos_invoices.invoicedate FROM pos_invoice_items LEFT JOIN pos_invoices ON pos_invoices.id=pos_invoice_items.tid LEFT JOIN pos_products ON pos_products.pid=pos_invoice_items.pid $qj WHERE pos_invoices.status!='canceled'  AND (DATE(pos_invoices.invoicedate) BETWEEN DATE('$s_date') AND DATE('$e_date')) AND pos_products.warehouse='$pid' $wr");
                     $result = $query->result_array();
                     break;
 

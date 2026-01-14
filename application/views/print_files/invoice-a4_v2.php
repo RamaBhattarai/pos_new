@@ -206,6 +206,14 @@
                     <td class="meta-head"><?= $this->lang->line('Total Amount') ?></td>
                     <td><?= amountExchange($invoice['total'], $invoice['multi'], $invoice['loc']) ?></td>
                 </tr>
+                <tr>
+                    <td class="meta-head"><?= $this->lang->line('Payment Status') ?></td>
+                    <td><?= $this->lang->line(ucwords($invoice['status'])) ?></td>
+                </tr>
+                <tr>
+                    <td class="meta-head"><?= $this->lang->line('Payment Method') ?></td>
+                    <td><?= $invoice['pmethod'] ?></td>
+                </tr>
 
             </table>
         </td>

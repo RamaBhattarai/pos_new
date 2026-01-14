@@ -68,19 +68,31 @@ class Chart extends CI_Controller
 
     }
 
-    public function trending_products()
-    {
+   
+public function trending_products()
+{
+    $CI =& get_instance();
+    $package = $CI->config->item('package');
 
-        $head['title'] = "Trending Products";
-        $type = $this->input->get('p');
-        $data['chart'] = $this->chart->trendingproducts($type);
-        $head['usernm'] = $this->aauth->get_user()->username;
-        $this->load->view('fixed/header', $head);
-        $this->load->view('chart/trending', $data);
-        $this->load->view('fixed/footer');
-
-
+    // Set default type based on package
+    if ($package == 'basic') {
+        $type = 'week';
+    } elseif ($package == 'standard') {
+        $type = 'month';
+    } elseif ($package == 'premium') {
+        // Allow all, or use GET param if provided
+        $type = $this->input->get('p') ?: 'month';
+    } else {
+        $type = 'week'; // fallback
     }
+
+    $head['title'] = "Trending Products";
+    $data['chart'] = $this->chart->trendingproducts($type);
+    $head['usernm'] = $this->aauth->get_user()->username;
+    $this->load->view('fixed/header', $head);
+    $this->load->view('chart/trending', $data);
+    $this->load->view('fixed/footer');
+}
 
     public function trending_products_update()
     {

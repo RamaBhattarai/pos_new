@@ -56,7 +56,7 @@ class Employee_model extends CI_Model
         return $query->result_array();
     }
 
-    public function update_employee($id, $name, $phone, $phonealt, $address, $city, $region, $country, $postbox, $location, $salary = 0, $department = -1, $commission = 0, $roleid = false)
+    public function update_employee($id, $name, $phone, $phonealt, $address, $city, $region, $country, $postbox, $location, $salary = 0, $department = -1, $commission = 0, $roleid = false, $warehouse = 0)
     {
         $this->db->select('salary');
         $this->db->from('pos_employees');
@@ -80,7 +80,8 @@ class Employee_model extends CI_Model
             'country' => $country,
             'postbox' => $postbox,
             'salary' => $salary,
-            'c_rate' => $commission
+            'c_rate' => $commission,
+            'warehouse' => $warehouse
         );
         if ($department > -1) {
             $data = array(
@@ -94,7 +95,8 @@ class Employee_model extends CI_Model
                 'postbox' => $postbox,
                 'salary' => $salary,
                 'dept' => $department,
-                'c_rate' => $commission
+                'c_rate' => $commission,
+                'warehouse' => $warehouse
             );
         }
 
@@ -339,8 +341,30 @@ class Employee_model extends CI_Model
     }
 
 
-    public function add_employee($id, $username, $name, $roleid, $phone, $address, $city, $region, $country, $postbox, $location, $salary = 0, $commission = 0, $department = 0)
+    public function add_employee($id, $username, $name, $roleid, $phone, $address, $city, $region, $country, $postbox, $location, $salary = 0, $commission = 0, $department = 0, $warehouse = 0)
     {
+        $CI =& get_instance();
+    $package = $CI->config->item('package');
+
+    // Set employee limit based on package
+    if ($package == 'basic') {
+        $employee_limit = 2;
+    } elseif ($package == 'standard') {
+        $employee_limit = 5;
+    } elseif ($package == 'premium') {
+        $employee_limit = PHP_INT_MAX; // Unlimited
+    } else {
+        $employee_limit = 3; // default fallback
+    }
+
+    // Count current employees
+    $this->db->from('pos_employees');
+    $count = $this->db->count_all_results();
+
+    if ($count >= $employee_limit) {
+        echo json_encode(array('status' => 'Error', 'message' => 'Employee limit reached for your package. For assistance or upgrades, please contact Deskgoo Consulting at 9824729783 or 9816399804.'));
+        return;
+    }
         $data = array(
             'id' => $id,
             'username' => $username,
@@ -352,6 +376,7 @@ class Employee_model extends CI_Model
             'postbox' => $postbox,
             'phone' => $phone,
             'dept' => $department,
+            'warehouse' => $warehouse,
             'salary' => $salary,
             'c_rate' => $commission
         );
@@ -403,13 +428,19 @@ class Employee_model extends CI_Model
         return $query->row_array();
     }
 
-    public function employee_permissions()
+    public function warehouses()
     {
         $this->db->select('*');
-        $this->db->from('pos_premissions');
-        $this->db->order_by('id', 'ASC');
+        $this->db->from('pos_warehouse');
+        if ($this->aauth->get_user()->loc) {
+            $this->db->where('loc', $this->aauth->get_user()->loc);
+          if(BDATA)  $this->db->or_where('loc', 0);
+        }  elseif(!BDATA) { $this->db->where('loc', 0); }
+
         $query = $this->db->get();
+
         return $query->result_array();
+
     }
 
     //documents list
@@ -816,6 +847,14 @@ class Employee_model extends CI_Model
 
         $this->db->update('univarsal_api');
         return true;
+    }
+
+    public function employee_permissions()
+    {
+        $this->db->select('*');
+        $this->db->from('pos_premissions');
+        $query = $this->db->get();
+        return $query->result_array();
     }
 
 

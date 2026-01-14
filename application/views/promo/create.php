@@ -63,9 +63,9 @@
                                for="valid"><?php echo $this->lang->line('Valid') ?></label>
 
                         <div class="col-sm-2">
-                            <input type="text" class="form-control required"
+                            <input type="date" class="form-control required"
                                    placeholder="Start Date" name="valid"
-                                   data-toggle="datepicker" autocomplete="false">
+                                   autocomplete="false">
                         </div>
                     </div>
                     <div class="form-group row"><label class="col-sm-2 col-form-label"

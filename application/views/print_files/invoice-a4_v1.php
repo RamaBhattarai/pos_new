@@ -226,8 +226,8 @@
                     }
                 }
                 ?>
-                <p>VAT Registration No: 101101</p>
-        <p>Seller’s PAN:101010100 </p>  
+                <!-- <p>VAT Registration No: 101101</p>
+        <p>Seller’s PAN:101010100 </p>   -->
                 </ul>
             </td>
         </tr><?php if (@$invoice['name_s']) { ?>
@@ -256,6 +256,10 @@
             <td>
                 <?php echo $this->lang->line('Description') ?>
             </td>
+            <?php if (isset($general) && ($general['title'] == $this->lang->line('Purchase Order') || $general['title'] == 'Purchase Order')) { ?>
+            <td>Batch No.</td>
+            <td>Expiry Date</td>
+            <?php } ?>
             <td>
                 <?php echo $this->lang->line('Price') ?>
             </td>
@@ -284,8 +288,13 @@
 
             if ($row['serial']) $row['product_des'] .= ' - ' . $row['serial'];
             echo '<tr class="item' . $flag . '">  <td>' . $n . '</td>
-                            <td>' . $row['product'] . '</td>
-							<td style="width:12%;">' . amountExchange($row['price'], $invoice['multi'], $invoice['loc']) . '</td>
+                            <td>' . $row['product'] . '</td>';
+            if (isset($general) && ($general['title'] == $this->lang->line('Purchase Order') || $general['title'] == 'Purchase Order')) {
+                echo '<td>' . ($row['batch_no'] ?? '-') . '</td>';
+                echo '<td>' . (isset($row['expiry_date']) && $row['expiry_date'] ? dateformat($row['expiry_date']) : '-') . '</td>';
+                $cols += 2;
+            }
+            echo '<td style="width:12%;">' . amountExchange($row['price'], $invoice['multi'], $invoice['loc']) . '</td>
                             <td style="width:12%;" >' . +$row['qty'] . $row['unit'] . '</td>   ';
             if ($invoice['tax'] > 0) {
                 $cols++;
@@ -360,7 +369,7 @@
                             echo '<p>' . $this->lang->line('Round Off') . ' ' . $this->lang->line('Amount') . ': ' . amountExchange($final_amount, $invoice['multi'], $invoice['loc']) . '</p><br><p>';
                         }
 
-                        echo $this->lang->line('Paid Amount') . ': ' . amountExchange($invoice['pamnt'], $invoice['multi'], $invoice['loc']);
+                        echo $this->lang->line('Paid Amount') . ': ' . amountExchange($invoice['pamnt'], $invoice['multi'], $invoice['loc']) . '</p><br><p>' . $this->lang->line('Payment Method') . ': ' . $invoice['pmethod'];
                     }
 
                     if ($general['t_type'] == 1) {

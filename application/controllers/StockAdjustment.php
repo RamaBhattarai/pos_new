@@ -195,16 +195,25 @@ if ($product) {
     }
 
             
-// Update the qty in pos_products for this warehouse
-$this->db->where('pid', $product_id);
-$this->db->where('warehouse', $warehouse_id);
-$updated = $this->db->update('pos_products', ['qty' => $new_stock]);
-
-if (!$updated) {
-    $errors[] = "Failed to update stock at row " . ($index + 1);
-}
-    
             // Update the qty in pos_products for this warehouse
+            $this->db->where('pid', $product_id);
+            $this->db->where('warehouse', $warehouse_id);
+            $updated = $this->db->update('pos_products', ['qty' => $new_stock]);
+
+            if (!$updated) {
+                $errors[] = "Failed to update stock at row " . ($index + 1);
+            }
+
+            // Update parent stock if this is a variation
+            $this->db->select('merge, sub');
+            $this->db->from('pos_products');
+            $this->db->where('pid', $product_id);
+            $this->db->where('warehouse', $warehouse_id);
+            $query = $this->db->get();
+            $product_info = $query->row_array();
+            if ($product_info && $product_info['merge'] == 1) {
+                $this->Products_model->update_parent_total_stock_at_warehouse($product_info['sub'], $warehouse_id);
+            }            // Update the qty in pos_products for this warehouse
     $this->db->where('pid', $product_id);
     $this->db->where('warehouse', $warehouse_id);
     $updated = $this->db->update('pos_products', ['qty' => $new_stock]);
@@ -397,6 +406,17 @@ $new_stock = ($adjustment_type === 'increment') ? $current_stock + $quantity : $
         $this->db->where('warehouse', $warehouse_id);
         $this->db->update('pos_products', ['qty' => $new_stock]);
 
+        // Update parent stock if this is a variation
+        $this->db->select('merge, sub');
+        $this->db->from('pos_products');
+        $this->db->where('pid', $product_id);
+        $this->db->where('warehouse', $warehouse_id);
+        $query = $this->db->get();
+        $product_info = $query->row_array();
+        if ($product_info && $product_info['merge'] == 1) {
+            $this->Products_model->update_parent_total_stock_at_warehouse($product_info['sub'], $warehouse_id);
+        }
+
         // Update adjustment record
         $this->db->where('adjustment_no', $adjustment_no);
         $this->db->where('product_id', $product_id);
@@ -439,6 +459,17 @@ foreach ($adjustments as $adj) {
         $this->db->where('pid', $adj['product_id']);
         $this->db->where('warehouse', $adj['warehouse']);
         $this->db->update('pos_products', ['qty' => $new_stock]);
+
+        // Update parent stock if this is a variation
+        $this->db->select('merge, sub');
+        $this->db->from('pos_products');
+        $this->db->where('pid', $adj['product_id']);
+        $this->db->where('warehouse', $adj['warehouse']);
+        $query = $this->db->get();
+        $product_info = $query->row_array();
+        if ($product_info && $product_info['merge'] == 1) {
+            $this->Products_model->update_parent_total_stock_at_warehouse($product_info['sub'], $adj['warehouse']);
+        }
     }
 }
     // Delete all adjustment rows for this adjustment_no

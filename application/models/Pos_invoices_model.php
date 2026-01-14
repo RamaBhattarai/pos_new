@@ -13,6 +13,7 @@ class Pos_invoices_model extends CI_Model
     public function __construct()
     {
         parent::__construct();
+        $this->load->database();
     }
 
     public function lastinvoice()
@@ -82,14 +83,16 @@ class Pos_invoices_model extends CI_Model
         return $query->row_array();
     }
 
-    public function warehouses()
+    public function warehouses($all = false)
     {
         $this->db->select('*');
         $this->db->from('pos_warehouse');
-       if ($this->aauth->get_user()->loc) {
+       if (!$all) {
+        if ($this->aauth->get_user()->loc) {
             $this->db->where('loc', $this->aauth->get_user()->loc);
           if(BDATA)  $this->db->or_where('loc', 0);
         }  elseif(!BDATA) { $this->db->where('loc', 0); }
+       }
 
         $query = $this->db->get();
 
@@ -402,5 +405,89 @@ class Pos_invoices_model extends CI_Model
 
         $query = $this->db->get();
         return $query->result_array();
+    }
+
+    public function get_day_end_report($payment_method = '', $start_date = '', $end_date = '', $warehouse = '', $limit = null, $offset = null)
+    {
+        $this->db->select('pos_invoices.id, pos_invoices.tid, pos_invoices.invoicedate, pos_invoices.total, pos_invoices.pmethod, pos_customers.name as customer_name');
+        $this->db->from('pos_invoices');
+        $this->db->join('pos_customers', 'pos_invoices.csd = pos_customers.id', 'left');
+        $this->db->where('pos_invoices.i_class', 1);
+        $this->db->where('pos_invoices.status !=', 'canceled');
+
+        // Filter by payment method if provided (case-insensitive)
+        if ($payment_method) {
+            $this->db->where('LOWER(pos_invoices.pmethod)', strtolower($payment_method));
+        }
+
+        // Filter by warehouse if provided
+        if ($warehouse && $warehouse != 'all') {
+            $this->db->join('pos_invoice_items', 'pos_invoice_items.tid = pos_invoices.id', 'inner');
+            $this->db->join('pos_products', 'pos_products.pid = pos_invoice_items.pid', 'inner');
+            $this->db->where('pos_products.warehouse', $warehouse);
+            $this->db->group_by('pos_invoices.id');
+        }
+
+        // Filter by date range
+        if ($start_date && $end_date) {
+            $this->db->where('DATE(pos_invoices.invoicedate) >=', $start_date);
+            $this->db->where('DATE(pos_invoices.invoicedate) <=', $end_date);
+        }
+
+        // Apply location filter if user has location restriction
+        if ($this->aauth->get_user()->loc) {
+            $this->db->where('pos_invoices.loc', $this->aauth->get_user()->loc);
+        } elseif (!BDATA) {
+            $this->db->where('pos_invoices.loc', 0);
+        }
+
+        $this->db->order_by('pos_invoices.invoicedate', 'DESC');
+        $this->db->order_by('pos_invoices.tid', 'DESC');
+
+        // Apply pagination if limit is provided
+        if ($limit !== null) {
+            $this->db->limit($limit, $offset);
+        }
+
+        $query = $this->db->get();
+        return $query->result_array();
+    }
+
+    public function count_day_end_report($payment_method = '', $start_date = '', $end_date = '', $warehouse = '')
+    {
+        $this->db->select('COUNT(DISTINCT pos_invoices.id) as total');
+        $this->db->from('pos_invoices');
+        $this->db->join('pos_customers', 'pos_invoices.csd = pos_customers.id', 'left');
+        $this->db->where('pos_invoices.i_class', 1);
+        $this->db->where('pos_invoices.status !=', 'canceled');
+
+        // Filter by payment method if provided (case-insensitive)
+        if ($payment_method) {
+            $this->db->where('LOWER(pos_invoices.pmethod)', strtolower($payment_method));
+        }
+
+        // Filter by warehouse if provided
+        if ($warehouse && $warehouse != 'all') {
+            $this->db->join('pos_invoice_items', 'pos_invoice_items.tid = pos_invoices.id', 'inner');
+            $this->db->join('pos_products', 'pos_products.pid = pos_invoice_items.pid', 'inner');
+            $this->db->where('pos_products.warehouse', $warehouse);
+        }
+
+        // Filter by date range
+        if ($start_date && $end_date) {
+            $this->db->where('DATE(pos_invoices.invoicedate) >=', $start_date);
+            $this->db->where('DATE(pos_invoices.invoicedate) <=', $end_date);
+        }
+
+        // Apply location filter if user has location restriction
+        if ($this->aauth->get_user()->loc) {
+            $this->db->where('pos_invoices.loc', $this->aauth->get_user()->loc);
+        } elseif (!BDATA) {
+            $this->db->where('pos_invoices.loc', 0);
+        }
+
+        $query = $this->db->get();
+        $result = $query->row_array();
+        return $result['total'];
     }
 }

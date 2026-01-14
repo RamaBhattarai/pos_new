@@ -297,8 +297,8 @@
 					<select
 							id="warehouses"
 							class="selectpicker form-control round teal">
-						<?php echo $this->common->default_warehouse();
-						echo '<option value="0">' . $this->lang->line('All') ?></option><?php foreach ($warehouse as $row) {
+						<?php if (!isset($warehouse_filtered) || !$warehouse_filtered) { echo $this->common->default_warehouse();
+						echo '<option value="0">' . $this->lang->line('All') . '</option>'; } ?><?php foreach ($warehouse as $row) {
 							echo '<option value="' . $row['id'] . '">' . $row['title'] . '</option>';
 						} ?>
 
@@ -559,7 +559,7 @@
 		</div>
 	</div>
 </div>
-<?php $this->load->view('pos/payment_modal',['acc_list'=>$acc_list]); ?>
+<?php $this->load->view('pos/payment_modal',['acc_list'=>$acc_list, 'payment_methods'=>$payment_methods]); ?>
 <div class="modal fade" id="register" role="dialog">
 	<div class="modal-dialog">
 		<div class="modal-content ">
@@ -691,7 +691,7 @@
 
 				<div class="row p-1">
 					<div class="alert alert-danger mb-2" role="alert">
-						<strong>Oh snap!</strong> <?php echo $this->lang->line('order or edit the stock') ?>
+						<strong>Insufficient Stock!</strong> The requested quantity exceeds available stock. Please adjust the quantity or select a different product.
 					</div>
 				</div>
 

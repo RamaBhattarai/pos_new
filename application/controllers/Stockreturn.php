@@ -299,6 +299,17 @@ class Stockreturn extends CI_Controller
 
                         $this->db->where('pid', $product_id[$key]);
                         $this->db->update('pos_products');
+
+                        // Update parent stock if this is a variation
+                        $this->db->select('merge, sub');
+                        $this->db->from('pos_products');
+                        $this->db->where('pid', $product_id[$key]);
+                        $query = $this->db->get();
+                        $product_info = $query->row_array();
+                        if ($product_info && $product_info['merge'] == 1) {
+                            $this->load->model('Products_model');
+                            $this->Products_model->update_parent_total_stock($product_info['sub']);
+                        }
                     }
                     $itc += $amt;
                 }
@@ -524,6 +535,17 @@ class Stockreturn extends CI_Controller
                 $this->db->set('qty', "qty-$amt", FALSE);
                 $this->db->where('pid', $product_id[$key]);
                 $this->db->update('pos_products');
+
+                // Update parent stock if this is a variation
+                $this->db->select('merge, sub');
+                $this->db->from('pos_products');
+                $this->db->where('pid', $product_id[$key]);
+                $query = $this->db->get();
+                $product_info = $query->row_array();
+                if ($product_info && $product_info['merge'] == 1) {
+                    $this->load->model('Products_model');
+                    $this->Products_model->update_parent_total_stock($product_info['sub']);
+                }
             }
             $flag = true;
         }
@@ -558,6 +580,17 @@ class Stockreturn extends CI_Controller
                         $this->db->set('qty', "qty-$dqty", FALSE);
                         $this->db->where('pid', $prid);
                         $this->db->update('pos_products');
+
+                        // Update parent stock if this is a variation
+                        $this->db->select('merge, sub');
+                        $this->db->from('pos_products');
+                        $this->db->where('pid', $prid);
+                        $query = $this->db->get();
+                        $product_info = $query->row_array();
+                        if ($product_info && $product_info['merge'] == 1) {
+                            $this->load->model('Products_model');
+                            $this->Products_model->update_parent_total_stock($product_info['sub']);
+                        }
                     }
                 }
             }
@@ -643,6 +676,17 @@ class Stockreturn extends CI_Controller
                 $this->db->set('qty', "qty+$amt", FALSE);
                 $this->db->where('pid', $prd['pid']);
                 $this->db->update('pos_products');
+
+                // Update parent stock if this is a variation
+                $this->db->select('merge, sub');
+                $this->db->from('pos_products');
+                $this->db->where('pid', $prd['pid']);
+                $query = $this->db->get();
+                $product_info = $query->row_array();
+                if ($product_info && $product_info['merge'] == 1) {
+                    $this->load->model('Products_model');
+                    $this->Products_model->update_parent_total_stock($product_info['sub']);
+                }
             }
             $this->db->delete('pos_transactions', array('tid' => $tid, 'ext' => 6));
             echo json_encode(array('status' => 'Success', 'message' =>

@@ -104,16 +104,22 @@
                             <div class="col-3">
                                 <strong> <?php echo $this->lang->line('Extra') . ' ' . $this->lang->line('Discount') ?></strong>
                             </div>
+                            <div class="col-2">
+                                <select class="form-control form-control-sm" id="extra_discount_type" name="extra_discount_type">
+                                    <option value="%">%</option>
+                                    <option value="NRS"><?php echo $this->config->item('currency'); ?></option>
+                                </select>
+                            </div>
                             <div class="col-3">
                                 <input type="text" class="form-control form-control-sm discVal"
                                        onkeypress="return isNumber(event)"
                                        placeholder="Value" value="0"
                                        name="disc_val" autocomplete="off"
-                                       onkeyup="billUpyog()">
+                                       >
                                 <input type="hidden"
                                        name="after_disc" id="after_disc" value="0">
                             </div>
-                            <div class="col-3">
+                            <div class="col-4">
                                 ( <?= $this->config->item('currency'); ?>
                                 <span id="disc_final">0</span> )
                             </div>
@@ -188,9 +194,10 @@
                                         <div class="col-4 blue text-xs-center"><?php echo $this->lang->line('Warehouse') ?>
                                             <select
                                                     id="v2_warehouses"
+                                                    name="warehouse"
                                                     class="selectpicker form-control round teal">
-                                                <?php echo $this->common->default_warehouse();
-                                                echo '<option value="0">' . $this->lang->line('All') ?></option><?php foreach ($warehouse as $row) {
+                                                <?php if (!isset($warehouse_filtered) || !$warehouse_filtered) { echo $this->common->default_warehouse();
+                                                echo '<option value="0">' . $this->lang->line('All') . '</option>'; } ?><?php foreach ($warehouse as $row) {
                                                     echo '<option value="' . $row['id'] . '">' . $row['title'] . '</option>';
                                                 } ?>
 
@@ -241,35 +248,35 @@
                                                        name="refer">
                                             </div>
                                         </div>
+                                           <div class="form-group row">
 
+                                    <div class="col-sm-6"><label for="invociedate"
+                                                                 class="caption"><?php echo $this->lang->line('Invoice Date'); ?></label>
 
-                                        <div class="col-sm-3"><label for="invociedate"
-                                                                     class="caption"><?php echo $this->lang->line('Invoice Date'); ?></label>
-
-                                            <div class="input-group">
-                                                <div class="input-group-addon"><span class="icon-calendar4"
-                                                                                     aria-hidden="true"></span>
-                                                </div>
-                                                <input type="text" class="form-control required"
-                                                       placeholder="Billing Date" name="invoicedate"
-                                                       data-toggle="datepicker"
-                                                       autocomplete="false">
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-3"><label for="invocieduedate"
-                                                                     class="caption"><?php echo $this->lang->line('Invoice Due Date') ?></label>
-
-                                            <div class="input-group">
-                                                <div class="input-group-addon"><span class="icon-calendar-o"
-                                                                                     aria-hidden="true"></span>
-                                                </div>
-                                                <input type="text" class="form-control required" id="tsn_due"
-                                                       name="invocieduedate"
-                                                       placeholder="Due Date" data-toggle="datepicker"
-                                                       autocomplete="false">
-                                            </div>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-calendar4"
+                                                                                 aria-hidden="true"></span></div>
+                                            <input type="text" class="form-control round required"
+                                                   placeholder="Billing Date" name="invoicedate" id="invoicedate"
+                                                   data-toggle="datepicker"
+                                                   autocomplete="false">
                                         </div>
                                     </div>
+                                    <div class="col-sm-6"><label for="invocieduedate"
+                                                                 class="caption"><?php echo $this->lang->line('Invoice Due Date') ?></label>
+
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-calendar-o"
+                                                                                 aria-hidden="true"></span></div>
+                                            <input type="text" class="form-control round required"
+                                                   name="invocieduedate" id="invocieduedate"
+                                                   placeholder="Due Date" autocomplete="false"    data-toggle="datepicker">
+                                        </div>
+                                    </div>
+                                </div>
+
+
+         </div>
 
 
                                     <div class="form-group row">
@@ -603,7 +610,7 @@
         </div>
     </div>
 </div>
-<?php $this->load->view('pos/payment_modal',['acc_list'=>$acc_list]); ?>
+<?php $this->load->view('pos/payment_modal',['acc_list'=>$acc_list, 'payment_methods'=>$payment_methods]); ?>
 <div class="modal fade" id="register" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content ">
@@ -738,7 +745,7 @@
 
                 <div class="row p-1">
                     <div class="alert alert-danger mb-2" role="alert">
-                        <strong>Oh snap!</strong> <?php echo $this->lang->line('order or edit the stock') ?>
+                        <strong>Insufficient Stock!</strong> The requested quantity exceeds available stock. Please adjust the quantity or select a different product.
                     </div>
                 </div>
 
@@ -830,6 +837,15 @@
         success: function (data) {
             $('#pos_item').html(data);
 
+        }
+    });
+    
+     // Initialize tax format on page load to ensure proper VAT calculation
+    $(document).ready(function() {
+        // Trigger tax format initialization with current dropdown value
+        var currentTaxValue = $('#taxformat').val();
+        if (currentTaxValue && typeof changeTaxFormat === 'function') {
+            changeTaxFormat(currentTaxValue);
         }
     });
 
@@ -987,7 +1003,35 @@
 
     }
 
+function updateExtraDiscount() {
+    var disc_val = accounting.unformat($('.discVal').val(), accounting.settings.number.decimal);
+    var disc_type = $('#extra_discount_type').val();
+    var subtotal = accounting.unformat($('#subttlform').val(), accounting.settings.number.decimal);
 
+    var disc_amount = 0;
+    if (disc_val > 0 && subtotal > 0) {
+        if (disc_type == 'NRS') {
+            disc_amount = disc_val;
+        } else {
+            disc_amount = (subtotal * disc_val) / 100;
+        }
+    }
+    $('#disc_final').html(accounting.formatNumber(disc_amount));
+    $('#after_disc').val(accounting.formatNumber(disc_amount));
+
+    // Now update the total using the correct discount
+    var shipping = parseFloat(shipTot());
+    var grand_total = subtotal + shipping - disc_amount;
+    $("#invoiceyoghtml").val(accounting.formatNumber(grand_total));
+    $("#bigtotal").html(accounting.formatNumber(grand_total));
+}
+
+$('#extra_discount_type').on('change', function() {
+    updateExtraDiscount();
+});
+$('.discVal').on('input', function() {
+    updateExtraDiscount();
+});
 
 </script>
 
@@ -1195,44 +1239,133 @@
                     data: {name: barcode, 
                         warehouse: whr  // Send warehouse with barcode
                     },
+                    dataType: 'json',
                     success: function(data) {
-                        var globalPid = data;
-                        console.log('Product ID from barcode:', globalPid);
-                        console.log($("#pos_item").html()); // Log the entire product list HTML
-
-
-                        wait = false;
-                    // alert(globalPid);
-                    $('#posp'+globalPid).click();
-
-                       var whr = $('#v2_warehouses option:selected').val();
-                        var cat = $('#v2_categories option:selected').val();
+                        console.log('Product data from barcode:', data);
+                        
+                        // Check if we received an error response
+                        if (data.error) {
+                            console.error("Error: " + data.error);
+                            $('#v2_search_bar').attr('readonly', false);
+                            $('#v2_search_bar').val('');
+                            return;
+                        }
+                        
+                        // Also update product grid to show the product (useful for multiple scans)
                         $.ajax({
                             type: "POST",
                             url: baseurl + 'search_products/v2_pos_search',
-                            data: 'name=' + $(this).val() + '&wid=' + whr + '&cid=' + cat + '&' + crsf_token + '=' + crsf_hash + '&bar=' + $('#bar_only').prop('checked'),
+                            data: 'name=' + barcode + '&wid=' + whr + '&cid=' + cat + '&' + crsf_token + '=' + crsf_hash + '&bar=' + $('#bar_only').prop('checked'),
                             beforeSend: function () {
                                 $("#customer-box").css("background", "#FFF url(" + baseurl + "assets/custom/load-ring.gif) no-repeat 165px");
                             },
-                            success: function (data) {
-                                alert('Got response!');
-                                console.log(data); // Add this!
-                                $("#pos_item").html(data);
-                                $('#v2_search_bar').attr('readonly', false);
-                                $('#v2_search_bar').val('');
+                            success: function (gridData) {
+                                $("#pos_item").html(gridData);
                             }
-
                         });
-                   
-
-
-                
+                        
+                        // DIRECTLY ADD TO CART WITHOUT SIMULATING CLICK
+                        var flag = true;
+                        var custom_discount = accounting.unformat($('#custom_discount').val(), accounting.settings.number.decimal);
+                        var discount = data.disrate;
+                        if (custom_discount > 0) discount = accounting.formatNumber(custom_discount);
+                        
+                        // Check if product already exists in cart (by pid and batch if applicable)
+                        $('.pdIn').each(function () {
+                            var existingPid = $(this).val();
+                            var pi = $(this).attr('id').split('-')[1];
+                            var existingBatchId = $('#batchid-' + pi).val() || '';
+                            
+                            var dataBatchId = data.has_batches ? data.batch_id : '';
+                            
+                            if (data.pid == existingPid && (dataBatchId == existingBatchId || (!data.has_batches && !existingBatchId))) {
+                                // Same product & batch found — increment quantity
+                                var stotal = accounting.unformat($('#amount-' + pi).val(), accounting.settings.number.decimal) + 1;
+                                
+                                if (stotal <= accounting.unformat(data.stock, accounting.settings.number.decimal)) {
+                                    $('#amount-' + pi).val(accounting.formatNumber(stotal));
+                                } else {
+                                    $('#stock_alert').modal('toggle');
+                                }
+                                
+                                rowTotal(pi);
+                                billUpyog();
+                                
+                                flag = false;
+                                return false; // Break out of each loop
+                            }
+                        });
+                        
+                        // Add new item to cart if not found
+                        if (flag) {
+                            var sound = document.getElementById("beep");
+                            if(sound) sound.play();
+                            
+                            var ganak = $('#ganak').val();
+                            var cvalue = parseInt(ganak);
+                            var functionNum = "'" + cvalue + "'";
+                            
+                            var batchidInput = '';
+                            var batchDisplay = '';
+                            if (data.has_batches && data.batch_no) {
+                                batchidInput = '<input type="hidden" name="batchid[]" id="batchid-' + cvalue + '" value="' + data.batch_id + '">';
+                                batchDisplay = ' (' + data.batch_no + ')';
+                            }
+                            
+                            var productDisplayName = data.product_name.replace(/ \([^)]*\).*/, '') + batchDisplay;
+                            
+                            var taxRate = data.taxrate;
+                            if ($("#taxformat option:selected").attr('data-trate')) {
+                                taxRate = $("#taxformat option:selected").attr('data-trate');
+                            }
+                            
+                            var data_html = `
+                            <div class="row m-0 pt-1 pb-1 border-bottom" id="ppid-${cvalue}">
+                                <div class="col-6">
+                                    <span class="quantity">
+                                        <input type="text" class="form-control req amnt display-inline mousetrap" name="product_qty[]" inputmode="numeric" id="amount-${cvalue}" onkeypress="return isNumber(event)" onkeyup="rowTotal(${functionNum}), billUpyog()" autocomplete="off" value="1" >
+                                        <div class="quantity-nav">
+                                            <div class="quantity-button quantity-up">+</div>
+                                            <div class="quantity-button quantity-down">-</div>
+                                        </div>
+                                    </span>
+                                    ${productDisplayName}
+                                </div>
+                                <div class="col-3"> ${data.product_price} </div>
+                                <div class="col-3">
+                                    <strong><span class="ttlText" id="result-${cvalue}">0</span></strong>
+                                    <a data-rowid="${cvalue}" class="red removeItem" title="Remove"><i class="fa fa-trash"></i></a>
+                                </div>
+                                <input type="hidden" class="form-control text-center" name="product_name[]" id="productname-${cvalue}" value="${productDisplayName}">
+                                <input type="hidden" id="alert-${cvalue}" value="${data.stock}" name="alert[]">
+                                <input type="hidden" class="form-control req prc" name="product_price[]" id="price-${cvalue}" onkeypress="return isNumber(event)" onkeyup="rowTotal(${functionNum}), billUpyog()" autocomplete="off" value="${data.product_price}" inputmode="numeric">
+                                <input type="hidden" class="form-control vat" name="product_tax[]" id="vat-${cvalue}" onkeypress="return isNumber(event)" onkeyup="rowTotal(${functionNum}), billUpyog()" autocomplete="off" value="${taxRate}">
+                                <input type="hidden" class="form-control discount pos_w" name="product_discount[]" onkeypress="return isNumber(event)" id="discount-${cvalue}" onkeyup="rowTotal(${functionNum}), billUpyog()" autocomplete="off" value="${discount}">
+                                <input type="hidden" name="taxa[]" id="taxa-${cvalue}" value="0">
+                                <input type="hidden" name="disca[]" id="disca-${cvalue}" value="0">
+                                <input type="hidden" class="ttInput" name="product_subtotal[]" id="total-${cvalue}" value="0">
+                                <input type="hidden" class="pdIn" name="pid[]" id="pid-${cvalue}" value="${data.pid}">
+                                <input type="hidden" name="unit[]" id="unit-${cvalue}" value="${data.unit}">
+                                <input type="hidden" name="hsn[]" id="hsn-${cvalue}" value="${data.product_code}">
+                                <input type="hidden" name="serial[]" id="serial-${cvalue}" value="">
+                                ${batchidInput}
+                            </div>`;
+                            
+                            $('#pos_items').append(data_html);
+                            rowTotal(cvalue);
+                            billUpyog();
+                            $('#ganak').val(cvalue + 1);
+                        }
+                        
+                        // Reset search input for next scan
+                        $('#v2_search_bar').attr('readonly', false);
+                        $('#v2_search_bar').val('');
                     },
                     error: function(xhr, status, error) {
-                        console.error("Error: " + error); // Error handling
+                        console.error("Error: " + error);
+                        $('#v2_search_bar').attr('readonly', false);
+                        $('#v2_search_bar').val('');
                     }
-                    
-
                 });
 
 
@@ -1242,4 +1375,197 @@
             }
         });
     });
+
+    // Handle product clicks - check for variations
+    $(document).on('click', '.v2_select_pos_item, .v2_select_pos_item_bar', function(e) {
+        var hasVariations = $(this).attr('data-has-variations');
+        
+        if (hasVariations == '1' || hasVariations == 1) {
+            // Prevent default and show variations modal
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            
+            var pid = $(this).attr('data-pid');
+            var wid = $('#v2_warehouses option:selected').val();
+
+            console.log('Showing variations popup for product:', pid);
+            $.ajax({
+                type: "POST",
+                url: baseurl + 'search_products/get_product_variations_popup',
+                data: 'pid=' + pid + '&wid=' + wid + '&' + crsf_token + '=' + crsf_hash,
+                success: function(data) {
+                    $('#variationsContent').html(data);
+                    $('#productVariationsModal').modal('show');
+                }
+            });
+            return false; // Prevent any other click handlers
+        }
+        // For products without variations, allow normal click behavior to proceed
+    });
+
+    // Handle variation selection
+    $(document).on('click', '.select-variation', function() {
+        var data = {
+            product_name: $(this).data('name'),
+            product_price: $(this).data('price'),
+            taxrate: $(this).data('tax'),
+            disrate: $(this).data('discount'),
+            product_code: $(this).data('pcode'),
+            pid: $(this).data('pid'),
+            stock: $(this).data('stock'),
+            unit: $(this).data('unit'),
+            batch_id: $(this).data('batchid'),
+            batch_no: $(this).data('batchno'),
+            expiry_date: $(this).data('expiry'),
+            has_batches: true
+        };
+
+        // Add the selected variation to cart (similar to barcode scanning logic)
+        var flag = true;
+        var custom_discount = accounting.unformat($('#custom_discount').val(), accounting.settings.number.decimal);
+        var discount = data.disrate;
+        if (custom_discount > 0) discount = accounting.formatNumber(custom_discount);
+        
+        // Check if product already exists in cart (by pid and batch)
+        $('.pdIn').each(function () {
+            var existingPid = $(this).val();
+            var pi = $(this).attr('id').split('-')[1];
+            var existingBatchId = $('#batchid-' + pi).val() || '';
+            
+            if (data.pid == existingPid && data.batch_id == existingBatchId) {
+                // Same product & batch found — increment quantity
+                var stotal = accounting.unformat($('#amount-' + pi).val(), accounting.settings.number.decimal) + 1;
+                
+                if (stotal <= accounting.unformat(data.stock, accounting.settings.number.decimal)) {
+                    $('#amount-' + pi).val(accounting.formatNumber(stotal));
+                } else {
+                    $('#stock_alert').modal('toggle');
+                }
+                
+                rowTotal(pi);
+                billUpyog();
+                
+                flag = false;
+                return false; // Break out of each loop
+            }
+        });
+        
+        // Add new item to cart if not found
+        if (flag) {
+            var sound = document.getElementById("beep");
+            if(sound) sound.play();
+            
+            var ganak = $('#ganak').val();
+            var cvalue = parseInt(ganak);
+            var functionNum = "'" + cvalue + "'";
+            
+            var batchidInput = data.batch_id ? '<input type="hidden" name="batchid[]" id="batchid-' + cvalue + '" value="' + data.batch_id + '">' : '';
+            var batchDisplay = data.batch_no ? ' (' + data.batch_no + ')' : '';
+            
+            var productDisplayName = data.product_name.replace(/ \([^)]*\).*/, '') + batchDisplay;
+            
+            var taxRate = data.taxrate;
+            if ($("#taxformat option:selected").attr('data-trate')) {
+                taxRate = $("#taxformat option:selected").attr('data-trate');
+            }
+            
+            var data_html = `
+            <div class="row m-0 pt-1 pb-1 border-bottom" id="ppid-${cvalue}">
+                <div class="col-6">
+                    <span class="quantity">
+                        <input type="text" class="form-control req amnt display-inline mousetrap" name="product_qty[]" inputmode="numeric" id="amount-${cvalue}" onkeypress="return isNumber(event)" onkeyup="rowTotal(${functionNum}), billUpyog()" autocomplete="off" value="1" >
+                        <div class="quantity-nav">
+                            <div class="quantity-button quantity-up">+</div>
+                            <div class="quantity-button quantity-down">-</div>
+                        </div>
+                    </span>
+                    ${productDisplayName}
+                </div>
+                <div class="col-3"> ${data.product_price} </div>
+                <div class="col-3">
+                    <strong><span class="ttlText" id="result-${cvalue}">0</span></strong>
+                    <a data-rowid="${cvalue}" class="red removeItem" title="Remove"><i class="fa fa-trash"></i></a>
+                </div>
+                <input type="hidden" class="form-control text-center" name="product_name[]" id="productname-${cvalue}" value="${productDisplayName}">
+                <input type="hidden" id="alert-${cvalue}" value="${data.stock}" name="alert[]">
+                <input type="hidden" class="form-control req prc" name="product_price[]" id="price-${cvalue}" onkeypress="return isNumber(event)" onkeyup="rowTotal(${functionNum}), billUpyog()" autocomplete="off" value="${data.product_price}" inputmode="numeric">
+                <input type="hidden" class="form-control vat" name="product_tax[]" id="vat-${cvalue}" onkeypress="return isNumber(event)" onkeyup="rowTotal(${functionNum}), billUpyog()" autocomplete="off" value="${taxRate}">
+                <input type="hidden" class="form-control discount pos_w" name="product_discount[]" onkeypress="return isNumber(event)" id="discount-${cvalue}" onkeyup="rowTotal(${functionNum}), billUpyog()" autocomplete="off" value="${discount}">
+                <input type="hidden" name="taxa[]" id="taxa-${cvalue}" value="0">
+                <input type="hidden" name="disca[]" id="disca-${cvalue}" value="0">
+                <input type="hidden" class="ttInput" name="product_subtotal[]" id="total-${cvalue}" value="0">
+                <input type="hidden" class="pdIn" name="pid[]" id="pid-${cvalue}" value="${data.pid}">
+                <input type="hidden" name="unit[]" id="unit-${cvalue}" value="${data.unit}">
+                <input type="hidden" name="hsn[]" id="hsn-${cvalue}" value="${data.product_code}">
+                <input type="hidden" name="serial[]" id="serial-${cvalue}" value="">
+                ${batchidInput}
+            </div>`;
+            
+            $('#pos_items').append(data_html);
+            rowTotal(cvalue);
+            billUpyog();
+            $('#ganak').val(cvalue + 1);
+        }
+        
+        // Close the modal
+        $('#productVariationsModal').modal('hide');
+    });
+
+    // Extra discount events
+    $('#extra_discount_type').on('change', function() {
+        updateExtraDiscount();
+    });
+    $('.discVal').on('input', function() {
+        updateExtraDiscount();
+    });
+
 </script>
+
+<!-- Product Variations Modal -->
+<div class="modal fade" id="productVariationsModal" tabindex="-1" role="dialog" aria-labelledby="productVariationsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 500px;">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h6 class="modal-title font-weight-bold" id="productVariationsModalLabel">
+                    <i class="fa fa-list-ul mr-2"></i>Select Product Variation
+                </h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-3" id="variationsContent" style="max-height: 400px; overflow-y: auto;">
+                <!-- Variations will be loaded here -->
+            </div>
+            <div class="modal-footer p-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+$(document).ready(function () {
+    // Initialize Nepali Datepicker on all datepickers
+    $('[data-toggle="datepicker"]').each(function () {
+        var $input = $(this);
+        var inputId = $input.attr('id');
+        if (!inputId) return; // Skip if no ID
+
+        // Destroy if already initialized
+        if ($input.data('NepaliDatePicker')) {
+            $input.nepaliDatePicker('destroy');
+        }
+
+        // Initialize with toggle
+        $input.nepaliDatePicker({
+            language: 'en',
+            dateFormat: 'YYYY-MM-DD',
+            ndpEnglishInput: '#' + inputId,
+            closeOnDateSelect: true
+        });
+    });
+});
+</script>
+
+

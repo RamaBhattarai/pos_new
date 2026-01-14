@@ -202,6 +202,24 @@ foreach ($loc as $row) {
                         <div class="form-group row">
 
                             <label class="col-sm-2 col-form-label"
+                                   for="name"><?php echo $this->lang->line('Warehouse') ?></label>
+
+                            <div class="col-sm-5">
+                                <select name="warehouse" class="form-control margin-bottom">
+                                    <option value="0"><?php echo $this->lang->line('All') ?></option>
+                                    <?php
+                                    foreach ($warehouse as $row) {
+                                        $selected = ($row['id'] == $user['warehouse']) ? 'selected' : '';
+                                        echo ' <option value="' . $row['id'] . '" ' . $selected . '> ' . $row['title'] . '</option>';
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+
+                            <label class="col-sm-2 col-form-label"
                                    for="phone"><?php echo $this->lang->line('Salary') ?></label>
 
                             <div class="col-sm-5">

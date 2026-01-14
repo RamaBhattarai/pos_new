@@ -107,6 +107,7 @@
                                     <tr>
                                         <th>#</th>
                                         <th><?php echo $this->lang->line('Description') ?></th>
+                                        
                                         <th class="text-xs-left"><?php echo $this->lang->line('HSN') ?></th>
                                         <th class="text-xs-left"><?php echo $this->lang->line('Rate') ?></th>
                                         <th class="text-xs-left"><?php echo $this->lang->line('Qty') ?></th>

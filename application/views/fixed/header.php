@@ -41,6 +41,95 @@
     <link rel="stylesheet" type="text/css"
           href="<?= assets_url() ?>app-assets/<?= LTR ?>/core/colors/palette-gradient.css">
     <link rel="stylesheet" href="<?php echo assets_url('assets/custom/datepicker.min.css') . APPVER ?>">
+    <!-- Nepali Datepicker CSS -->
+    <link href="https://nepalidatepicker.sajanmaharjan.com.np/v5/nepali.datepicker/css/nepali.datepicker.v5.0.4.min.css" rel="stylesheet" type="text/css"/>
+    
+    <!-- Modern Date Toggle Styles -->
+    <style>
+        /* Essential layout for EN/NP date toggle */
+        /* Hide default calendar icon for date inputs with EN/NP toggle */
+        .date-toggle-input::-webkit-calendar-picker-indicator {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .date-toggle-input::-ms-input-placeholder {
+            color: transparent;
+        }
+        .date-toggle-input::-moz-placeholder {
+            color: transparent;
+        }
+        .date-toggle-input::-o-placeholder {
+            color: transparent;
+        }
+        .date-toggle-input::-webkit-input-placeholder {
+            color: transparent;
+        }
+        .date-toggle-input::-webkit-clear-button,
+        .date-toggle-input::-webkit-inner-spin-button,
+        .date-toggle-input::-webkit-outer-spin-button {
+            display: none;
+            -webkit-appearance: none;
+        }
+        .date-toggle-input[type="date"]::-ms-expand {
+            display: none;
+        }
+        .date-toggle-input[type="date"]::-webkit-calendar-picker-indicator {
+            display: none;
+        }
+        .date-toggle-input[type="date"]::-moz-calendar-picker-indicator {
+            display: none;
+        }
+        .date-toggle-container {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        .date-toggle-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: #f1f1f1;
+            color: #888;
+            font-size: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            z-index: 10;
+            min-width: 32px;
+            height: 24px;
+            padding: 0 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .date-toggle-input {
+            padding-right: 40px !important;
+        }
+        @media (max-width: 768px) {
+            .date-toggle-btn {
+                right: 5px;
+                min-width: 28px;
+                height: 22px;
+                font-size: 11px;
+                padding: 0 6px;
+            }
+            .date-toggle-input {
+                padding-right: 36px !important;
+            }
+        }
+        .form-control-sm + .date-toggle-btn {
+            height: 20px;
+            min-width: 24px;
+            font-size: 10px;
+            right: 6px;
+            padding: 0 5px;
+        }
+        .form-control-sm.date-toggle-input {
+            padding-right: 32px !important;
+        }
+    </style>
+    
     <link rel="stylesheet" href="<?php echo assets_url('assets/custom/summernote-bs4.css') . APPVER; ?>">
     <link rel="stylesheet" type="text/css"
           href="<?= assets_url() ?>app-assets/vendors/css/forms/selects/select2.min.css">

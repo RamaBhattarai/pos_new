@@ -61,14 +61,61 @@
                         class="btn btn-primary btn-sm rounded">
                     <?php echo $this->lang->line('Add new') ?>
                 </a> 
-                
+                <a href="<?php echo base_url('products?stock=out'); ?>" class="btn btn-danger btn-sm rounded" style="margin-left:2px;">
+    Show Stock Out
+</a>
+
                  <a
                         href="<?php echo base_url('products') ?>?group=yes"
                         class="btn btn-purple btn-sm rounded"><i class="ft-grid"></i></a> <a
                         href="<?php echo base_url('products') ?>"
                         class="btn btn-purple btn-sm rounded"><i class="ft-list"></i></a></h5>
             <a class="heading-elements-toggle"><i class="fa fa-ellipsis-v font-medium-3"></i></a>
-            
+
+<!-- Import Excel Section -->
+<div class="card shadow-sm border-0 mt-3" style="border-left: 5px solid #28a745; transition: all 0.3s ease;">
+    <div class="card-body" style="padding: 0.5rem;">
+        <div class="d-flex align-items-center mb-3">
+            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                <i class="fa fa-file-excel-o"></i>
+            </div>
+            <div class="ms-3">
+                <h5 class="mb-0">Import Products via Excel</h5>
+                <small class="text-muted">Easily upload products in bulk using a spreadsheet file.</small>
+            </div>
+        </div>
+
+        <form id="excelForm" action="<?php echo base_url('products/import_excel'); ?>" method="post" enctype="multipart/form-data">
+            <div class="mb-2">
+                <label for="excel_file" class="form-label fw-semibold">Select Excel File</label>
+                <input type="file" name="excel_file" id="excel_file" class="form-control border border-success" required>
+                <small class="form-text text-muted">
+                    Don't have a template?
+                    <a href="<?php echo base_url('assets/templates/POS.xlsx'); ?>" download>
+                        Download sample Excel template
+                    </a>
+                </small>
+            </div>
+            <button type="submit" class="btn btn-success">
+                <i class="fa fa-upload"></i> Import Now
+            </button>
+
+            <!-- Spinner (initially hidden) -->
+            <div id="loadingSpinner" class="text-center mt-3" style="display: none;">
+                <div class="spinner-border text-success" role="status"></div>
+                <div class="mt-2 fw-semibold text-success">Importing... Please wait</div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+
+
+
+
+
             <div class="heading-elements">
                 <ul class="list-inline mb-0">
                     <li><a data-action="collapse"><i class="ft-minus"></i></a></li>
@@ -122,6 +169,9 @@
             <input type="hidden" id="dashurl" value="products/prd_stats">
         </div>
         <script type="text/javascript">
+            document.getElementById('excelForm').addEventListener('submit', function () {
+        document.getElementById('loadingSpinner').style.display = 'block';
+    });
 
             var table;
 
@@ -136,12 +186,15 @@
                     responsive: true,
                     <?php datatable_lang();?>
 
-                    // Load data for the table's content from an Ajax source
-                    "ajax": {
-                        "url": "<?php echo site_url('products/product_list')?>",
-                        "type": "POST",
-                        'data': {'<?=$this->security->get_csrf_token_name()?>': crsf_hash,'group': '<?=$this->input->get('group')?>'}
-                    },
+                   "ajax": {
+    "url": "<?php echo site_url('products/product_list')?>",
+    "type": "POST",
+    "data": function(d) {
+        d.<?=$this->security->get_csrf_token_name()?> = crsf_hash;
+        d.group = '<?=$this->input->get('group')?>';
+        d.stock = '<?php echo $this->input->get('stock'); ?>'; // Pass stock filter from URL
+    }
+},
 
                     //Set column definition initialisation properties.
                     "columnDefs": [
@@ -150,7 +203,7 @@
                             "orderable": false, //set not orderable
                         },
                     ],
-                    dom: 'Blfrtip',lengthMenu: [10, 20, 50, 100, 200, 500],
+                    dom: 'Blfrtip',lengthMenu: [10, 20, 50, 100, 200, 500, 1000, 1500],
                     buttons: [
                         {
                             extend: 'excelHtml5',

@@ -148,17 +148,29 @@
         ?>
     </table>
     <hr>
-    <div class="text-center">  <?php echo $this->lang->line('Thank you') ?></div>
-    <?php if (@$qrc AND $invoice['status'] != 'paid') {
-
-        $this->pheight = $this->pheight + 40;
-        ?>
-        <div class="text-center">
-            <small><?php echo $this->lang->line('Scan & Pay') ?></small>
-            <img style="max-height:230px;" src='<?php echo base_url('userfiles/pos_temp/' . $qrc) ?>' alt='QR'></div>
-    <?php } else {
-        echo '<div class="stamp">' . $this->lang->line(ucwords($invoice['status'])) . '</div>';
-    } ?>
+    <?php 
+    // Determine payment status for display
+    $payment_status = 'Paid'; // Default
+    if (isset($invoice['status'])) {
+        switch (strtolower($invoice['status'])) {
+            case 'paid':
+                $payment_status = 'Paid';
+                break;
+            case 'due':
+                $payment_status = 'Due';
+                break;
+            case 'partial':
+                $payment_status = 'Partial';
+                break;
+            default:
+                $payment_status = ucfirst($invoice['status']);
+                break;
+        }
+    }
+    ?>
+    <div class="text-center">THANK you for shopping </div>
+    <div class="stamp"><?php echo $payment_status ?></div>
+    <div class="text-center">Payment Method: <?php echo $invoice['pmethod'] ?></div>
 </div>
 </body>
 </html>

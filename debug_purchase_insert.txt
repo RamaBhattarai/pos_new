@@ -1,0 +1,571 @@
+Purchase Order: 284
+Raw POST expiry_date: Array
+(
+    [0] => 2025-12-03
+    [1] => english
+)
+
+Raw POST batch_no: Array
+(
+    [0] => B00001
+)
+
+Items to insert: 1
+Data: [
+    {
+        "tid": 284,
+        "pid": "1825",
+        "product": "Airpodes",
+        "code": "2001",
+        "qty": 10,
+        "price": 150,
+        "tax": 13,
+        "discount": 0,
+        "subtotal": 1695,
+        "totaltax": 195,
+        "totaldiscount": 0,
+        "product_des": "",
+        "unit": "",
+        "batch_no": "B00001",
+        "expiry_date": "2025-12-03 00:00:00",
+        "selling_price": 700,
+        "profit": 550,
+        "profit_margin": 366.67
+    }
+]
+
+SUCCESS: Inserted 1 products successfully
+
+Purchase Order: 285
+Raw POST expiry_date: Array
+(
+    [0] => 
+    [1] => english
+    [2] => 
+    [3] => english
+)
+
+Raw POST batch_no: Array
+(
+    [0] => B00002
+    [1] => B00003
+)
+
+Items to insert: 2
+Data: [
+    {
+        "tid": 285,
+        "pid": "1837",
+        "product": "Bottle",
+        "code": "1003",
+        "qty": 10,
+        "price": 259,
+        "tax": 13,
+        "discount": 0,
+        "subtotal": 2926.7,
+        "totaltax": 336.7,
+        "totaldiscount": 0,
+        "product_des": "",
+        "unit": "",
+        "batch_no": "B00002",
+        "expiry_date": null,
+        "selling_price": 300,
+        "profit": 41,
+        "profit_margin": 15.83
+    },
+    {
+        "tid": 285,
+        "pid": "1837",
+        "product": "Bottle",
+        "code": "1003",
+        "qty": 11,
+        "price": 259,
+        "tax": 13,
+        "discount": 0,
+        "subtotal": 3219.37,
+        "totaltax": 370.37,
+        "totaldiscount": 0,
+        "product_des": "",
+        "unit": "",
+        "batch_no": "B00003",
+        "expiry_date": null,
+        "selling_price": 0,
+        "profit": 0,
+        "profit_margin": 0
+    }
+]
+
+SUCCESS: Inserted 2 products successfully
+
+Purchase Order: 287
+Raw POST expiry_date: Array
+(
+    [0] => 2026-01-02
+    [1] => nepali
+)
+
+Raw POST batch_no: Array
+(
+    [0] => B00004
+)
+
+Items to insert: 1
+Data: [
+    {
+        "tid": 287,
+        "pid": "1890",
+        "product": "shirt-colour-Black",
+        "code": "",
+        "qty": 10,
+        "price": 400,
+        "tax": 0,
+        "discount": 0,
+        "subtotal": 4000,
+        "totaltax": 0,
+        "totaldiscount": 0,
+        "product_des": "",
+        "unit": "",
+        "batch_no": "B00004",
+        "expiry_date": "2026-01-02 00:00:00",
+        "selling_price": 500,
+        "profit": 100,
+        "profit_margin": 25
+    }
+]
+
+SUCCESS: Inserted 1 products successfully
+
+Purchase Order: 288
+Raw POST expiry_date: Array
+(
+    [0] => 2026-01-23
+    [1] => english
+)
+
+Raw POST batch_no: Array
+(
+    [0] => B00002
+)
+
+Items to insert: 1
+Data: [
+    {
+        "tid": 288,
+        "pid": "1837",
+        "product": "Bottle",
+        "code": "1003",
+        "qty": 10,
+        "price": 259,
+        "tax": 13,
+        "discount": 10,
+        "subtotal": 2331,
+        "totaltax": 0,
+        "totaldiscount": 259,
+        "product_des": "",
+        "unit": "",
+        "batch_no": "B00002",
+        "expiry_date": "2026-01-23 00:00:00",
+        "selling_price": 300,
+        "profit": 41,
+        "profit_margin": 15.83
+    }
+]
+
+SUCCESS: Inserted 1 products successfully
+
+Purchase Order: 290
+Raw POST expiry_date: Array
+(
+    [0] => 
+    [1] => english
+)
+
+Raw POST batch_no: Array
+(
+    [0] => B00003
+)
+
+Items to insert: 1
+Data: [
+    {
+        "tid": 290,
+        "pid": "1893",
+        "product": "Adiddas Shoes-XL & Color Red",
+        "code": "101-XCR",
+        "qty": 5,
+        "price": 2500,
+        "tax": 10,
+        "discount": 0,
+        "subtotal": 12500,
+        "totaltax": 0,
+        "totaldiscount": 0,
+        "product_des": "",
+        "unit": "pp",
+        "batch_no": "B00003",
+        "expiry_date": null,
+        "selling_price": 3000,
+        "profit": 500,
+        "profit_margin": 20
+    }
+]
+
+SUCCESS: Inserted 1 products successfully
+
+Purchase Order: 291
+Raw POST expiry_date: Array
+(
+    [0] => 2026-01-08
+    [1] => nepali
+)
+
+Raw POST batch_no: Array
+(
+    [0] => B00004
+)
+
+Items to insert: 1
+Data: [
+    {
+        "tid": 291,
+        "pid": "1884",
+        "product": "newnew-Material Cotton & Si",
+        "code": "404-MCS",
+        "qty": 10,
+        "price": 100,
+        "tax": 0,
+        "discount": 0,
+        "subtotal": 1000,
+        "totaltax": 0,
+        "totaldiscount": 0,
+        "product_des": "",
+        "unit": "none",
+        "batch_no": "B00004",
+        "expiry_date": "2026-01-08 00:00:00",
+        "selling_price": 200,
+        "profit": 100,
+        "profit_margin": 100
+    }
+]
+
+SUCCESS: Inserted 1 products successfully
+
+Purchase Order: 292
+Raw POST expiry_date: Array
+(
+    [0] => 2026-09-16
+    [1] => nepali
+)
+
+Raw POST batch_no: Array
+(
+    [0] => B00005
+)
+
+Items to insert: 1
+Data: [
+    {
+        "tid": 292,
+        "pid": "1825",
+        "product": "Airpodes",
+        "code": "2001",
+        "qty": 1,
+        "price": 150,
+        "tax": 13,
+        "discount": 0,
+        "subtotal": 150,
+        "totaltax": 0,
+        "totaldiscount": 0,
+        "product_des": "",
+        "unit": "",
+        "batch_no": "B00005",
+        "expiry_date": "2026-09-16 00:00:00",
+        "selling_price": 200,
+        "profit": 50,
+        "profit_margin": 33.33
+    }
+]
+
+SUCCESS: Inserted 1 products successfully
+
+Purchase Order: 293
+Raw POST expiry_date: Array
+(
+    [0] => 
+    [1] => english
+    [2] => 
+    [3] => english
+    [4] => 
+    [5] => english
+)
+
+Raw POST batch_no: Array
+(
+    [0] => B00006
+    [1] => B00007
+    [2] => B00008
+)
+
+Items to insert: 3
+Data: [
+    {
+        "tid": 293,
+        "pid": "1825",
+        "product": "Airpodes",
+        "code": "2001",
+        "qty": 1,
+        "price": 150,
+        "tax": 13,
+        "discount": 0,
+        "subtotal": 0,
+        "totaltax": 0,
+        "totaldiscount": 0,
+        "product_des": "",
+        "unit": "",
+        "batch_no": "B00006",
+        "expiry_date": null,
+        "selling_price": 200,
+        "profit": 50,
+        "profit_margin": 33.33
+    },
+    {
+        "tid": 293,
+        "pid": "1826",
+        "product": "Handwash",
+        "code": "1002",
+        "qty": 1,
+        "price": 100,
+        "tax": 13,
+        "discount": 0,
+        "subtotal": 0,
+        "totaltax": 0,
+        "totaldiscount": 0,
+        "product_des": "",
+        "unit": "kg",
+        "batch_no": "B00007",
+        "expiry_date": null,
+        "selling_price": 200,
+        "profit": 100,
+        "profit_margin": 100
+    },
+    {
+        "tid": 293,
+        "pid": "1828",
+        "product": "Wai wai noodles",
+        "code": "102",
+        "qty": 1,
+        "price": 17,
+        "tax": 0,
+        "discount": 0,
+        "subtotal": 0,
+        "totaltax": 0,
+        "totaldiscount": 0,
+        "product_des": "",
+        "unit": "pckt",
+        "batch_no": "B00008",
+        "expiry_date": null,
+        "selling_price": 20,
+        "profit": 3,
+        "profit_margin": 17.65
+    }
+]
+
+SUCCESS: Inserted 3 products successfully
+
+Purchase Order: 294
+Raw POST expiry_date: Array
+(
+    [0] => 
+    [1] => english
+)
+
+Raw POST batch_no: Array
+(
+    [0] => B00009
+)
+
+Items to insert: 1
+Data: [
+    {
+        "tid": 294,
+        "pid": "1833",
+        "product": "PARLE G 25+17 GM FREE (MRP 10)",
+        "code": "001",
+        "qty": 1,
+        "price": 20,
+        "tax": 13,
+        "discount": 0,
+        "subtotal": 0,
+        "totaltax": 0,
+        "totaldiscount": 0,
+        "product_des": "",
+        "unit": "pc",
+        "batch_no": "B00009",
+        "expiry_date": null,
+        "selling_price": 30,
+        "profit": 10,
+        "profit_margin": 50
+    }
+]
+
+SUCCESS: Inserted 1 products successfully
+
+Purchase Order: 295
+Raw POST expiry_date: Array
+(
+    [0] => 
+    [1] => english
+)
+
+Raw POST batch_no: Array
+(
+    [0] => B00010
+)
+
+Items to insert: 1
+Data: [
+    {
+        "tid": 295,
+        "pid": "1825",
+        "product": "Airpodes",
+        "code": "2001",
+        "qty": 1,
+        "price": 150,
+        "tax": 13,
+        "discount": 0,
+        "subtotal": 0,
+        "totaltax": 0,
+        "totaldiscount": 0,
+        "product_des": "",
+        "unit": "",
+        "batch_no": "B00010",
+        "expiry_date": null,
+        "selling_price": 200,
+        "profit": 50,
+        "profit_margin": 33.33
+    }
+]
+
+SUCCESS: Inserted 1 products successfully
+
+Purchase Order: 296
+Raw POST expiry_date: Array
+(
+    [0] => 
+    [1] => english
+    [2] => 
+    [3] => english
+)
+
+Raw POST batch_no: Array
+(
+    [0] => B00011
+    [1] => B00012
+)
+
+Items to insert: 2
+Data: [
+    {
+        "tid": 296,
+        "pid": "1827",
+        "product": "Bottle",
+        "code": "1003",
+        "qty": 1,
+        "price": 259,
+        "tax": 13,
+        "discount": 0,
+        "subtotal": 0,
+        "totaltax": 0,
+        "totaldiscount": 0,
+        "product_des": "",
+        "unit": "",
+        "batch_no": "B00011",
+        "expiry_date": null,
+        "selling_price": 300,
+        "profit": 41,
+        "profit_margin": 15.83
+    },
+    {
+        "tid": 296,
+        "pid": "1825",
+        "product": "Airpodes",
+        "code": "2001",
+        "qty": 1,
+        "price": 150,
+        "tax": 13,
+        "discount": 0,
+        "subtotal": 0,
+        "totaltax": 0,
+        "totaldiscount": 0,
+        "product_des": "",
+        "unit": "",
+        "batch_no": "B00012",
+        "expiry_date": null,
+        "selling_price": 200,
+        "profit": 50,
+        "profit_margin": 33.33
+    }
+]
+
+SUCCESS: Inserted 2 products successfully
+
+Purchase Order: 297
+Raw POST expiry_date: Array
+(
+    [0] => 
+    [1] => english
+    [2] => 
+    [3] => english
+)
+
+Raw POST batch_no: Array
+(
+    [0] => B00013
+    [1] => B00014
+)
+
+Items to insert: 2
+Data: [
+    {
+        "tid": 297,
+        "pid": "1825",
+        "product": "Airpodes",
+        "code": "2001",
+        "qty": 1,
+        "price": 150,
+        "tax": 13,
+        "discount": 0,
+        "subtotal": 0,
+        "totaltax": 0,
+        "totaldiscount": 0,
+        "product_des": "",
+        "unit": "",
+        "batch_no": "B00013",
+        "expiry_date": null,
+        "selling_price": 200,
+        "profit": 50,
+        "profit_margin": 33.33
+    },
+    {
+        "tid": 297,
+        "pid": "1839",
+        "product": "foundation",
+        "code": "",
+        "qty": 1,
+        "price": 250,
+        "tax": 10,
+        "discount": 5,
+        "subtotal": 0,
+        "totaltax": 0,
+        "totaldiscount": 12.5,
+        "product_des": "",
+        "unit": "ml",
+        "batch_no": "B00014",
+        "expiry_date": null,
+        "selling_price": 300,
+        "profit": 50,
+        "profit_margin": 20
+    }
+]
+
+SUCCESS: Inserted 2 products successfully
+

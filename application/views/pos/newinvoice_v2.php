@@ -209,8 +209,8 @@
                                 <select
                                         id="warehouses"
                                         class="selectpicker form-control round teal">
-                                    <?php echo $this->common->default_warehouse();
-                                    echo '<option value="0">' . $this->lang->line('All') ?></option><?php foreach ($warehouse as $row) {
+                                    <?php if (!isset($warehouse_filtered) || !$warehouse_filtered) { echo $this->common->default_warehouse();
+                                    echo '<option value="0">' . $this->lang->line('All') . '</option>'; } ?><?php foreach ($warehouse as $row) {
                                         echo '<option value="' . $row['id'] . '">' . $row['title'] . '</option>';
                                     } ?>
 
@@ -679,11 +679,23 @@
                             <div class="card-title">
                                 <label for="cardNumber"><?php echo $this->lang->line('Payment Method') ?></label>
                                 <select class="form-control" name="p_method" id="p_method">
-                                    <option value='Cash'><?php echo $this->lang->line('Cash') ?></option>
-                                    <option value='Card Swipe'><?php echo $this->lang->line('Card Swipe') ?></option>
-                                    <option value='Bank'><?php echo $this->lang->line('Bank') ?></option>
-
-                                </select></div>
+                                    <?php if (!empty($payment_methods)): ?>
+                                        <?php foreach ($payment_methods as $method): ?>
+                                            <?php if ($method['account_name'] != 'Not Linked'): ?>
+                                                <option value="<?php echo htmlspecialchars($method['name']); ?>" 
+                                                        data-balance="<?php echo $method['balance'] ?? 0; ?>" 
+                                                        data-account-id="<?php echo $method['account_id']; ?>"
+                                                        data-account-name="<?php echo htmlspecialchars($method['account_name']); ?>">
+                                                    <?php echo htmlspecialchars($method['name']); ?>
+                                                </option>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <option value="">No payment methods available</option>
+                                    <?php endif; ?>
+                                </select>
+                                <small class="text-muted mt-1" id="payment-method-info">Select a payment method to see linked account</small>
+                            </div>
                         </div>
 
 
@@ -884,7 +896,7 @@
 
                 <div class="row p-1">
                     <div class="alert alert-danger mb-2" role="alert">
-                        <strong>Oh snap!</strong> <?php echo $this->lang->line('order or edit the stock') ?>
+                        <strong>Insufficient Stock!</strong> The requested quantity exceeds available stock. Please adjust the quantity or select a different product.
                     </div>
                 </div>
 
@@ -1130,6 +1142,27 @@
                 $('.possubmit3').click();
             }
         });
+        // Update account balance when payment method changes
+        $('#p_method').change(function() {
+            var selectedOption = $(this).find('option:selected');
+            var balance = selectedOption.data('balance') || 0;
+            var accountName = selectedOption.data('account-name') || '';
+            var accountId = selectedOption.data('account-id') || '';
+            
+            if (accountName) {
+                $('#payment-method-info').text('Account: ' + accountName);
+                $('#payment-method-info').removeClass('text-muted').addClass('text-info');
+            } else {
+                $('#payment-method-info').text('Select a payment method to see linked account');
+                $('#payment-method-info').removeClass('text-info').addClass('text-muted');
+            }
+            
+            console.log('Payment method changed - Account:', accountName);
+        });
+        
+        // Initialize payment method info on page load
+        $('#p_method').trigger('change');
+        
         $('#search_bar').keypress(function (event) {
             if (event.keyCode == 13) {
                 setTimeout(

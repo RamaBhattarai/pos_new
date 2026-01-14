@@ -230,12 +230,20 @@
     </table>
     <br/>
     <table class="plist" cellpadding="0" cellspacing="0">
+        
 
 
         <tr class="heading">
             <td>
                 <?php echo $this->lang->line('Description') ?>
             </td>
+            <?php 
+            // Debug: Check what title we have
+            // echo "<!-- Debug: Title is: " . (isset($general) ? $general['title'] : 'NOT_SET') . " -->"; 
+            if (isset($general) && ($general['title'] == $this->lang->line('Purchase Order') || $general['title'] == 'Purchase Order')) { ?>
+            <td>Batch No.</td>
+            <td>Expiry Date</td>
+            <?php } ?>
             <td>
                 <?php echo $this->lang->line('HSN') ?>
             </td>
@@ -287,8 +295,13 @@
 
 
             echo '<tr class="item' . $flag . '"> 
-                            <td>' . $row['product'] . '</td>
-                            <td style="width:12%;" >' . $row['code'] . '</td> 
+                            <td>' . $row['product'] . '</td>';
+            if (isset($general) && ($general['title'] == $this->lang->line('Purchase Order') || $general['title'] == 'Purchase Order')) {
+                echo '<td>' . ($row['batch_no'] ?? '-') . '</td>';
+                echo '<td>' . (isset($row['expiry_date']) && $row['expiry_date'] ? dateformat($row['expiry_date']) : '-') . '</td>';
+                $cols += 2;
+            }
+            echo '<td style="width:12%;" >' . $row['code'] . '</td> 
 							<td style="width:12%;">' . amountExchange($row['price'], $invoice['multi'], $invoice['loc']) . '</td>
                             <td style="width:12%;" >' . amountFormat_general($row['qty']) . $row['unit'] . '</td>   ';
             if ($invoice['discount'] > 0) {
@@ -338,7 +351,7 @@
                 <p><?php echo '<strong>' . $this->lang->line('Status') . ': ' . $this->lang->line(ucwords($invoice['status'])) . '</strong></p>';
                     if (!$general['t_type']) {
 
-                        echo '<br><p>' . $this->lang->line('Total Amount') . ': ' . amountExchange($invoice['total'], $invoice['multi'], $invoice['loc']) . '</p><br><p>' . $this->lang->line('Paid Amount') . ': ' . amountExchange($invoice['pamnt'], $invoice['multi'], $invoice['loc']) . '</p><br><p>';;
+                        echo '<br><p>' . $this->lang->line('Total Amount') . ': ' . amountExchange($invoice['total'], $invoice['multi'], $invoice['loc']) . '</p><br><p>' . $this->lang->line('Paid Amount') . ': ' . amountExchange($invoice['pamnt'], $invoice['multi'], $invoice['loc']) . '</p><br><p>' . $this->lang->line('Payment Method') . ': ' . $invoice['pmethod'] . '</p><br><p>';;
 
                              if (@$round_off['other']) {
                             $final_amount = round($invoice['total'], $round_off['active'], constant($round_off['other']));

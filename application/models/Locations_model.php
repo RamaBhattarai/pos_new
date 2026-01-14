@@ -7,9 +7,9 @@ class Locations_model extends CI_Model
 {
 
 
-    public function locations_list()
+   public function locations_list()
     {
-        $query = $this->db->query("SELECT * FROM pos_locations ORDER BY id DESC");
+        $query = $this->db->query("SELECT id, title as cname, extra as address FROM pos_warehouse ORDER BY id DESC");
         return $query->result_array();
     }
 
@@ -34,6 +34,22 @@ class Locations_model extends CI_Model
 
     public function create($name, $address, $city, $region, $country, $postbox, $phone, $email, $taxid, $image, $cur_id, $ac_id, $wid)
     {
+         // Get package from config
+    $CI =& get_instance();
+    $package = $CI->config->item('package');
+          // Only premium can create a business location
+    if ($package != 'premium') {
+        echo json_encode(array('status' => 'Error', 'message' => 'Only premium package can create a business location. For assistance or upgrades, please contact Deskgoo Consulting at 9824729783 or 9816399804.'));
+        return;
+    }
+
+    // Premium can create only 1 business location
+    $this->db->from('pos_locations');
+    $count = $this->db->count_all_results();
+    if ($count >= 1) {
+        echo json_encode(array('status' => 'Error', 'message' => 'You can only create one business location in the premium package. For upgrades, please contact Deskgoo Consulting at 9824729783 or 9816399804.'));
+        return;
+    }
         $data = array(
             'cname' => $name,
             'address' => $address,

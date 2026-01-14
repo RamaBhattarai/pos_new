@@ -375,6 +375,8 @@
                                             class="fa fa-credit-card"></i> <?php echo $this->lang->line('Card') ?>
                                 </button>     <?php } ?>
 
+                                
+
 
                         </div>
                         <a href="<?= base_url('stockreturn/create_client') ?>" class="red float-right"><i
@@ -845,7 +847,7 @@
 
                 <div class="row p-1">
                     <div class="alert alert-danger mb-2" role="alert">
-                        <strong>Oh snap!</strong> <?php echo $this->lang->line('order or edit the stock') ?>
+                        <strong>Insufficient Stock!</strong> The requested quantity exceeds available stock. Please adjust the quantity or select a different product.
                     </div>
                 </div>
 
@@ -1197,49 +1199,87 @@ $(document).ready(function() {
 
         //new code for barcode---
         $('#v2_search_bar').keypress(function (event) {
-    if (event.keyCode == 13) {  // Enter key pressed
-        setTimeout(function () {
-            // Make the click event for the first product
-            $('#posp0').click();
-            
-            // Clear and focus the input field again
-            $('#v2_search_bar').val('');
-            $('#v2_search_bar').focus();
-            
-            // Get selected warehouse and category
-            var whr = $('#v2_warehouses option:selected').val();
-            var cat = $('#v2_categories option:selected').val();
-            var barcode = $('#v2_search_bar').val();  // Get the barcode value
-            
-            // Make the AJAX request to search the product using the barcode
-            $.ajax({
-                type: "POST",
-                url: baseurl + 'search_products/v2_pos_search',
-                data: {
-                    'wid': whr,
-                    'cid': cat,
-                    'barcode': barcode,  // Send barcode value in the request
-                    crsf_token: crsf_hash  // CSRF token (replace with actual variable)
-                },
-                beforeSend: function () {
-                    // Show loading spinner (optional)
-                    $("#customer-box").css("background", "#FFF url(" + baseurl + "assets/custom/load-ring.gif) no-repeat 165px");
-                },
-                success: function (data) {
-                    console.log(data);  // Log the response data
-                    
-                    // Update the product list with the data returned from the server
-                    $("#pos_item").html(data);
-                    
-                    // If only one product matches, automatically select it and add to cart
-                    if ($("#pos_item .select_pos_item").length === 1) {
-                        $("#pos_item .select_pos_item").trigger('click');
-                    }
+            if (event.keyCode == 13) {  // Enter key pressed
+                var barcode = $('#v2_search_bar').val().trim();  // Get the barcode value
+                
+                // Trim 13-digit barcodes to 12 digits if needed
+                if (barcode.length === 13) {
+                    barcode = barcode.substring(0, 12);
+                    $('#v2_search_bar').val(barcode);
                 }
-            });
-        }, 700);
-    }
-});
+                
+                // Get selected warehouse and category
+                var whr = $('#v2_warehouses option:selected').val();
+                var cat = $('#v2_categories option:selected').val();
+                
+                // Make the AJAX request to search the product using the barcode
+                $.ajax({
+                    type: "POST",
+                    url: baseurl + 'search_products/v2_pos_search',
+                    data: 'name=' + barcode + '&wid=' + whr + '&cid=' + cat + '&' + crsf_token + '=' + crsf_hash + '&bar=true',
+                    beforeSend: function () {
+                        // Show loading spinner
+                        $("#customer-box").css("background", "#FFF url(" + baseurl + "assets/custom/load-ring.gif) no-repeat 165px");
+                    },
+                    success: function (data) {
+                        console.log(data);  // Log the response data
+                        
+                        // Update the product list with the data returned from the server
+                        $("#pos_item").html(data);
+                        
+                        setTimeout(function() {
+                            // Check for batch products first (v2_select_pos_item_bar class)
+                            var batchElements = $('.v2_select_pos_item_bar');
+                            
+                            if (batchElements.length > 0) {
+                                var earliestBatch = null;
+                                var earliestDate = null;
+                                
+                                // Find batch with earliest expiry date (FIFO)
+                                batchElements.each(function() {
+                                    var expiry = $(this).attr('data-expiry');
+                                    if (expiry && expiry !== '' && expiry !== 'null') {
+                                        var expiryDate = new Date(expiry);
+                                        if (!earliestDate || expiryDate < earliestDate) {
+                                            earliestDate = expiryDate;
+                                            earliestBatch = $(this);
+                                        }
+                                    }
+                                });
+                                
+                                // If no expiry dates found, select the first batch
+                                if (!earliestBatch) {
+                                    earliestBatch = batchElements.first();
+                                }
+                                
+                                // Auto-click the selected batch to add to cart
+                                if (earliestBatch) {
+                                    earliestBatch.click();
+                                }
+                            } else {
+                                // For non-batch products, check for regular product elements
+                                var productElements = $('.v2_select_pos_item');
+                                if (productElements.length === 1) {
+                                    productElements.first().click();
+                                } else if (productElements.length > 1) {
+                                    // Multiple products found, let user choose manually
+                                    console.log('Multiple products found, manual selection required');
+                                }
+                            }
+                            
+                            // Clear and focus the input field for next scan
+                            $('#v2_search_bar').val('');
+                            $('#v2_search_bar').focus();
+                        }, 100); // Small delay to ensure DOM is updated
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Barcode search error: " + error);
+                        $('#v2_search_bar').val('');
+                        $('#v2_search_bar').focus();
+                    }
+                });
+            }
+        });
 
       
 

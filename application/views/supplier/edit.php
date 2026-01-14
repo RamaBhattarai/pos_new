@@ -124,6 +124,32 @@
                                value="<?php echo $customer['taxid'] ?>">
                     </div>
                 </div>
+
+                <!-- Party Confirmation Settings Section -->
+                <div class="form-group row">
+                    <div class="col-sm-12">
+                        <hr>
+                        <h5 class="text-primary"><i class="fa fa-handshake-o"></i> Party Confirmation Settings</h5>
+                        <p class="text-muted">Configure threshold and preferences for automatic confirmation letters</p>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label" for="confirmation_threshold">Confirmation Threshold</label>
+                    <div class="col-sm-6">
+                        <div class="input-group">
+                            <div class="input-group-addon"><?php echo $this->config->item('currency'); ?></div>
+                            <input type="number" placeholder="100000" 
+                                   class="form-control margin-bottom" 
+                                   name="confirmation_threshold" 
+                                   id="confirmation_threshold"
+                                   value="<?php echo isset($customer['confirmation_threshold']) ? $customer['confirmation_threshold'] : '50000'; ?>"
+                                   step="1000">
+                        </div>
+                        <small class="text-muted">System will alert when total purchases exceed this amount</small>
+                    </div>
+                </div>
+
                 <div class="form-group row">
                     <label class="col-sm-2 col-form-label"></label>
                     <div class="col-sm-4">

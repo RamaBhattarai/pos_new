@@ -106,7 +106,7 @@
                 'processing': true,
                 'serverSide': true,
                 'stateSave': true,
-                responsive: true,
+                responsive: false,
                 <?php datatable_lang();?>
                 'order': [],
                 'ajax': {
@@ -123,6 +123,10 @@
                         'targets': [0],
                         'orderable': false,
                     },
+                    {
+                        'targets': [8], // Tax column
+                        'className': 'never-hidden'
+                    }
                 ],
                 dom: 'Blfrtip',
                  pageLength: 100,

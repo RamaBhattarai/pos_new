@@ -4,9 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $active_group = 'default';
 $query_builder = TRUE;
 $hostname ='localhost';
-$username ='root';
-$password ='';
-$database ='pos_system_db';	
+$username ='deskgoo_irdpos';
+$password ='irdpos@@321';
+$database ='deskgoo_irdpos';	
 
 $db['default'] = array(
 	'dsn'	=> '',

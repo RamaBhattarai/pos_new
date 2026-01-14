@@ -69,7 +69,7 @@
                         <td><?php echo $log['id']; ?></td>
                         <td><?php echo $log['note']; ?></td>
                         <td><?php echo $log['user']; ?></td>
-                        <td><?php echo $log['created']; ?></td>
+                       <td><?php echo $log['created']; ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>

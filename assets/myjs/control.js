@@ -12,6 +12,11 @@ function selectCustomer(cid, cname, cadd1, cadd2, ph, email, discount = 0) {
     $("#customer").show();
 }
 
+// Check global variables on page load
+$(document).ready(function() {
+    // Modal elements check removed - functionality verified working
+});
+
 
 function def_timeout(ms) {
             var wait_obj = $.Deferred();
@@ -171,79 +176,154 @@ $(document).ready(function () {
 
 
     $(document).on('click', ".v2_select_pos_item", function (e) {
-        var pid = $(this).attr('data-pid');
-        var stock = accounting.unformat($(this).attr('data-stock'), accounting.settings.number.decimal);
+    var pid = $(this).attr('data-pid');
+    var stock = accounting.unformat($(this).attr('data-stock'), accounting.settings.number.decimal);
+    var batchid = $(this).attr('data-batchid') || '';  // Get batch id (empty if none)
+    var batchDisplay = batchid ? ' (' + batchid + ')' : ''; // For display name
 
-        var discount = $(this).attr('data-discount');
-        var custom_discount = accounting.unformat($('#custom_discount').val(), accounting.settings.number.decimal);
-        if (custom_discount > 0) discount = accounting.formatNumber(custom_discount);
-        var flag = true;
+    var discount = $(this).attr('data-discount');
+    var custom_discount = accounting.unformat($('#custom_discount').val(), accounting.settings.number.decimal);
+    if (custom_discount > 0) discount = accounting.formatNumber(custom_discount);
+    var flag = true;
 
-             $('#v2_search_bar').attr('readonly',false);
-         $('#v2_search_bar').val('');
-            $('.pdIn').each(function () {
+    $('#v2_search_bar').attr('readonly', false);
+    $('#v2_search_bar').val('');
 
-                if (pid == $(this).val()) {
+    $('.pdIn').each(function () {
+        var existingPid = $(this).val();
+        var pi = $(this).attr('id').split('-')[1];
+        var existingBatchId = $('#batchid-' + pi).val() || '';
 
-                    var pi = $(this).attr('id');
-                    var arr = pi.split('-');
-                    pi = arr[1];
-                    $('#discount-' + pi).val(discount);
-                    var stotal = accounting.unformat($('#amount-' + pi).val(), accounting.settings.number.decimal) + 1;
+        if (pid == existingPid && batchid == existingBatchId) {
+            // Same product & batch found — increment quantity
+            $('#discount-' + pi).val(discount);
+            var stotal = accounting.unformat($('#amount-' + pi).val(), accounting.settings.number.decimal) + 1;
 
-                    if (stotal <= stock) {
-                        $('#amount-' + pi).val(accounting.formatNumber(stotal));
-                        $('#search_bar').val('').focus();
-                    } else {
-                        $('#stock_alert').modal('toggle');
-                    }
-                    rowTotal(pi);
-                    billUpyog();
-
-                    flag = false;
-                }
-            });
-            var t_r = $(this).attr('data-tax');
-            if ($("#taxformat option:selected").attr('data-trate')) {
-
-                var t_r = $("#taxformat option:selected").attr('data-trate');
+            if (stotal <= stock) {
+                $('#amount-' + pi).val(accounting.formatNumber(stotal));
+                $('#search_bar').val('').focus();
+            } else {
+                $('#stock_alert').modal('toggle');
             }
-            var sound = document.getElementById("beep");
-            sound.play();
-            if (flag) {
-                var ganak = $('#ganak').val();
-                var cvalue = parseInt(ganak);
-                var functionNum = "'" + cvalue + "'";
-                count = $('#saman-row div').length;
-                var data = ' <div class="row  m-0 pt-1 pb-1 border-bottom"  id="ppid-' + cvalue + '"> <div class="col-6 "> <span class="quantity"><input type="text" class="form-control req amnt display-inline mousetrap" name="product_qty[]" inputmode="numeric" id="amount-' + cvalue + '" onkeypress="return isNumber(event)" onkeyup="rowTotal(' + functionNum + '), billUpyog()" autocomplete="off" value="1" ><div class="quantity-nav"><div class="quantity-button quantity-up">+</div><div class="quantity-button quantity-down">-</div></div></span>' + $(this).attr('data-name') + '-' + $(this).attr('data-pcode') + '</div> <div class="col-3"> ' + $(this).attr('data-price') + ' </div> <div class="col-3"><strong><span class="ttlText" id="result-' + cvalue + '">0</span></strong><a data-rowid="' + cvalue + '" class="red removeItem" title="Remove"> <i class="fa fa-trash"></i> </a></div><input type="hidden" class="form-control text-center" name="product_name[]" id="productname-' + cvalue + '" value="' + $(this).attr('data-name') + '-' + $(this).attr('data-pcode') + '"><input type="hidden" id="alert-' + cvalue + '" value="' + $(this).attr('data-stock') + '"  name="alert[]"><input type="hidden" class="form-control req prc" name="product_price[]" id="price-' + cvalue + '" onkeypress="return isNumber(event)" onkeyup="rowTotal(' + functionNum + '), billUpyog()" autocomplete="off"  value="' + $(this).attr('data-price') + '" inputmode="numeric"> <input type="hidden" class="form-control vat" name="product_tax[]" id="vat-' + cvalue + '" onkeypress="return isNumber(event)" onkeyup="rowTotal(' + functionNum + '), billUpyog()" autocomplete="off"  value="' + t_r + '"><input type="hidden" class="form-control discount pos_w" name="product_discount[]" onkeypress="return isNumber(event)" id="discount-' + cvalue + '" onkeyup="rowTotal(' + functionNum + '), billUpyog()" autocomplete="off"  value="' + discount + '"><input type="hidden" name="taxa[]" id="taxa-' + cvalue + '" value="0"><input type="hidden" name="disca[]" id="disca-' + cvalue + '" value="0"><input type="hidden" class="ttInput" name="product_subtotal[]" id="total-' + cvalue + '" value="0"> <input type="hidden" class="pdIn" name="pid[]" id="pid-' + cvalue + '" value="' + $(this).attr('data-pid') + '"> <input type="hidden" name="unit[]" id="unit-' + cvalue + '" value="' + $(this).attr('data-unit') + '"><input type="hidden" name="hsn[]" id="hsn-' + cvalue + '" value="' + $(this).attr('data-pcode') + '"> <input type="hidden" name="serial[]" id="serial-' + cvalue + '" value="' + $(this).attr('data-serial') + '"></div>';
-                //ajax request
-                // $('#saman-row').append(data);
-                $('#pos_items').append(data);
-                rowTotal(cvalue);
-                billUpyog();
-                $('#ganak').val(cvalue + 1);
-                $('#amount-' + cvalue).focus();
-            }
-                 var whr = $('#v2_warehouses option:selected').val();
-                            var cat = $('#v2_categories option:selected').val();
+            rowTotal(pi);
+            billUpyog();
 
-                                $.ajax({
-                                    type: "POST",
-                                    url: baseurl + 'search_products/v2_pos_search',
-                                    data: 'name=' + $(this).val() + '&wid=' + whr + '&cid=' + cat + '&' + crsf_token + '=' + crsf_hash+'&bar=' + $('#bar_only').prop('checked')+'&bar=' + $('#bar_only').prop('checked'),
-                                    beforeSend: function () {
-                                        $("#customer-box").css("background", "#FFF url(" + baseurl + "assets/custom/load-ring.gif) no-repeat 165px");
-                                    },
-                                    success: function (data) {
-                                        $("#pos_item").html(data);
-
-                                    }
-                                });
-
-
-
+            flag = false;
+            return false; // Break out of each loop
+        }
     });
 
+    var t_r = $(this).attr('data-tax');
+    if ($("#taxformat option:selected").attr('data-trate')) {
+        t_r = $("#taxformat option:selected").attr('data-trate');
+    }
+
+    var sound = document.getElementById("beep");
+    if(sound) sound.play();
+
+    if (flag) {
+        // Check stock before adding new item
+        if (1 > stock) {
+            $('#stock_alert').modal('toggle');
+            return false;
+        }
+
+        var ganak = $('#ganak').val();
+        var cvalue = parseInt(ganak);
+        var functionNum = "'" + cvalue + "'";
+        count = $('#saman-row div').length;
+
+        var batchidInput = '';
+        if (batchid) {
+            batchidInput = '<input type="hidden" name="batchid[]" id="batchid-' + cvalue + '" value="' + batchid + '">';
+        }
+
+        // // Show product name with batch number
+        var rawName = $(this).attr('data-name');
+
+// Remove duplicate batch number if already present
+
+var batchNo = $(this).attr('data-batchno') || '';
+var cleanedName = rawName;
+
+// Only append batch if batchNo is not empty
+var productDisplayName = batchNo
+  ? cleanedName.replace(new RegExp("\\s*\\(" + batchNo + "\\)", "g"), '') + ' (' + batchNo + ')'
+  : cleanedName;
+
+productDisplayName += '-' + $(this).attr('data-pcode');
+
+
+
+        var data = `
+        <div class="row m-0 pt-1 pb-1 border-bottom" id="ppid-${cvalue}">
+            <div class="col-6">
+                <span class="quantity">
+                    <input type="text" class="form-control req amnt display-inline mousetrap" name="product_qty[]" inputmode="numeric" id="amount-${cvalue}" onkeypress="return isNumber(event)" onkeyup="rowTotal(${functionNum}), billUpyog()" autocomplete="off" value="1" >
+                    <div class="quantity-nav">
+                        <div class="quantity-button quantity-up">+</div>
+                        <div class="quantity-button quantity-down">-</div>
+                    </div>
+                </span>
+                ${productDisplayName}
+            </div>
+            <div class="col-3"> ${$(this).attr('data-price')} </div>
+            <div class="col-3">
+                <strong><span class="ttlText" id="result-${cvalue}">0</span></strong>
+                <a data-rowid="${cvalue}" class="red removeItem" title="Remove"><i class="fa fa-trash"></i></a>
+            </div>
+            <input type="hidden" class="form-control text-center" name="product_name[]" id="productname-${cvalue}" value="${productDisplayName}">
+            <input type="hidden" id="alert-${cvalue}" value="${$(this).attr('data-stock')}" name="alert[]">
+            <input type="hidden" class="form-control req prc" name="product_price[]" id="price-${cvalue}" onkeypress="return isNumber(event)" onkeyup="rowTotal(${functionNum}), billUpyog()" autocomplete="off" value="${$(this).attr('data-price')}" inputmode="numeric">
+            <input type="hidden" class="form-control vat" name="product_tax[]" id="vat-${cvalue}" onkeypress="return isNumber(event)" onkeyup="rowTotal(${functionNum}), billUpyog()" autocomplete="off" value="${t_r}">
+            <input type="hidden" class="form-control discount pos_w" name="product_discount[]" onkeypress="return isNumber(event)" id="discount-${cvalue}" onkeyup="rowTotal(${functionNum}), billUpyog()" autocomplete="off" value="${discount}">
+            <input type="hidden" name="taxa[]" id="taxa-${cvalue}" value="0">
+            <input type="hidden" name="disca[]" id="disca-${cvalue}" value="0">
+            <input type="hidden" class="ttInput" name="product_subtotal[]" id="total-${cvalue}" value="0">
+            <input type="hidden" class="pdIn" name="pid[]" id="pid-${cvalue}" value="${pid}">
+            <input type="hidden" name="unit[]" id="unit-${cvalue}" value="${$(this).attr('data-unit')}">
+            <input type="hidden" name="hsn[]" id="hsn-${cvalue}" value="${$(this).attr('data-pcode')}">
+            <input type="hidden" name="serial[]" id="serial-${cvalue}" value="${$(this).attr('data-serial')}">
+            ${batchidInput}
+        </div>`;
+
+        $('#pos_items').append(data);
+        rowTotal(cvalue);
+        billUpyog();
+        
+        // Trigger tax recalculation to ensure VAT is properly calculated
+        if (typeof formatRest === 'function') {
+            var taxFormat = $("#tax_format").val();
+            var disFormat = $("#discount_format").val();
+            var trate = $("#taxformat option:selected").attr('data-trate');
+            formatRest(taxFormat, disFormat, trate);
+        }
+        $('#ganak').val(cvalue + 1);
+        $('#amount-' + cvalue).focus();
+    }
+
+    // Your existing ajax call if needed (adjust params accordingly)
+    var whr = $('#v2_warehouses option:selected').val();
+    var cat = $('#v2_categories option:selected').val();
+
+    $.ajax({
+        type: "POST",
+        url: baseurl + 'search_products/v2_pos_search',
+        data: {
+            name: $(this).val(),
+            wid: whr,
+            cid: cat,
+            [crsf_token]: crsf_hash,
+            bar: $('#bar_only').prop('checked')
+        },
+        beforeSend: function () {
+            $("#customer-box").css("background", "#FFF url(" + baseurl + "assets/custom/load-ring.gif) no-repeat 165px");
+        },
+        success: function (data) {
+            $("#pos_item").html(data);
+        }
+    });
+});
 
 
       $(document).on('click', ".v2_select_pos_item_bar", function (e) {
@@ -296,6 +376,12 @@ $(document).ready(function () {
          var sound = document.getElementById("beep");
          sound.play();
          if (flag && barcode_flag) {
+             // Check stock before adding new item via barcode
+             if (1 > stock) {
+                 $('#stock_alert').modal('toggle');
+                 return false;
+             }
+
              var ganak = $('#ganak').val();
              var cvalue = parseInt(ganak);
              var functionNum = "'" + cvalue + "'";
@@ -647,15 +733,17 @@ function sendBill(message) {
 //////////////cancel
 $(document).on('click', "#cancel-bill", function (e) {
     e.preventDefault();
-    $('#cancel_bill').modal({backdrop: 'static', keyboard: false}).one('click', '#send', function () {
-        var acturl = 'transactions/cancelinvoice';
-        cancelBill(acturl);
-    });
+    $('#cancel_bill').modal({backdrop: 'static', keyboard: false});
+});
+
+$(document).on('click', '#send', function () {
+    var acturl = 'transactions/cancelinvoice';
+    cancelBill(acturl);
 });
 
 function cancelBill(acturl) {
     var $btn;
-    var errorNum = farmCheck();
+    var errorNum = farmCheck('form.cancelbill');
     $("#cancel_bill").modal('hide');
     if (errorNum > 0) {
         $("#notify").removeClass("alert-success").addClass("alert-warning").fadeIn();
@@ -939,6 +1027,13 @@ function addObject(action, action_url) {
                     $("#notify").removeClass("alert-danger").addClass("alert-success").fadeIn();
                     $("html, body").scrollTop($("body").offset().top);
                     $("#data_form").remove();
+                    
+                    //  redirect_url TO THE PRINT
+                    if (data.redirect_url) {
+                        setTimeout(function() {
+                            window.open(data.redirect_url, '_blank');
+                        }, 1000); // Wait 1 second to show success message, then open thermal PDF
+                    }
                 } else {
                     $("#notify .message").html("<strong>" + data.status + "</strong>: " + data.message);
                     $("#notify").removeClass("alert-success").addClass("alert-danger").fadeIn();
@@ -1079,6 +1174,7 @@ $(document).on('click', "#submit_model", function (e) {
     e.preventDefault();
     var o_data = $("#form_model").serialize();
     var action_url = $('#form_model #action-url').val();
+    $('#submit_model').blur();
     $("#pop_model").modal('hide');
     saveMData(o_data, action_url);
 });
@@ -1087,6 +1183,7 @@ $(document).on('click', "#submit_model2", function (e) {
     e.preventDefault();
     var o_data = $("#form_model2").serialize();
     var action_url = $('#form_model2 #action-url').val();
+    $('#submit_model2').blur();
     $("#pop_model2").modal('hide');
     saveMData(o_data, action_url);
 });
@@ -1100,7 +1197,7 @@ $(document).on('click', "#submit_model3", function (e) {
 });
 
 function saveMData(o_data, action_url) {
-    var errorNum = farmCheck();
+    var errorNum = farmCheck('#form_model');
     if (errorNum > 0) {
         $("#notify").removeClass("alert-success").addClass("alert-danger").fadeIn();
         $("#notify .message").html("<strong>Error</strong>");
@@ -1123,8 +1220,8 @@ function saveMData(o_data, action_url) {
                     $("html, body").scrollTop($("body").offset().top);
                 }
             },
-            error: function (data) {
-                $("#notify .message").html("<strong>" + data.status + "</strong>: " + data.message);
+            error: function (xhr, status, error) {
+                $("#notify .message").html("<strong>" + status + "</strong>: " + error);
                 $("#notify").removeClass("alert-success").addClass("alert-danger").fadeIn();
                 $("html, body").scrollTop($("body").offset().top);
             }
@@ -1246,3 +1343,32 @@ $(document).on('click', ".apply_coupon", function (e) {
     });
 
 });
+
+// Missing validation functions required by saveMData
+function farmCheck(formSelector) {
+    var errorNum = 0;
+    // If no form selector provided, check all required fields (backward compatibility)
+    var selector = formSelector ? formSelector + ' .required' : '.required';
+    $(selector).each(function() {
+        if ($(this).val() === '' || $(this).val() === null) {
+            $(this).addClass('error');
+            errorNum++;
+        } else {
+            $(this).removeClass('error');
+        }
+    });
+    return errorNum;
+}
+
+function farmCheck2() {
+    var errorNum = 0;
+    $('.crequired').each(function() {
+        if ($(this).val() === '' || $(this).val() === null) {
+            $(this).addClass('error');
+            errorNum++;
+        } else {
+            $(this).removeClass('error');
+        }
+    });
+    return errorNum;
+}

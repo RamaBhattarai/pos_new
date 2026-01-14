@@ -1,20 +1,5 @@
 <?php
-/**
- *  POS -  Accounting,  Invoicing  and CRM Application
- * Copyright (c) UltimateKode. All Rights Reserved
- * ***********************************************************************
- *
- *  Email: support@ultimatekode.com
- *  Website: https://www.ultimatekode.com
- *
- *  ************************************************************************
- *  * This software is furnished under a license and may be used and copied
- *  * only  in  accordance  with  the  terms  of such  license and with the
- *  * inclusion of the above copyright notice.
- *  * If you Purchased from Codecanyon, Please read the full License from
- *  * here- http://codecanyon.net/licenses/standard/
- * ***********************************************************************
- */
+
 
 
 if (!defined('BASEPATH')) exit('No direct script access allowed');
@@ -43,9 +28,19 @@ function dateformat_time($input)
 
 function datefordatabase($input)
 {
-    $date = new DateTime($input ?? '');
-    $date = $date->format('Y-m-d H:i:s');
-    return $date;
+    // Handle empty or null input
+    if (empty($input) || $input === null || $input === '' || $input === 'english' || $input === 'nepali') {
+        return null;
+    }
+    
+    try {
+        $date = new DateTime($input);
+        return $date->format('Y-m-d H:i:s');
+    } catch (Exception $e) {
+        // Log the error for debugging
+        error_log("datefordatabase error: " . $e->getMessage() . " for input: " . $input);
+        return null;
+    }
 }
 
 function timefordatabase($input)
@@ -313,17 +308,25 @@ function rev_amountExchange_s($number, $id = 0, $loc = 0)
 			else {
         $query2 = $ci->db->query("SELECT * FROM univarsal_api WHERE id=4 LIMIT 1");
         $row = $query2->row_array();
-        $number = str_replace($row['key2'], "", $number);
-        $number = str_replace($row['key1'], ".", $number);
+        if ($row) {
+            $number = str_replace($row['key2'], "", $number);
+            $number = str_replace($row['key1'], ".", $number);
+        } else {
+            $number = (float)$number;
+        }
 
     }
         } elseif ($id) {
             $query = $ci->db->query("SELECT * FROM pos_currencies WHERE id='$id' LIMIT 1");
             $row = $query->row_array();
-            $rate = $row['rate'];
-            $number = str_replace($row['thous'], "", $number);
-            $number = str_replace($row['dpoint'], ".", $number);
-            $number = (float)$number / $rate;
+            if ($row) {
+                $rate = $row['rate'];
+                $number = str_replace($row['thous'], "", $number);
+                $number = str_replace($row['dpoint'], ".", $number);
+                $number = (float)$number / $rate;
+            } else {
+                $number = (float)$number;
+            }
         }
 		else {
         $query2 = $ci->db->query("SELECT * FROM univarsal_api WHERE id=4 LIMIT 1");
@@ -345,8 +348,12 @@ function rev_amountExchange_s($number, $id = 0, $loc = 0)
     } else {
         $query2 = $ci->db->query("SELECT * FROM univarsal_api WHERE id=4 LIMIT 1");
         $row = $query2->row_array();
-        $number = str_replace($row['key2'], "", $number ?? '');
-        $number = str_replace($row['key1'], ".", $number);
+        if ($row) {
+            $number = str_replace($row['key2'], "", $number ?? '');
+            $number = str_replace($row['key1'], ".", $number);
+        } else {
+            $number = (float)$number;
+        }
 
     }
 

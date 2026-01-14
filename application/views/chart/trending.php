@@ -78,6 +78,7 @@
     </div>
 </div>
 <script type="text/javascript">
+    var user_package = "<?= $this->config->item('package'); ?>";
     $(document).ready(function () {
         var cat_data = [
             <?php foreach ($chart as $item) {
@@ -107,9 +108,20 @@
         });
     }
 
-    $(document).on('click', ".update_chart", function (e) {
+        $(document).on('click', ".update_chart", function (e) {
         e.preventDefault();
         var a_type = $(this).attr('data-val');
+
+        // Restriction logic
+        if (user_package === 'basic' && a_type !== 'week') {
+            showTrendingError('Upgrade your package to access this feature. For assistance or upgrades, please contact Deskgoo Consulting at 9824729783 or 9816399804.');
+            return;
+        }
+        if (user_package === 'standard' && a_type !== 'week' && a_type !== 'month') {
+            showTrendingError('Upgrade your package to access this feature. For assistance or upgrades, please contact Deskgoo Consulting at 9824729783 or 9816399804.');
+            return;
+        }
+
         if (a_type == 'custom') {
             $('#custom_c').show();
         } else {
@@ -127,6 +139,14 @@
             });
         }
     });
+
+    function showTrendingError(msg) {
+        $('#notify .message').text(msg);
+        $('#notify').removeClass('alert-success').addClass('alert-danger').show();
+        setTimeout(function () {
+            $('#notify').fadeOut();
+        }, 4000);
+    }
     $(document).on('click', "#custom_update_chart", function (e) {
         e.preventDefault();
         $.ajax({

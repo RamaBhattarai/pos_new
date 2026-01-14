@@ -116,6 +116,31 @@ p.pid='$id' $qj ");
 
     public function addwarehouse($cat_name, $cat_desc, $lid)
     {
+    // Get package from config
+$CI =& get_instance();
+$package = $CI->config->item('package');
+
+// Set warehouse limit based on package
+if ($package == 'basic') {
+    $warehouse_limit = 3;
+} elseif ($package == 'standard') {
+    $warehouse_limit = 4;
+} elseif ($package == 'premium') {
+    $warehouse_limit = 10;
+} else {
+    $warehouse_limit = 3; // default fallback
+}
+
+// Count existing warehouses
+$this->db->from('pos_warehouse');
+$count = $this->db->count_all_results();
+
+if ($count >= $warehouse_limit) {
+    echo json_encode(array('status' => 'Error', 'message' => 'Warehouse limit reached for your package. For assistance or upgrades, please contact Deskgoo Consulting at 9824729783 or 9816399804.'));
+    return;
+}
+
+
         $data = array(
             'title' => $cat_name,
             'extra' => $cat_desc,

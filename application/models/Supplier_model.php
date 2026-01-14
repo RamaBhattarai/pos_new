@@ -14,7 +14,7 @@ class Supplier_model extends CI_Model
     var $inv_column_order = array(null, 'tid', 'name', 'invoicedate', 'total', 'status', null);
     var $inv_column_search = array('tid', 'name', 'invoicedate', 'total');
     var $order = array('id' => 'desc');
-    var $inv_order = array('pos_purchase.tid' => 'desc');
+    var $purchase_order = array('pos_purchase.tid' => 'desc');
 
 
     private function _get_datatables_query($id = '')
@@ -131,7 +131,7 @@ class Supplier_model extends CI_Model
     }
 
 
-    public function add($name, $company, $phone, $email, $address, $city, $region, $country, $postbox, $taxid)
+    public function add($name, $company, $phone, $email, $address, $city, $region, $country, $postbox, $taxid, $confirmation_threshold = null, $confirmation_method = null, $confirmation_contact = null)
     {
         $data = array(
             'name' => $name,
@@ -145,6 +145,17 @@ class Supplier_model extends CI_Model
             'postbox' => $postbox,
             'taxid' => $taxid
         );
+
+        // Add party confirmation fields if provided
+        if ($confirmation_threshold !== null) {
+            $data['confirmation_threshold'] = $confirmation_threshold;
+        }
+        if ($confirmation_method !== null) {
+            $data['confirmation_method'] = $confirmation_method;
+        }
+        if ($confirmation_contact !== null) {
+            $data['confirmation_contact'] = $confirmation_contact;
+        }
 
         if ($this->aauth->get_user()->loc) {
             $data['loc'] = $this->aauth->get_user()->loc;
@@ -163,7 +174,7 @@ class Supplier_model extends CI_Model
     }
 
 
-    public function edit($id, $name, $company, $phone, $email, $address, $city, $region, $country, $postbox, $taxid)
+    public function edit($id, $name, $company, $phone, $email, $address, $city, $region, $country, $postbox, $taxid, $confirmation_threshold = null, $confirmation_method = null, $confirmation_contact = null)
     {
         $data = array(
             'name' => $name,
@@ -178,6 +189,17 @@ class Supplier_model extends CI_Model
             'taxid' => $taxid
 
         );
+
+        // Add party confirmation fields if provided
+        if ($confirmation_threshold !== null) {
+            $data['confirmation_threshold'] = $confirmation_threshold;
+        }
+        if ($confirmation_method !== null) {
+            $data['confirmation_method'] = $confirmation_method;
+        }
+        if ($confirmation_contact !== null) {
+            $data['confirmation_contact'] = $confirmation_contact;
+        }
 
 
         $this->db->set($data);
@@ -489,5 +511,305 @@ class Supplier_model extends CI_Model
         }
     }
 
+    
+    // PARTY CONFIRMATION METHODS
+    
+    
+ /**
+     * Check if supplier needs confirmation based on total purchases
+     */
+public function check_confirmation_threshold($supplier_id)
+{
+    // Get supplier's threshold and check in one query
+    $this->db->select('confirmation_threshold, confirmation_enabled, name, last_confirmation_date');
+    $this->db->from('pos_supplier');
+    $this->db->where('id', $supplier_id);
+    $supplier = $this->db->get()->row_array();
+
+    // Early returns for invalid cases
+    if (!$supplier || 
+        (isset($supplier['confirmation_enabled']) && !$supplier['confirmation_enabled']) ||
+        !isset($supplier['confirmation_threshold']) || 
+        $supplier['confirmation_threshold'] <= 0) {
+        return false;
+    }
+
+    // Calculate period efficiently
+    $since_date = $supplier['last_confirmation_date'] ?: '2020-01-01';
+    
+    // Single query for purchases total
+    $this->db->select('COALESCE(SUM(total), 0) as total_purchases');
+    $this->db->from('pos_purchase_entries');
+    $this->db->where('csd', $supplier_id);
+    $this->db->where('invoicedate >=', $since_date);
+    $this->db->where('status !=', 'canceled');
+    $result = $this->db->get()->row_array();
+
+    // Simple comparison
+    return ($result['total_purchases'] ?: 0) >= $supplier['confirmation_threshold'];
+}
+
+
+  
+    /**
+     * Update supplier's total purchase amount (called after each purchase)
+     */
+    public function update_purchase_total($supplier_id, $amount)
+    {
+        $this->db->set('total_purchase_amount', "total_purchase_amount + $amount", FALSE);
+        $this->db->where('id', $supplier_id);
+        $this->db->update('pos_supplier');
+    }
+
+
+    /**
+     * Get party confirmation settings
+     */
+    public function get_confirmation_settings()
+    {
+        $this->db->select('setting_key, setting_value');
+        $this->db->from('pos_party_confirmation_settings');
+        $result = $this->db->get()->result_array();
+        
+        $settings = [];
+        foreach ($result as $row) {
+            $settings[$row['setting_key']] = $row['setting_value'];
+        }
+        
+        return $settings;
+    }
+
+    
+ // Get suppliers that need party confirmation alerts
+
+public function get_suppliers_needing_confirmation_alerts()
+{
+    // Simplified version that excludes suppliers with existing confirmations
+    $this->db->select('s.id, s.name, s.company, s.confirmation_threshold');
+    $this->db->from('pos_supplier s');
+    $this->db->where('s.confirmation_threshold >', 0);
+    
+    if ($this->aauth->get_user()->loc) {
+        $this->db->where('s.loc', $this->aauth->get_user()->loc);
+    } elseif (!BDATA) {
+        $this->db->where('s.loc', 0);
+    }
+    
+    $suppliers = $this->db->get()->result_array();
+    
+    if (empty($suppliers)) {
+        return [];
+    }
+    
+    $alerts = [];
+    
+    // Get current date
+    $current_date = date('Y-m-d');
+    
+    foreach ($suppliers as $supplier) {
+        // Check if supplier already has a confirmation letter generated for current period
+        $this->db->select('COUNT(*) as existing_confirmations');
+        $this->db->from('pos_party_confirmations');
+        $this->db->where('supplier_id', $supplier['id']);
+        $this->db->where('status IN (\'generated\', \'sent\')', null, false);
+        // Check for current fiscal year or recent period
+        $this->db->where('confirmation_period_end >=', date('Y-m-d', strtotime('-6 months')));
+        $confirmation_check = $this->db->get()->row_array();
+        
+        // Skip this supplier if they already have a recent confirmation
+        if ($confirmation_check['existing_confirmations'] > 0) {
+            continue;
+        }
+        
+        // Calculate total purchases (all time)
+        $this->db->select('COALESCE(SUM(total), 0) as total_purchases, COUNT(*) as order_count');
+        $this->db->from('pos_purchase_entries');
+        $this->db->where('csd', $supplier['id']);
+        $this->db->where('status !=', 'canceled');
+        $purchase_result = $this->db->get()->row_array();
+        
+        $total_purchases = $purchase_result['total_purchases'] ?: 0;
+        
+        // Simple threshold check
+        if ($total_purchases >= $supplier['confirmation_threshold']) {
+            // Set confirmation period (current date)
+            $supplier['period_start'] = $current_date;
+            $supplier['period_end'] = $current_date;
+            
+            $supplier['total_purchases'] = $total_purchases;
+            $supplier['order_count'] = $purchase_result['order_count'];
+            $alerts[] = $supplier;
+        }
+    }
+    
+    return $alerts;
+}
+
+
+    /**
+     * Get all party confirmations
+     */ 
+
+public function get_all_party_confirmations()
+{
+    try {
+        // Check if table exists using more efficient method
+        if (!$this->db->table_exists('pos_party_confirmations')) {
+            return [];
+        }
+        
+        $this->db->select('pc.*, s.name as supplier_name, s.company');
+        $this->db->from('pos_party_confirmations pc');
+        $this->db->join('pos_supplier s', 'pc.supplier_id = s.id', 'left');
+        
+        if ($this->aauth->get_user()->loc) {
+            $this->db->where('s.loc', $this->aauth->get_user()->loc);
+        } elseif (!BDATA) {
+            $this->db->where('s.loc', 0);
+        }
+        
+        $this->db->order_by('pc.created_at', 'DESC');
+        $query = $this->db->get();
+        return $query->result_array();
+    } catch (Exception $e) {
+        log_message('error', 'Error in get_all_party_confirmations: ' . $e->getMessage());
+        return [];
+    }
+}
+
+    
+ /**
+     * Generate confirmation letter
+     */
+public function generate_confirmation_letter($supplier_id, $amount, $period_start, $period_end)
+{
+    // Delete any existing confirmations for this supplier and period first
+    $this->db->where('supplier_id', $supplier_id);
+    $this->db->where('confirmation_period_start', $period_start);
+    $this->db->where('confirmation_period_end', $period_end);
+    $this->db->delete('pos_party_confirmations');
+    
+    // Insert new confirmation record
+    $now = new DateTime('now', new DateTimeZone('Asia/Kathmandu'));
+    $data = [
+        'supplier_id' => $supplier_id,
+        'total_amount' => $amount,
+        'confirmation_period_start' => $period_start,
+        'confirmation_period_end' => $period_end,
+        'status' => 'generated',
+        'generated_date' => $now->format('Y-m-d H:i:s'),
+        'created_at' => date('Y-m-d H:i:s'),
+        'created_by' => $this->aauth->get_user()->id
+    ];
+    
+    $this->db->insert('pos_party_confirmations', $data);
+    $confirmation_id = $this->db->insert_id();
+    
+    return [
+        'status' => 'success',
+        'confirmation_id' => $confirmation_id,
+        'message' => 'Confirmation letter generated successfully',
+        'action' => 'created'
+    ];
+}
+
+    
+ // Mark confirmation as sent 
+      
+public function mark_confirmation_sent_by_id($confirmation_id)
+{
+    try {
+        $now = new DateTime('now', new DateTimeZone('Asia/Kathmandu'));
+        $data = [
+            'status' => 'sent',
+            'sent_date' => $now->format('Y-m-d H:i:s'),
+            'created_by' => $this->aauth->get_user()->id
+        ];
+        
+        $this->db->where('id', $confirmation_id);
+        $updated = $this->db->update('pos_party_confirmations', $data);
+        
+        if ($updated) {
+            // Also update the supplier's last_confirmation_date
+            $this->db->select('supplier_id');
+            $this->db->from('pos_party_confirmations');
+            $this->db->where('id', $confirmation_id);
+            $confirmation = $this->db->get()->row_array();
+            
+            if ($confirmation) {
+                $this->db->where('id', $confirmation['supplier_id']);
+                $this->db->update('pos_supplier', ['last_confirmation_date' => date('Y-m-d')]);
+            }
+            
+            return ['status' => 'success', 'message' => 'Confirmation marked as sent'];
+        } else {
+            return ['status' => 'error', 'message' => 'Failed to update confirmation status'];
+        }
+    } catch (Exception $e) {
+        log_message('error', 'Error in mark_confirmation_sent_by_id: ' . $e->getMessage());
+        return ['status' => 'error', 'message' => 'Error: ' . $e->getMessage()];
+    }
+}
+
+public function delete_confirmation_by_id($confirmation_id)
+{
+    try {
+        // Validate confirmation ID
+        if (empty($confirmation_id) || !is_numeric($confirmation_id)) {
+            return ['status' => 'error', 'message' => 'Invalid confirmation ID'];
+        }
+        
+        // Check if confirmation exists
+        $this->db->select('id, supplier_id');
+        $this->db->from('pos_party_confirmations');
+        $this->db->where('id', $confirmation_id);
+        $confirmation = $this->db->get()->row_array();
+        
+        if (!$confirmation) {
+            return ['status' => 'error', 'message' => 'Confirmation record not found'];
+        }
+        
+        // Delete the confirmation record
+        $this->db->where('id', $confirmation_id);
+        $deleted = $this->db->delete('pos_party_confirmations');
+        
+        if ($deleted) {
+            return ['status' => 'success', 'message' => 'Confirmation deleted successfully'];
+        } else {
+            return ['status' => 'error', 'message' => 'Failed to delete confirmation'];
+        }
+    } catch (Exception $e) {
+        log_message('error', 'Error in delete_confirmation_by_id: ' . $e->getMessage());
+        return ['status' => 'error', 'message' => 'Error: ' . $e->getMessage()];
+    }
+}
+
+    /**
+     * Get supplier list for dropdown
+     */
+    public function supplier_list()
+    {
+        try {
+            $this->db->select('id, name, company');
+            $this->db->from('pos_supplier');
+            
+            if ($this->aauth->get_user()->loc) {
+                $this->db->where('loc', $this->aauth->get_user()->loc);
+            } elseif (!BDATA) {
+                $this->db->where('loc', 0);
+            }
+            
+            $this->db->order_by('name', 'ASC');
+            $query = $this->db->get();
+            return $query->result_array();
+        } catch (Exception $e) {
+            // Log error and return empty array instead of failing
+            log_message('error', 'Error in supplier_list: ' . $e->getMessage());
+            return array();
+        }
+    }
+
+
+    
 
 }

@@ -57,6 +57,7 @@ class Products extends CI_Controller
         $data['custom_fields'] = $this->custom->add_fields(4);
         $this->load->model('units_model', 'units');
         $data['variables'] = $this->units->variables_list();
+        $data['options'] = $this->units->options_list();  // New: get options (formerly variations)
         $head['title'] = "Add Product";
         $head['usernm'] = $this->aauth->get_user()->username;
         $this->load->view('fixed/header', $head);
@@ -70,11 +71,18 @@ class Products extends CI_Controller
         $catid = $this->input->get('id');
         $sub = $this->input->get('sub');
 
-        if ($catid > 0) {
-            $list = $this->products->get_datatables($catid, '', $sub);
-        } else {
-            $list = $this->products->get_datatables();
-        }
+        $stock = $this->input->post('stock'); // Get stock filter from AJAX POST
+
+    $filter = [];
+    if ($stock == 'out') {
+        $filter['qty <='] = 0;
+    }
+
+    if ($catid > 0) {
+        $list = $this->products->get_datatables($catid, '', $sub, $filter);
+    } else {
+        $list = $this->products->get_datatables(null, '', null, $filter);
+    }
         $data = array();
         $no = $this->input->post('start');
         foreach ($list as $prd) {
@@ -96,7 +104,9 @@ class Products extends CI_Controller
 
 //             // Replace default.png with deskgoo.png
 // $image = ($prd->image === 'default.png') ? 'deskgoo.png' : $prd->image;
-            $row[] = '<a href="#" data-object-id="' . $pid . '" class="view-object"><span class="avatar-lg align-baseline"><img style="max-width: 80px" src="' . base_url() . 'userfiles/product/thumbnail/' . $prd->image . '" ></span>&nbsp;' . $prd->product_name . '</a>';
+            // Use default image if product image is empty or null  
+            $productImage = (!empty($prd->image) && $prd->image !== null) ? $prd->image : 'deskgoo.png';
+            $row[] = '<a href="#" data-object-id="' . $pid . '" class="view-object"><span class="avatar-lg align-baseline"><img style="max-width: 80px" src="' . base_url() . 'userfiles/product/thumbnail/' . $productImage . '" ></span>&nbsp;' . $prd->product_name . '</a>';
             $row[] = +$prd->qty;
             $row[] = $prd->product_code;
             $row[] = $prd->c_title;
@@ -128,6 +138,13 @@ class Products extends CI_Controller
 
     public function addproduct()
     {
+        if (!$this->aauth->premission(10)) {
+            exit('<h3>Sorry! You have insufficient permissions to access this section</h3>');
+        }
+
+        // Debug: Log all POST data
+        error_log("ADDPRODUCT DEBUG: POST data received: " . print_r($_POST, true));
+
         $product_name = $this->input->post('product_name', true);
         $catid = $this->input->post('product_cat');
         $warehouse = $this->input->post('product_warehouse');
@@ -154,7 +171,135 @@ class Products extends CI_Controller
         $brand = $this->input->post('brand');
         $serial = $this->input->post('product_serial');
         if ($catid) {
-            $this->products->addnew($catid, $warehouse, $product_name, $product_code, $product_price, $factoryprice, $taxrate, $disrate, $product_qty, $product_qty_alert, $product_desc, $image, $unit, $barcode, $v_type, $v_stock, $v_alert, $wdate, $code_type, $w_type, $w_stock, $w_alert, $sub_cat, $brand, $serial);
+            // Handle new variation system - check if variations are present
+            $variant_ids = $this->input->post('variant_id');
+            $variant_prices = $this->input->post('variant_price');
+            $variant_stocks = $this->input->post('variant_stock');
+
+            // Check if there are actually valid variations (not just empty form fields)
+            $has_valid_variations = false;
+            if ($variant_ids && is_array($variant_ids)) {
+                foreach ($variant_ids as $index => $variant_id) {
+                    if (!empty($variant_id) && isset($variant_stocks[$index]) && $variant_stocks[$index] > 0) {
+                        $has_valid_variations = true;
+                        break;
+                    }
+                }
+            }
+
+            // If variations are present, parent product should have 0 stock (stock managed by variations)
+            if ($has_valid_variations) {
+                $product_qty = 0;
+            }
+
+            $result = $this->products->addnew($catid, $warehouse, $product_name, $product_code, $product_price, $factoryprice, $taxrate, $disrate, $product_qty, $product_qty_alert, $product_desc, $image, $unit, $barcode, $v_type, $v_stock, $v_alert, $wdate, $code_type, $w_type, $w_stock, $w_alert, $sub_cat, $brand, $serial, true);
+            
+            if ($result['pid']) {
+                $product_id = $result['pid'];
+
+                // Handle new variation system
+                if ($has_valid_variations) {
+                    error_log("ADDPRODUCT DEBUG: Processing " . count($variant_ids) . " variations");
+                    foreach ($variant_ids as $index => $variant_id) {
+                        $price = numberClean($variant_prices[$index]);
+                        $stock = numberClean($variant_stocks[$index]);
+
+                        error_log("ADDPRODUCT DEBUG: Processing variation $index - variant_id: $variant_id, price: $price, stock: $stock");
+
+                        if ($price > 0 && $stock >= 0 && !empty($variant_id)) {
+                            // Get parent product details
+                            $this->db->select('*');
+                            $this->db->where('pid', $product_id);
+                            $parent_product = $this->db->get('pos_products')->row_array();
+
+                            // Get variation name
+                            $this->db->select('name');
+                            $this->db->where('id', $variant_id);
+                            $this->db->where('level_type', 3);
+                            $this->db->where('parent_id', 0);
+                            $variation_query = $this->db->get('pos_units');
+                            $variation_name = $variation_query->row()->name;
+
+                            // Shorten variation name by removing prefixes
+                            $variation_name = str_replace(['Capacity ', 'Size ', 'color '], '', $variation_name);
+
+                            // Get attributes for option_id and variation_option_id
+                            $this->db->select('option_id, option_value_id');
+                            $this->db->where('variation_id', $variant_id);
+                            $attributes = $this->db->get('pos_variation_attributes')->result_array();
+                            $option_id = isset($attributes[0]['option_id']) ? $attributes[0]['option_id'] : 0;
+                            $variation_option_id = isset($attributes[0]['option_value_id']) ? $attributes[0]['option_value_id'] : 0;
+
+                            // Create variation product name and code
+                            $full_variation_name = $parent_product['product_name'] . '-' . $variation_name;
+                            
+                            // Generate variation code from variation name (e.g., "Blue Large" -> "BL")
+                            $variation_parts = preg_split('/[\s\-\+\&]+/', $variation_name);
+                            $variation_short = '';
+                            foreach ($variation_parts as $part) {
+                                if (strlen(trim($part)) > 0) {
+                                    $variation_short .= strtoupper(substr(trim($part), 0, 1));
+                                }
+                            }
+                            // Limit to 4 characters max
+                            $variation_short = substr($variation_short, 0, 4);
+                            $variation_code = $parent_product['product_code'] . '-' . $variation_short;
+
+                            error_log("ADDPRODUCT DEBUG: Creating variation: $full_variation_name with code: $variation_code");
+
+                            // Insert variation product
+                            $variation_data = array(
+                                'product_name' => $full_variation_name,
+                                'pcat' => $parent_product['pcat'],
+                                'warehouse' => $parent_product['warehouse'],
+                                'product_code' => $variation_code,
+                                'product_price' => $price,
+                                'fproduct_price' => $price,
+                                'qty' => $stock,
+                                'alert' => 0, // Default alert
+                                'merge' => 1,
+                                'sub' => $product_id,
+                                'vb' => 0,
+                                'option_id' => $option_id,
+                                'variation_option_id' => $variation_option_id,
+                                'variation_id' => $variant_id,
+                                'unit' => $parent_product['unit'],
+                                'taxrate' => $parent_product['taxrate'],
+                                'disrate' => $parent_product['disrate'],
+                                'barcode' => rand(100, 999) . rand(0, 9) . rand(1000000, 9999999) . rand(0, 9),
+                                'code_type' => 'EAN13',
+                                'expiry' => '2028-12-31',
+                                'expiry_alert_seen' => 0,
+                                'sub_id' => 0,
+                                'b_id' => 0
+                            );
+
+                            if ($this->db->insert('pos_products', $variation_data)) {
+                                $variation_pid = $this->db->insert_id();
+                                error_log("ADDPRODUCT DEBUG: Variation created with PID: $variation_pid");
+                                // Log stock movement
+                                $this->products->movers(1, $variation_pid, $stock, 0, 'Variation Stock Initialized');
+                            } else {
+                                error_log("ADDPRODUCT DEBUG: Failed to insert variation");
+                            }
+                        } else {
+                            error_log("ADDPRODUCT DEBUG: Skipping variation $index - invalid data");
+                        }
+                    }
+
+                    // Update parent product total stock from all variations
+                    $this->products->update_parent_total_stock($product_id);
+                    error_log("ADDPRODUCT DEBUG: Updated parent stock for product $product_id");
+                } else {
+                    error_log("ADDPRODUCT DEBUG: No variation data found or not an array");
+                }
+
+                // Return success response
+                echo json_encode($result['response']);
+            } else {
+                // Return error response
+                echo json_encode($result['response']);
+            }
         }
     }
 
@@ -218,6 +363,7 @@ class Products extends CI_Controller
         $head['usernm'] = $this->aauth->get_user()->username;
         $this->load->model('units_model', 'units');
         $data['variables'] = $this->units->variables_list();
+        $data['options'] = $this->units->options_list();  // New: get options
         $this->load->view('fixed/header', $head);
         $this->load->view('products/product-edit', $data);
         $this->load->view('fixed/footer');
@@ -230,6 +376,13 @@ class Products extends CI_Controller
             exit('<h3>Sorry! You have insufficient permissions to access this section</h3>');
         }
         $pid = $this->input->post('pid');
+
+        // Fetch product data to check if it's a variation
+        $this->db->select('*');
+        $this->db->from('pos_products');
+        $this->db->where('pid', $pid);
+        $query = $this->db->get();
+        $product_data = $query->row_array();
         $product_name = $this->input->post('product_name', true);
         $catid = $this->input->post('product_cat');
         $warehouse = $this->input->post('product_warehouse');
@@ -261,8 +414,126 @@ class Products extends CI_Controller
 		$wdate = datefordatabase($this->input->post('wdate'));
 		$wdate =substr($wdate,0,10);
 		//print_r($wdate);
+        
+        // Handle new variation system for edit
+        $variant_ids = $this->input->post('variation_id');
+        $variant_prices = $this->input->post('variation_price');
+        $variant_stocks = $this->input->post('variation_stock');
+        
+        // Check if there are actually valid variations (not just empty form fields)
+        $has_valid_variations = false;
+        if ($variant_ids && is_array($variant_ids)) {
+            foreach ($variant_ids as $index => $variant_id) {
+                if (!empty($variant_id) && isset($variant_stocks[$index]) && $variant_stocks[$index] > 0) {
+                    $has_valid_variations = true;
+                    break;
+                }
+            }
+        }
+        
+        if ($has_valid_variations) {
+            // If variations are present, parent product should have 0 stock (stock managed by variations)
+            $product_qty = 0;
+        }
+        
+        if ($has_valid_variations) {
+            // Process new variations for the product
+            foreach ($variant_ids as $index => $variant_id) {
+                $price = numberClean($variant_prices[$index]);
+                $stock = numberClean($variant_stocks[$index]);
+                
+                if ($price > 0 && $stock >= 0 && !empty($variant_id)) {
+                    // Get parent product details
+                    $this->db->select('*');
+                    $this->db->where('pid', $pid);
+                    $parent_product = $this->db->get('pos_products')->row_array();
+                    
+                    // Get variation name
+                    $this->db->select('name');
+                    $this->db->where('id', $variant_id);
+                    $this->db->where('level_type', 3);
+                    $this->db->where('parent_id', 0);
+                    $variation_query = $this->db->get('pos_units');
+                    $variation_name = $variation_query->row()->name;
+
+                    // Shorten variation name by removing prefixes
+                    $variation_name = str_replace(['Capacity ', 'Size ', 'color '], '', $variation_name);
+                    
+                    // Get attributes for option_id and variation_option_id
+                    $this->db->select('option_id, option_value_id');
+                    $this->db->where('variation_id', $variant_id);
+                    $attributes = $this->db->get('pos_variation_attributes')->result_array();
+                    $option_id = isset($attributes[0]['option_id']) ? $attributes[0]['option_id'] : 0;
+                    $variation_option_id = isset($attributes[0]['option_value_id']) ? $attributes[0]['option_value_id'] : 0;
+                    
+                    // Create variation product name and code
+                    $full_variation_name = $parent_product['product_name'] . '-' . $variation_name;
+                    
+                    // Generate variation code from variation name (e.g., "Blue Large" -> "BL")
+                    $variation_parts = preg_split('/[\s\-\+\&]+/', $variation_name);
+                    $variation_short = '';
+                    foreach ($variation_parts as $part) {
+                        if (strlen(trim($part)) > 0) {
+                            $variation_short .= strtoupper(substr(trim($part), 0, 1));
+                        }
+                    }
+                    // Limit to 4 characters max
+                    $variation_short = substr($variation_short, 0, 4);
+                    $variation_code = $parent_product['product_code'] . '-' . $variation_short;
+                    
+                    // Insert variation product
+                    $variation_data = array(
+                        'product_name' => $full_variation_name,
+                        'pcat' => $parent_product['pcat'],
+                        'warehouse' => $parent_product['warehouse'],
+                        'product_code' => $variation_code,
+                        'product_price' => $price,
+                        'fproduct_price' => $price,
+                        'qty' => $stock,
+                        'alert' => 0,
+                        'merge' => 1,
+                        'sub' => $pid,
+                        'vb' => 0,
+                        'option_id' => $option_id,
+                        'variation_option_id' => $variation_option_id,
+                        'variation_id' => $variant_id,
+                        'unit' => $parent_product['unit'],
+                        'taxrate' => $parent_product['taxrate'],
+                        'disrate' => $parent_product['disrate'],
+                        'barcode' => rand(100, 999) . rand(0, 9) . rand(1000000, 9999999) . rand(0, 9),
+                        'code_type' => 'EAN13',
+                        'expiry' => '2028-12-31',
+                        'expiry_alert_seen' => 0,
+                        'sub_id' => 0,
+                        'b_id' => 0
+                    );
+                    
+                    if ($this->db->insert('pos_products', $variation_data)) {
+                        $variation_pid = $this->db->insert_id();
+                        // Log stock movement
+                        $this->products->movers(1, $variation_pid, $stock, 0, 'Variation Stock Initialized');
+                    }
+                }
+            }
+            
+            // Update parent product total stock
+            $this->update_parent_total_stock($pid);
+        }
+        
         if ($pid) {
             $this->products->edit($pid, $catid, $warehouse, $product_name, $product_code, $product_price, $factoryprice, $taxrate, $disrate, $product_qty, $product_qty_alert, $product_desc, $image, $unit, $barcode, $code_type, $sub_cat, $brand, $vari, $serial,$wdate);
+        }
+
+        // Update parent stock if editing a variation
+        if ($product_data['merge'] == 1) {
+            $this->update_parent_total_stock($product_data['sub']);
+        }
+
+        // Update parent stock if it has variations
+        $this->db->where('sub', $pid);
+        $this->db->where('merge', 1);
+        if ($this->db->count_all_results('pos_products') > 0) {
+            $this->update_parent_total_stock($pid);
         }
     }
 
@@ -278,7 +549,11 @@ class Products extends CI_Controller
             $row = array();
             $row[] = $no;
             $pid = $prd->pid;
-            $row[] = $prd->product_name;
+            $name = $prd->product_name;
+            if ($prd->variant_count > 0) {
+                $name .= ' (' . $prd->variant_count . ' variants)';
+            }
+            $row[] = $name;
             $row[] = +$prd->qty;
             $row[] = $prd->product_code;
             $row[] = $prd->c_title;
@@ -359,8 +634,9 @@ class Products extends CI_Controller
                 'accept_file_types' => '/\.(gif|jpeg|jpg|png|jpe?g)$/i',  // More explicit
 				'upload_dir' => FCPATH . 'userfiles/product/',
 				'upload_url' => base_url() . 'userfiles/product/',
-				'max_width'=>1024,
-				'max_height'=>1024,
+				'max_file_size' => 10485760, // 10MB (10 * 1024 * 1024 bytes)
+				'max_width'=>4096,  // Increased from 2024 to 4096 pixels
+				'max_height'=>4096, // Increased from 2024 to 4096 pixels
                 'image_quality'=> 90     // Optional: Maintains quality after resizing
             ));
         }
@@ -434,9 +710,16 @@ class Products extends CI_Controller
         $query = $this->db->get();
         $data['product'] = $query->row_array();
 
-        $this->db->select('pos_products.*,pos_warehouse.title');
+        // Fetch variations with hierarchical information (Option → Option Value → Variant)
+        $this->db->select('pos_products.*,pos_warehouse.title, 
+                          u1.name as option_name, 
+                          u2.name as option_value_name, 
+                          u3.name as variant_name');
         $this->db->from('pos_products');
         $this->db->join('pos_warehouse', 'pos_warehouse.id = pos_products.warehouse');
+        $this->db->join('pos_units u1', 'pos_products.option_id = u1.id', 'left');
+        $this->db->join('pos_units u2', 'pos_products.variation_option_id = u2.id', 'left');
+        $this->db->join('pos_units u3', 'pos_products.variation_id = u3.id', 'left');
         if ($this->aauth->get_user()->loc) {
             $this->db->group_start();
             $this->db->where('pos_warehouse.loc', $this->aauth->get_user()->loc);
@@ -761,24 +1044,208 @@ public function manage_expiry()
 }
 
 
-
-
-
-public function check_product_name()
+public function import_excel()
 {
-    $product_name = $this->input->post('product_name');
-    // $warehouse = $this->input->post('product_warehouse'); // Optional: check by warehouse too
+    $this->load->library('upload');
 
-    $this->db->where('LOWER(product_name)', strtolower($product_name));
-    // if ($warehouse) {
-    //     $this->db->where('warehouse', $warehouse);
-    // }
-    $exists = $this->db->get('pos_products')->num_rows() > 0;
+    $config['upload_path'] = FCPATH . 'uploads/';
 
-    echo json_encode(['exists' => $exists]);
+    $config['allowed_types'] = 'xls|xlsx';
+    $config['max_size'] = 2048; // 2MB
+    $this->upload->initialize($config);
+
+    if (!$this->upload->do_upload('excel_file')) {
+        $error = $this->upload->display_errors();
+        $this->session->set_flashdata('error', "File upload failed: $error");
+        redirect('products'); // Redirect back with error message
+    } else {
+        $file_data = $this->upload->data();
+        $file_path = $file_data['full_path'];
+
+        if (!file_exists($file_path)) {
+            $this->session->set_flashdata('error', 'Uploaded file not found.');
+            redirect('products');
+        }
+
+        require_once FCPATH . 'vendor/autoload.php';
+
+        try {
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file_path);
+            $sheet_data = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+        } catch (\PhpOffice\PhpSpreadsheet\Reader\Exception $e) {
+            $this->session->set_flashdata('error', 'Error reading Excel file: ' . $e->getMessage());
+            unlink($file_path);
+            redirect('products');
+        } catch (Throwable $t) {
+            $this->session->set_flashdata('error', 'General error: ' . $t->getMessage());
+            unlink($file_path);
+            redirect('products');
+        }
+
+        $this->load->model('Products_model');
+        $imported = $this->Products_model->import_products($sheet_data);
+
+        unlink($file_path); // Delete the uploaded file
+
+        if ($imported) {
+            $this->session->set_flashdata('success', 'Products imported successfully.');
+        } else {
+            $this->session->set_flashdata('error', 'Failed to import products.');
+        }
+
+        redirect('products');
+    }
 }
 
 
+
+    public function check_product_name()
+    {
+        $product_name = $this->input->post('product_name');
+        // $warehouse = $this->input->post('product_warehouse'); // Optional: check by warehouse too
+
+        $this->db->where('LOWER(product_name)', strtolower($product_name));
+        // if ($warehouse) {
+        //     $this->db->where('warehouse', $warehouse);
+        // }
+        $exists = $this->db->get('pos_products')->num_rows() > 0;
+
+        echo json_encode(['exists' => $exists]);
+    }
+
+    // New method: Get variation options for a specific option (AJAX)
+    public function get_variation_options()
+    {
+        $option_id = $this->input->post('option_id');
+        $this->load->model('units_model', 'units');
+        $variation_options = $this->units->variation_options_by_option($option_id);
+        echo json_encode($variation_options);
+    }
+
+    // New method: Get variations for a specific variation option (AJAX)
+    public function get_variations()
+    {
+        $variation_option_id = $this->input->post('variation_option_id');
+        $this->load->model('units_model', 'units');
+        $variations = $this->units->variations_by_variation_option($variation_option_id);
+        echo json_encode($variations);
+    }
+
+    // New method: Get all variations for a parent product (for POS popup)
+    public function get_product_variations_popup()
+    {
+        $product_id = $this->input->post('product_id');
+        
+        $this->db->select('pv.*, po.name as option_name, pvo.name as variation_option_name, pvar.name as variation_name');
+        $this->db->from('pos_products pv');
+        $this->db->join('pos_units po', 'po.id = pv.option_id', 'left');
+        $this->db->join('pos_units pvo', 'pvo.id = pv.variation_option_id', 'left');
+        $this->db->join('pos_units pvar', 'pvar.id = pv.variation_id', 'left');
+        $this->db->where('pv.sub', $product_id);
+        $this->db->where('pv.merge', 1);
+        $variations = $this->db->get()->result_array();
+        
+        echo json_encode($variations);
+    }
+
+    // New method: Add product variation with 3-level system
+    public function add_product_variation()
+    {
+        $product_id = $this->input->post('product_id');
+        $option_id = $this->input->post('option_id');
+        $variation_option_id = $this->input->post('variation_option_id');
+        $variation_id = $this->input->post('variation_id');
+        $price = $this->input->post('variation_price');
+        $stock = $this->input->post('variation_stock');
+        $alert = $this->input->post('variation_alert');
+        $sku = $this->input->post('variation_sku');
+
+        // Get parent product details
+        $this->db->select('*');
+        $this->db->where('pid', $product_id);
+        $parent_product = $this->db->get('pos_products')->row_array();
+
+        // Get variation names for product name
+        $this->db->select('u1.name as option_name, u2.name as variation_option_name, u3.name as variation_name');
+        $this->db->from('pos_units u1');
+        $this->db->join('pos_units u2', 'u1.id = u2.parent_id', 'left');
+        $this->db->join('pos_units u3', 'u2.id = u3.parent_id', 'left');
+        $this->db->where('u1.id', $option_id);
+        $this->db->where('u2.id', $variation_option_id);
+        if ($variation_id) {
+            $this->db->where('u3.id', $variation_id);
+        }
+        $variation_info = $this->db->get()->row_array();
+
+        // Shorten variation name by removing prefixes
+        $variation_info['variation_name'] = str_replace(['Capacity ', 'Size ', 'color '], '', $variation_info['variation_name']);
+
+        // Create variation product name
+        $variation_name = $parent_product['product_name'];
+        if ($variation_info['option_name']) {
+            $variation_name .= '-' . $variation_info['option_name'];
+        }
+        if ($variation_info['variation_option_name']) {
+            $variation_name .= '-' . $variation_info['variation_option_name'];
+        }
+        if ($variation_info['variation_name']) {
+            $variation_name .= '-' . $variation_info['variation_name'];
+        }
+
+        // Insert variation product
+        $variation_data = array(
+            'product_name' => $variation_name,
+            'pcat' => $parent_product['pcat'],
+            'warehouse' => $parent_product['warehouse'],
+            'product_code' => $sku ? $sku : '', // Clean: only use SKU if provided, otherwise leave empty
+            'product_price' => $price,
+            'fproduct_price' => $price, // Final price same as product price
+            'qty' => $stock,
+            'alert' => $alert,
+            'merge' => 1,
+            'sub' => $product_id,
+            'vb' => 0, // Required field
+            'option_id' => $option_id,
+            'variation_option_id' => $variation_option_id,
+            'variation_id' => $variation_id,
+            'unit' => $parent_product['unit'],
+            'taxrate' => $parent_product['taxrate'],
+            'disrate' => $parent_product['disrate'],
+            'barcode' => rand(100, 999) . rand(0, 9) . rand(1000000, 9999999) . rand(0, 9), // Auto-generate barcode
+            'code_type' => 'EAN13',
+            'expiry' => '2028-12-31', // Default expiry
+            'expiry_alert_seen' => 0,
+            'sub_id' => 0,
+            'b_id' => 0
+        );
+
+        if ($this->db->insert('pos_products', $variation_data)) {
+            $variation_pid = $this->db->insert_id();
+            
+            // Update parent product total stock
+            $this->update_parent_total_stock($product_id);
+            
+            // Log stock movement
+            $this->products->movers(1, $variation_pid, $stock, 0, 'Variation Stock Initialized');
+            
+            echo json_encode(array('status' => 'Success', 'message' => 'Product variation added successfully'));
+        } else {
+            echo json_encode(array('status' => 'Error', 'message' => 'Failed to add product variation'));
+        }
+    }
+
+    // Update parent product total stock from all variations
+    private function update_parent_total_stock($product_id)
+    {
+        $this->db->select_sum('qty');
+        $this->db->where('sub', $product_id);
+        $this->db->where('merge', 1);
+        $result = $this->db->get('pos_products')->row();
+        $total_stock = $result->qty ? $result->qty : 0;
+
+        $this->db->where('pid', $product_id);
+        $this->db->update('pos_products', array('qty' => $total_stock));
+    }
 
 
     public function custom_label_old()
@@ -920,6 +1387,8 @@ public function check_product_name()
             $this->load->view('fixed/footer');
         }
     }
+
+    
 
 
 }

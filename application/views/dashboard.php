@@ -291,25 +291,31 @@
             </div>
         </div>
     </div>
-    <div class="col-xl-4 col-lg-12">
-        <div class="card">
+    <?php $package = $this->config->item('package'); ?>
 
-            <div class="card-header">
-                <div class="header-block">
-                    <h4 class="title">
-                        <?php echo $this->lang->line('income_vs_expenses') ?>
-                    </h4></div>
-            </div>
-            <div class="card-body">
-                <div id="salesbreakdown" class="card mt-2"
-                     data-exclude="xs,sm,lg">
-                    <div class="dashboard-sales-breakdown-chart" id="dashboard-sales-breakdown-chart"></div>
-
-                </div>
-                <br>
+<div class="col-xl-4 col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="header-block">
+                <h4 class="title">
+                    <?php echo $this->lang->line('income_vs_expenses') ?>
+                </h4>
             </div>
         </div>
+        <div class="card-body">
+            <?php if ($package == 'premium'): ?>
+                <div id="salesbreakdown" class="card mt-2" data-exclude="xs,sm,lg">
+                    <div class="dashboard-sales-breakdown-chart" id="dashboard-sales-breakdown-chart"></div>
+                </div>
+                <br>
+            <?php else: ?>
+                <div class="alert alert-info">
+                    Upgrade to Premium to view the Income vs Expenses chart.
+                </div>
+            <?php endif; ?>
+        </div>
     </div>
+</div>
 </div>
 <div class="row">
     <div class="col-12">
@@ -321,7 +327,7 @@
                         <div class="media">
                             <div class="media-body text-left w-100">
                                 <h3 class="primary"><?php $ipt = sprintf("%0.0f", ($tt_inc * 100) / $goals['income']); ?><?php echo ' ' . $ipt . '%' ?></h3><?= '<span class=" font-medium-1 display-block">' . date('F') . ' ' . $this->lang->line('income') . '</span>'; ?>
-                                <span class="font-medium-1"><?= amountExchange($tt_inc, 0, $this->aauth->get_user()->loc) . '/' . amountExchange($goals['income'], 0, $this->aauth->get_user()->loc) ?></span>
+                                <span class="font-medium-1"><?= amountExchange($tt_inc, 0, $this->aauth->get_user()->loc) ?></span>
                             </div>
                             <div class="media-right media-middle">
                                 <i class="fa fa-money primary font-large-2 float-right"></i>
@@ -341,7 +347,7 @@
                         <div class="media">
                             <div class="media-body text-left w-100">
                                 <h3 class="red"><?php $ipt = sprintf("%0.0f", ($tt_exp * 100) / $goals['expense']); ?><?php echo ' ' . $ipt . '%' ?></h3><?= '<span class="font-medium-1 display-block">' . date('F') . ' ' . $this->lang->line('expenses') . '</span>'; ?>
-                                <span class="font-medium-1"><?= amountExchange($tt_exp, 0, $this->aauth->get_user()->loc) . '/' . amountExchange($goals['expense'], 0, $this->aauth->get_user()->loc) ?></span>
+                                <span class="font-medium-1"><?= amountExchange($tt_exp, 0, $this->aauth->get_user()->loc) ?></span>
                             </div>
                             <div class="media-right media-middle">
                                 <i class="ft-external-link red font-large-2 float-right"></i>
@@ -361,7 +367,7 @@
                         <div class="media">
                             <div class="media-body text-left w-100">
                                 <h3 class="blue"><?php $ipt = sprintf("%0.0f", ($monthsales * 100) / $goals['sales']); ?><?php echo ' ' . $ipt . '%' ?></h3><?= '<span class="font-medium-1 display-block">' . date('F') . ' ' . $this->lang->line('sales') . '</span>'; ?>
-                                <span class="font-medium-1"><?= amountExchange($monthsales, 0, $this->aauth->get_user()->loc) . '/' . amountExchange($goals['sales'], 0, $this->aauth->get_user()->loc) ?></span>
+                                <span class="font-medium-1"><?= amountExchange($monthsales, 0, $this->aauth->get_user()->loc) ?></span>
                             </div>
                             <div class="media-right media-middle">
                                 <i class="ft-flag blue font-large-2 float-right"></i>
@@ -381,7 +387,7 @@
                         <div class="media">
                             <div class="media-body text-left w-100">
                                 <h3 class="purple"><?php $ipt = sprintf("%0.0f", (($tt_inc - $tt_exp) * 100) / $goals['sales']); ?><?php echo ' ' . $ipt . '%' ?></h3><?= '<span class="font-medium-1 display-block">' . date('F') . ' ' . $this->lang->line('net_income') . '</span>'; ?>
-                                <span class="font-medium-1"><?= amountExchange($tt_inc - $tt_exp, 0, $this->aauth->get_user()->loc) . '/' . amountExchange($goals['netincome'], 0, $this->aauth->get_user()->loc) ?></span>
+                                <span class="font-medium-1"><?= amountExchange($tt_inc - $tt_exp, 0, $this->aauth->get_user()->loc) ?></span>
                             </div>
                             <div class="media-right media-middle">
                                 <i class="ft-inbox purple font-large-2 float-right"></i>
@@ -419,15 +425,25 @@
 
                 </ul>
                 <div class="tab-content pt-1">
-                    <div role="tabpanel" class="tab-pane active" id="sales" aria-expanded="true"
-                         data-toggle="tab">
-                        <div id="dashboard-income-chart"></div>
-
-                    </div>
-                    <div class="tab-pane" id="transactions1" data-toggle="tab" aria-expanded="false">
-                        <div id="dashboard-expense-chart"></div>
-                    </div>
-                </div>
+    <div role="tabpanel" class="tab-pane active" id="sales" aria-expanded="true" data-toggle="tab">
+        <?php if ($package == 'premium'): ?>
+            <div id="dashboard-income-chart"></div>
+        <?php else: ?>
+            <div class="alert alert-info">
+                Upgrade to Premium to view the income chart.
+            </div>
+        <?php endif; ?>
+    </div>
+    <div class="tab-pane" id="transactions1" data-toggle="tab" aria-expanded="false">
+        <?php if ($package == 'premium'): ?>
+            <div id="dashboard-expense-chart"></div>
+        <?php else: ?>
+            <div class="alert alert-info">
+                Upgrade to Premium to view the expense chart.
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
             </div>
         </div>
     </div>
@@ -661,20 +677,22 @@
     drawIncomeChart(dataVisits);
     drawExpenseChart(dataVisits2);
     $('#dashboard-sales-breakdown-chart').empty();
-    Morris.Donut({
-        element: 'dashboard-sales-breakdown-chart',
-        data: [{
-            label: "<?php echo $this->lang->line('Income') ?>",
-            value: <?= intval(amountExchange_s($tt_inc, 0, $this->aauth->get_user()->loc)); ?> },
-            {
-                label: "<?php echo $this->lang->line('Expenses') ?>",
-                value: <?= intval(amountExchange_s($tt_exp, 0, $this->aauth->get_user()->loc)); ?> }
-        ],
-        resize: true,
-        colors: ['#34cea7', '#ff6e40'],
-        gridTextSize: 6,
-        gridTextWeight: 400
-    });
+   <?php if ($package == 'premium'): ?>
+Morris.Donut({
+    element: 'dashboard-sales-breakdown-chart',
+    data: [{
+        label: "<?php echo $this->lang->line('Income') ?>",
+        value: <?= intval(amountExchange_s($tt_inc, 0, $this->aauth->get_user()->loc)); ?> },
+        {
+            label: "<?php echo $this->lang->line('Expenses') ?>",
+            value: <?= intval(amountExchange_s($tt_exp, 0, $this->aauth->get_user()->loc)); ?> }
+    ],
+    resize: true,
+    colors: ['#34cea7', '#ff6e40'],
+    gridTextSize: 6,
+    gridTextWeight: 400
+});
+<?php endif; ?>
     $('a[data-toggle=tab').on('shown.bs.tab', function (e) {
         window.dispatchEvent(new Event('resize'));
     });

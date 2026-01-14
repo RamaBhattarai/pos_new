@@ -14,13 +14,16 @@
                 <li class="nav-item mobile-menu d-md-none mr-auto"><a
                             class="nav-link nav-menu-main menu-toggle hidden-xs" href="#"><i
                                 class="ft-menu font-large-1"></i></a></li>
-                <li class="nav-item"><a class="navbar-brand" href="<?= base_url() ?>dashboard/"><img
-                                class="brand-logo ml-1" alt="logo"
-                                src="<?php echo base_url(); ?>userfiles/theme/logo-header.png">
+                <li class="nav-item"><a class="navbar-brand" href="<?= base_url() ?>dashboard/" style="margin-left: 10px;"><img
+                                class="brand-logo" alt="logo"
+                                src="<?php echo base_url(); ?>userfiles/theme/logo-header.png"
+                                style="height: 90px; width: auto; max-width: 600px; object-fit: contain; margin-top: -5px;">
                     </a></li>
                 <li class="nav-item d-md-none"><a class="nav-link open-navbar-container" data-toggle="collapse"
                                                   data-target="#navbar-mobile"><i class="fa fa-ellipsis-v"></i></a></li>
             </ul>
+
+
         </div>
         <div class="navbar-container content">
             <div class="collapse navbar-collapse" id="navbar-mobile">
@@ -47,11 +50,16 @@
 
                         </ul>
                     </li>
-                    <?php    if ($this->aauth->premission(12)) { ?>   <li class="nav-item d-none d-md-block nav-link "><a href="<?= base_url() ?>pos_invoices/create"
-                                                                        class="btn btn-info btn-md t_tooltip"
-                                                                        title="Access POS"><i
-                                    class="icon-handbag"></i><?php echo $this->lang->line('POS') ?> </a>
-                    </li>  <?php    } ?>
+                    <?php $package = $this->config->item('package'); ?>
+<?php if ($this->aauth->premission(12) && $package != 'basic') { ?>
+    <li class="nav-item d-none d-md-block nav-link ">
+        <a href="<?= base_url() ?>pos_invoices/create"
+           class="btn btn-info btn-md t_tooltip"
+           title="Access POS">
+            <i class="icon-handbag"></i><?php echo $this->lang->line('POS') ?>
+        </a>
+    </li>
+<?php } ?>
                     <li class="nav-item nav-search"><a class="nav-link nav-link-search" href="#" aria-haspopup="true"
                                                        aria-expanded="false" id="search-input"><i
                                     class="ficon ft-search"></i></a>
@@ -92,6 +100,16 @@
                                                                href="<?php echo base_url(); ?>locations"><i
                                                                         class="ft-chevron-right"></i><?php echo $this->lang->line('Business Locations') ?>
                                                             </a></li>
+                                                        <li><select  class="dropdown-item" onchange="javascript:location.href = baseurl+'settings/switch_location?id='+this.value;"><?php
+                        $loc = location($this->aauth->get_user()->loc);
+                        echo ' <option value="' . $loc['id'] . '"> *' . $loc['cname'] . '*</option>';
+
+                        $loc = locations();
+                        foreach ($loc as $row) {
+                            echo ' <option value="' . $row['id'] . '"> ' . $row['cname'] . '</option>';
+                        }
+                        echo ' <option value="0">Master/Default</option>';
+                        ?></select></li>
                                                         <li><a class="dropdown-item"
                                                                href="<?php echo base_url(); ?>tools/setgoals"><i
                                                                         class="ft-chevron-right"></i> <?php echo $this->lang->line('Set Goals') ?>
@@ -127,7 +145,7 @@
                                                     </ul>
                                                 </div>
                                             </div>
-
+                    
                                             <div class="card-header p-0 pb-1 border-0 mt-1" id="heading3" role="tab">
                                                 <a class=" text-uppercase black" data-toggle="collapse"
                                                    data-parent="#accordionWrap" href="#accordion3"
@@ -296,14 +314,6 @@
                                                                href="<?php echo base_url(); ?>units"><i
                                                                         class="ft-chevron-right"></i><?php echo $this->lang->line('Measurement Unit') ?>
                                                             </a></li>
-                                                        <li><a class="dropdown-item"
-                                                               href="<?php echo base_url(); ?>units/variations"><i
-                                                                        class="ft-chevron-right"></i> <?php echo $this->lang->line('ProductsVariations') ?>
-                                                            </a></li>
-                                                        <li><a class="dropdown-item"
-                                                               href="<?php echo base_url(); ?>units/variables"><i
-                                                                        class="ft-chevron-right"></i> <?php echo $this->lang->line('VariationsVariables') ?>
-                                                            </a></li>
                                                     </ul>
                                                 </div>
                                             </div>
@@ -332,6 +342,10 @@
                                                         <li><a class="dropdown-item"
                                                                href="<?php echo base_url(); ?>paymentgateways/exchange"><i
                                                                         class="ft-chevron-right"></i> <?php echo $this->lang->line('Currency Exchange') ?>
+                                                            </a></li>
+                                                            <li><a class="dropdown-item"
+                                                               href="<?php echo base_url(); ?>paymentmethods"><i
+                                                                        class="ft-chevron-right"></i> Payment Methods
                                                             </a></li>
                                                         <li><a class="dropdown-item"
                                                                href="<?php echo base_url(); ?>paymentgateways/bank_accounts"><i
@@ -495,6 +509,29 @@
     </ul>
 </li>
 
+<!-- Party Confirmation Alerts -->
+<li class="dropdown dropdown-notification nav-item">
+    <a class="nav-link nav-link-label" href="#" data-toggle="dropdown">
+        <i class="ficon ft-users"></i> <!-- Party Confirmation Icon -->
+        <span class="badge badge-pill badge-default badge-warning badge-up" id="confirmationcount">0</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-media dropdown-menu-right">
+        <li class="dropdown-menu-header">
+            <h6 class="dropdown-header m-0">
+                <span class="grey darken-2">Party Confirmation Alerts</span>
+            </h6>
+        </li>
+        <li class="scrollable-container media-list" id="confirmationlist">
+            <!-- JS will insert confirmation items here -->
+        </li>
+        <li class="dropdown-menu-footer">
+           <a class="dropdown-item text-muted text-center" href="<?= base_url('supplier/party_confirmations') ?>">
+    Manage Party Confirmations
+</a>
+        </li>
+    </ul>
+</li>
+
                         
                         
                     <li class="dropdown dropdown-notification nav-item">
@@ -614,6 +651,7 @@
 <!-- ////////////////////////////////////////////////////////////////////////////-->
 <!-- Horizontal navigation-->
 <div class="main-menu menu-fixed menu-dark menu-accordion menu-shadow" data-scroll-to-active="true">
+   
     <!-- Horizontal menu content-->
     <div class="main-menu-content">
 
@@ -718,6 +756,21 @@
                                 </li>
                             </ul>
                         </li>
+                        
+                        <li class="menu-item"><a href="#"><i
+                                        class="ft-box"></i> Product Variations</a>
+                            <ul class="menu-content">
+                                <li class="menu-item"><a
+                                            href="<?php echo base_url(); ?>units/variations"> <?php echo $this->lang->line('ProductsVariations') ?></a>
+                                </li>
+                                <li class="menu-item"><a
+                                            href="<?php echo base_url(); ?>units/variation_options"> <?php echo $this->lang->line('VariationsVariables') ?></a>
+                                </li>
+                                <li class="menu-item"><a
+                                            href="<?php echo base_url(); ?>units/product_variations"> Product Variations</a>
+                                </li>
+                            </ul>
+                        </li>
                         <li class="menu-item"><a href="<?php echo base_url(); ?>productcategory"><i
                                         class="ft-umbrella"></i><?php echo $this->lang->line('Product Categories'); ?>
                             </a>
@@ -746,6 +799,20 @@
                         </li>
 
                         <li class="menu-item"><a href="#"><i
+                                        class="icon-notebook"></i> <?php echo $this->lang->line('Purchase Entry') ?></a>
+                            <ul class="menu-content">
+                                <li class="menu-item"><a class="dropdown-item" href="<?= base_url(); ?>purchase/create_entry"
+                                                         data-toggle="dropdown"> <?php echo $this->lang->line('New Entry'); ?></a>
+                                </li>
+                                <li class="menu-item"><a
+                                            href="<?php echo base_url(); ?>purchase/purchase_entry"><?= $this->lang->line('Manage Entries'); ?></a>
+                                </li>
+
+
+                            </ul>
+                        </li>
+
+                        <li class="menu-item"><a href="#"><i
                                         class="icon-puzzle"></i> <?php echo $this->lang->line('Stock Return') ?></a>
                             <ul class="menu-content">
                                 <li class="menu-item"><a
@@ -761,6 +828,14 @@
                         <!-- 🔽 ADD THIS NEW MENU ITEM BELOW -->
         <li><a href="<?= base_url('StockAdjustment/index') ?>"><i class="fa fa-sliders"></i>
  Stock Adjustment</a></li>
+        
+        <!-- Batch Management Menu Item -->
+        <li><a href="<?= base_url('batches/index') ?>"><i class="fa fa-cubes"></i>
+ Batch Management</a></li>
+        
+        <!-- Day End Report Menu Item -->
+        <li><a href="<?= base_url('pos_invoices/day_end_report') ?>"><i class="fa fa-calendar-check-o"></i>
+ Day End Report</a></li>
         <!-- 🔼 -->
 
 
@@ -775,17 +850,26 @@
                                             href="<?php echo base_url(); ?>supplier"><?php echo $this->lang->line('Manage Suppliers'); ?></a>
                             </ul>
                         </li>
-                           <li class="menu-item" ><a
-                                  href="#"><i
-                                        class="fa fa-barcode"></i><?php echo $this->lang->line('ProductsLabel'); ?></a>
-                            <ul class="menu-content">
+                        
+                          <?php $package = $this->config->item('package'); ?>
+<?php if ($package != 'basic'): ?>
+    <li class="menu-item has-sub">
+        <a href="#"><i class="fa fa-barcode"></i><?php echo $this->lang->line('ProductsLabel'); ?></a>
+        <ul class="menu-content">
+            <li class="menu-item">
+                <a href="<?php echo base_url(); ?>products/custom_label">
+                    <?php echo $this->lang->line('custom_label'); ?>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="<?php echo base_url(); ?>products/standard_label">
+                    <?php echo $this->lang->line('standard_label'); ?>
+                </a>
+            </li>
+        </ul>
+    </li>
+<?php endif; ?>
 
-
-                                <li  class="menu-item"><a href="<?php echo base_url(); ?>products/custom_label"
-                                                   ><?php echo $this->lang->line('custom_label'); ?></a></li>
-                                  <li  class="menu-item"><a href="<?php echo base_url(); ?>products/standard_label"
-                                                ><?php echo $this->lang->line('standard_label'); ?></a></li>
-                            </ul>
                         </li>
                     </ul>
                 </li>
@@ -829,7 +913,7 @@
             <?php }
             if ($this->aauth->premission(4)) {
                 ?>
-                <li class="menu-item  has-sub <?php if ($this->li_a == "project") {
+                <!-- <li class="menu-item  has-sub <?php if ($this->li_a == "project") {
                     echo ' open';
                 } ?>"><a href="#"><i
                                 class="icon-briefcase"></i><span><?= $this->lang->line('Project') ?></span></a>
@@ -852,7 +936,7 @@
                         </li>
 
                     </ul>
-                </li>
+                </li> -->
             <?php }
             if (!$this->aauth->premission(4) && $this->aauth->premission(7)) {
                 ?>
@@ -1054,14 +1138,14 @@
                             <a href="<?php echo base_url(); ?>tools/notes"><i
                                         class="icon-note"></i> <?php echo $this->lang->line('Notes'); ?></a>
                         </li>
-                        <li class="menu-item">
+                        <!-- <li class="menu-item">
                             <a href="<?php echo base_url(); ?>events"><i
                                         class="icon-calendar"></i> <?php echo $this->lang->line('Calendar'); ?></a>
-                        </li>
-                        <li class="menu-item">
+                        </li> -->
+                        <!-- <li class="menu-item">
                             <a href="<?php echo base_url(); ?>tools/documents"><i
                                         class="icon-doc"></i> <?php echo $this->lang->line('Documents'); ?></a>
-                        </li>
+                        </li> -->
                          <!-- ✅ Your new Logs menu item -->
             <li class="menu-item">
                 <a href="<?php echo base_url(); ?>logs"><i class="icon-list"></i> Logs</a>
@@ -1088,12 +1172,12 @@
                             <li class="menu-item"><a
                                         href="<?php echo base_url(); ?>employee/permissions"><?= $this->lang->line('Permissions'); ?></a>
                             </li>
-                            <li class="menu-item"><a
+                            <!-- <li class="menu-item"><a
                                         href="<?php echo base_url(); ?>employee/salaries"><?= $this->lang->line('Salaries'); ?></a>
-                            </li>
-                            <li class="menu-item"><a
+                            </li> -->
+                            <!-- <li class="menu-item"><a
                                         href="<?php echo base_url(); ?>employee/attendances"><?= $this->lang->line('Attendance'); ?></a>
-                            </li>
+                            </li> -->
                             <li class="menu-item"><a
                                         href="<?php echo base_url(); ?>employee/holidays"><?= $this->lang->line('Holidays'); ?></a>
                             </li>
@@ -1155,6 +1239,15 @@
 
 
                 </li>
+                <!-- Subscription Plan -->
+<li class="menu-item <?php if ($this->li_a == "subscription") {
+    echo ' open';
+} ?>">
+    <a href="<?php echo base_url('subscription/plans'); ?>">
+        <i class="fa fa-credit-card"></i>
+        <span><?php echo $this->lang->line('Subscription Plan'); ?></span>
+    </a>
+</li>
             <?php }
             ?>
 
@@ -1172,6 +1265,7 @@
 
  <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // Load expiry alerts
     fetch('<?= base_url('products/expiry_alerts') ?>')
         .then(response => response.json())
         .then(data => {
@@ -1223,6 +1317,77 @@ document.addEventListener('DOMContentLoaded', function () {
         .catch(error => {
             console.error('Error loading expiry alerts:', error);
         });
+
+    // Define global function to reload party confirmation alerts
+    window.loadPartyConfirmationAlerts = function() {
+        // Load party confirmation alerts
+        fetch('<?= base_url('supplier/party_confirmation_alerts') ?>')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                const confirmationList = document.getElementById('confirmationlist');
+                const confirmationCount = document.getElementById('confirmationcount');
+
+                if (!confirmationList || !confirmationCount) {
+                    return;
+                }
+
+                confirmationList.innerHTML = ''; // Clear old items
+
+                if (data && Array.isArray(data) && data.length > 0) {
+                    confirmationCount.textContent = data.length;
+
+                    data.forEach((supplier) => {
+                        const item = document.createElement('a');
+                        item.className = 'dropdown-item';
+                        item.href = '#';
+                        item.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            window.location.href = `<?= base_url('supplier/party_confirmations') ?>?supplier_id=${supplier.id}`;
+                        });
+
+                        const amount = supplier.total_purchases ? parseFloat(supplier.total_purchases).toLocaleString() : '0';
+                        const threshold = supplier.confirmation_threshold ? parseFloat(supplier.confirmation_threshold).toLocaleString() : '0';
+                        
+                        item.innerHTML = `
+                            <div class="media">
+                                <div class="media-left align-self-center">
+                                    <i class="ft-users icon-bg-circle bg-warning"></i>
+                                </div>
+                                <div class="media-body">
+                                    <h6 class="media-heading">${supplier.name || supplier.company || 'Unknown Supplier'}</h6>
+                                    <p class="notification-text font-small-3">Amount: ₹${amount} | Threshold: ₹${threshold}</p>
+                                    <small class="text-muted">Period: ${supplier.period_start || 'N/A'} to ${supplier.period_end || 'N/A'}</small>
+                                </div>
+                            </div>
+                        `;
+                        confirmationList.appendChild(item);
+                    });
+                } else if (data && data.error) {
+                    confirmationCount.textContent = '⚠';
+                    confirmationList.innerHTML = `<div class="dropdown-item text-center text-danger">API Error: ${data.error}</div>`;
+                } else {
+                    confirmationCount.textContent = '0';
+                    confirmationList.innerHTML = `<div class="dropdown-item text-center text-muted">No confirmation alerts</div>`;
+                }
+            })
+            .catch(error => {
+                const confirmationList = document.getElementById('confirmationlist');
+                const confirmationCount = document.getElementById('confirmationcount');
+                
+                if (confirmationCount) confirmationCount.textContent = '⚠';
+                if (confirmationList) {
+                    confirmationList.innerHTML = `<div class="dropdown-item text-center text-danger">Network Error: ${error.message}</div>`;
+                }
+            });
+    };
+
+    // Load alerts on page load
+    window.loadPartyConfirmationAlerts();
 });
 </script>
 

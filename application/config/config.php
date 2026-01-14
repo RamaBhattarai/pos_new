@@ -24,7 +24,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 */
 
-$config['base_url'] = 'http://localhost/pos-system/';
+$config['base_url'] = ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == "on") ? "https" : "http");
+$config['base_url'] .= "://" . $_SERVER['HTTP_HOST'];
+$config['base_url'] .= str_replace(basename($_SERVER['SCRIPT_NAME']), "", $_SERVER['SCRIPT_NAME']);
 
 /*
 |--------------------------------------------------------------------------
@@ -37,7 +39,7 @@ $config['base_url'] = 'http://localhost/pos-system/';
 |
 */
 $config['index_page'] = '';
-
+ 
 /*
 |--------------------------------------------------------------------------
 | URI PROTOCOL
@@ -513,3 +515,11 @@ $config['rewrite_short_tags'] = FALSE;
 | Array:		array('10.0.1.200', '192.168.5.0/24')
 */
 $config['proxy_ips'] = '';
+
+
+$config['package'] = 'premium'; // Set the package name for the application
+
+
+
+
+$config['upload_path'] = FCPATH . 'uploads/'; // Set the upload path for file uploads

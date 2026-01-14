@@ -25,16 +25,16 @@
                                        aria-controls="tab1" href="#tab1" role="tab"
                                        aria-selected="true"><?php echo $this->lang->line('Billing Address') ?></a>
                                 </li>
-                                <li class="nav-item">
+                                <!-- <li class="nav-item">
                                     <a class="nav-link" id="base-tab2" data-toggle="tab" aria-controls="tab2"
                                        href="#tab2" role="tab"
                                        aria-selected="false"><?php echo $this->lang->line('Shipping Address') ?></a>
-                                </li>
-                                  <li class="nav-item">
+                                </li> -->
+                                  <!-- <li class="nav-item">
                                     <a class="nav-link" id="base-tab3" data-toggle="tab" aria-controls="tab3"
                                        href="#tab4" role="tab"
                                        aria-selected="false"><?php echo $this->lang->line('CustomFields') ?></a>
-                                </li>
+                                </li> -->
                                 <li class="nav-item">
                                     <a class="nav-link" id="base-tab3" data-toggle="tab" aria-controls="tab3"
                                        href="#tab3" role="tab"
@@ -83,7 +83,7 @@
 
                                         <div class="col-sm-8">
                                             <input type="text" placeholder="email"
-                                                   class="form-control margin-bottom required b_input" name="email"
+                                                   class="form-control margin-bottom  b_input" name="email"
                                                    id="mcustomer_email">
                                         </div>
                                     </div>
@@ -109,7 +109,7 @@
                                                    id="mcustomer_city">
                                         </div>
                                     </div>
-                                    <div class="form-group row">
+                                    <!-- <div class="form-group row">
 
                                         <label class="col-sm-2 col-form-label"
                                                for="region"><?php echo $this->lang->line('Region') ?></label>
@@ -119,8 +119,8 @@
                                                    class="form-control margin-bottom b_input" name="region"
                                                    id="region">
                                         </div>
-                                    </div>
-                                    <div class="form-group row">
+                                    </div> -->
+                                    <!-- <div class="form-group row">
 
                                         <label class="col-sm-2 col-form-label"
                                                for="country"><?php echo $this->lang->line('Country') ?></label>
@@ -130,8 +130,8 @@
                                                    class="form-control margin-bottom b_input" name="country"
                                                    id="mcustomer_country">
                                         </div>
-                                    </div>
-                                    <div class="form-group row">
+                                    </div> -->
+                                    <!-- <div class="form-group row">
 
                                         <label class="col-sm-2 col-form-label"
                                                for="postbox"><?php echo $this->lang->line('PostBox') ?></label>
@@ -141,7 +141,7 @@
                                                    class="form-control margin-bottom b_input" name="postbox"
                                                    id="postbox">
                                         </div>
-                                    </div>
+                                    </div> -->
                                 </div>
                                 <div class="tab-pane" id="tab2" role="tabpanel" aria-labelledby="base-tab2">
                                     <div class="form-group row">

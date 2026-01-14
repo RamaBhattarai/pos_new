@@ -77,6 +77,7 @@ class Employee extends CI_Controller
         $head['usernm'] = $this->aauth->get_user()->username;
         $head['title'] = 'Add Employee';
         $data['dept'] = $this->employee->department_list(0);
+        $data['warehouse'] = $this->employee->warehouses();
 
         $this->load->view('fixed/header', $head);
         $this->load->view('employee/add', $data);
@@ -118,6 +119,7 @@ class Employee extends CI_Controller
         $salary = numberClean($this->input->post('salary', true));
         $commission = $this->input->post('commission', true);
         $department = $this->input->post('department', true);
+        $warehouse = $this->input->post('warehouse', true);
 
 
         $a = $this->aauth->create_user($email, $password, $username);
@@ -128,7 +130,7 @@ class Employee extends CI_Controller
             if ($nuid > 0) {
 
 
-                $this->employee->add_employee($nuid, (string)$this->aauth->get_user($a)->username, $name, $roleid, $phone, $address, $city, $region, $country, $postbox, $location, $salary, $commission, $department);
+                $this->employee->add_employee($nuid, (string)$this->aauth->get_user($a)->username, $name, $roleid, $phone, $address, $city, $region, $country, $postbox, $location, $salary, $commission, $department, $warehouse);
 
             }
 
@@ -382,7 +384,8 @@ class Employee extends CI_Controller
             $department = $this->input->post('department', true);
             $commission = $this->input->post('commission', true);
             $roleid = $this->input->post('roleid', true);
-            $this->employee->update_employee($eid, $name, $phone, $phonealt, $address, $city, $region, $country, $postbox, $location, $salary, $department, $commission, $roleid);
+            $warehouse = $this->input->post('warehouse', true);
+            $this->employee->update_employee($eid, $name, $phone, $phonealt, $address, $city, $region, $country, $postbox, $location, $salary, $department, $commission, $roleid, $warehouse);
 
         } else {
             $head['usernm'] = $this->aauth->get_user($id)->username;
@@ -391,6 +394,7 @@ class Employee extends CI_Controller
 
             $data['user'] = $this->employee->employee_details($id);
             $data['dept'] = $this->employee->department_list($id, $this->aauth->get_user()->loc);
+            $data['warehouse'] = $this->employee->warehouses();
             $data['eid'] = intval($id);
             $this->load->view('fixed/header', $head);
             $this->load->view('employee/edit', $data);

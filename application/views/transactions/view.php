@@ -39,12 +39,23 @@
                 <div class="row">
 
 
-                    <?php echo '<div class="col-md-6">
+                    <?php 
+                    // Format for original format tracking (check if user originally entered Nepali or English)
+                    $dateFormat = $trans['date_format'] ?? 'english';
+                    
+                    echo '<div class="col-md-6">
                     <p>' . $this->lang->line('Debit') . ' : ' . amountExchange($trans['debit'], 0, $this->aauth->get_user()->loc) . ' </p><p>' . $this->lang->line('Credit') . ' : ' . amountExchange($trans['credit'], 0, $this->aauth->get_user()->loc) . ' </p><p>' . $this->lang->line('Type') . ' : ' . $trans['type'] . '</p>
                 </div>
 
                 <div class="col-md-6 text-right">
-                    <p>' . $this->lang->line('Date') . ' : ' . dateformat($trans['date']) . '</p><p>' . $this->lang->line('Transaction') . ' ID : ' . prefix(5) . $trans['id'] . '</p><p>' . $this->lang->line('Category') . ' : ' . $trans['cat'] . '</p>
+                    <p>' . $this->lang->line('Date') . ' : 
+                        <span class="date-display" data-raw="' . $trans['date'] . '" data-format="' . $dateFormat . '">
+                            ' . dateformat($trans['date']) . '
+                        </span>
+                        <span class="english-date" style="display:none; color:#666; font-size:0.9em;"></span>
+                    </p>
+                    <p>' . $this->lang->line('Transaction') . ' ID : ' . prefix(5) . $trans['id'] . '</p>
+                    <p>' . $this->lang->line('Category') . ' : ' . $trans['cat'] . '</p>
             </div><div class="col-md-12 "><hr>
                     <p>' . $this->lang->line('Note') . ' : ' . $trans['note'] . '</p>
             </div></div>'; ?>'

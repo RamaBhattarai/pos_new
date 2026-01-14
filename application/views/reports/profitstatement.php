@@ -53,10 +53,9 @@
 
                         <div class="form-group row">
 
-                            <label class="col-sm-3 col-form-label"
-                                   for="pay_cat"><?php echo $this->lang->line('Business Locations') ?></label>
-
                             <div class="col-sm-6">
+                                <label class="col-form-label"
+                                       for="pay_cat"><?php echo $this->lang->line('Business Locations') ?></label>
                                 <select name="pay_acc" class="form-control">
                                     <option value='0'><?php echo $this->lang->line('All') ?></option>
                                     <?php
@@ -68,33 +67,43 @@
                                     }
                                     ?>
                                 </select>
-
-
                             </div>
-                        </div>
 
+                            <div class="col-sm-6">
+                                <label class="col-form-label"
+                                       for="warehouse"><?php echo $this->lang->line('Warehouse') ?></label>
+                                <select name="warehouse" id="warehouse" class="form-control">
+                                    <option value=''><?php echo $this->lang->line('All') . ' ' . $this->lang->line('Warehouses') ?></option>
+                                    <?php
+                                    foreach ($locations as $row) {
+                                        $cid = $row['id'];
+                                        $acn = $row['cname'];
+                                        echo "<option value='$cid'>$acn</option>";
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+
+                        </div>
 
                         <div class="form-group row">
 
-                            <label class="col-sm-3 control-label"
-                                   for="sdate"><?php echo $this->lang->line('From Date') ?></label>
-
-                            <div class="col-sm-4">
+                            <div class="col-sm-6">
+                                <label class="control-label"
+                                       for="sdate"><?php echo $this->lang->line('From Date') ?></label>
                                 <input type="text" class="form-control required"
                                        placeholder="Start Date" name="sdate" id="sdate"
                                        data-toggle="datepicker" autocomplete="false">
                             </div>
-                        </div>
-                        <div class="form-group row">
 
-                            <label class="col-sm-3 control-label"
-                                   for="edate"><?php echo $this->lang->line('To Date') ?></label>
-
-                            <div class="col-sm-4">
+                            <div class="col-sm-6">
+                                <label class="control-label"
+                                       for="edate"><?php echo $this->lang->line('To Date') ?></label>
                                 <input type="text" class="form-control required"
                                        placeholder="End Date" name="edate"
                                        data-toggle="datepicker" autocomplete="false">
                             </div>
+
                         </div>
 
 
@@ -116,25 +125,36 @@
         </div>
     </div>
     <script type="text/javascript">
+        function fetchProfitData() {
+            var warehouse = $('#warehouse').val();
+            var url = baseurl + 'reports/fetch_data?p=profit';
+            if (warehouse) {
+                url += '&warehouse=' + warehouse;
+            }
+            $.ajax({
+                url: url,
+                dataType: 'json',
+                success: function (data) {
+                    $('#p1').html(data.p1);
+                    $('#p2').html(data.p2);
+                },
+                error: function (data) {
+                    $('#response').html('Error')
+                }
+            });
+        }
+
         $("#calculate_profit").click(function (e) {
             e.preventDefault();
             var actionurl = baseurl + 'reports/customprofit';
             actionCaculate(actionurl);
         });
 
+        $("#warehouse").change(function () {
+            fetchProfitData();
+        });
+
         setTimeout(function () {
-            $.ajax({
-                url: baseurl + 'reports/fetch_data?p=profit',
-                dataType: 'json',
-                success: function (data) {
-                    $('#p1').html(data.p1);
-                    $('#p2').html(data.p2);
-
-                },
-                error: function (data) {
-                    $('#response').html('Error')
-                }
-
-            });
+            fetchProfitData();
         }, 2000);
     </script>

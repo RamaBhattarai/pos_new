@@ -60,6 +60,7 @@ class Chart_model extends CI_Model
 
     public function trendingproducts($type, $c1 = '', $c2 = '')
     {
+        
         switch ($type) {
             case 'week':
                 $day1 = date("Y-m-d", strtotime(' - 7 days'));

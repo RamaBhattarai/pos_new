@@ -67,6 +67,18 @@ class Pos_invoices extends CI_Controller
         $data['lastinvoice'] = $this->invocies->lastinvoice();
         $data['draft_list'] = $this->invocies->drafts();
         $data['warehouse'] = $this->invocies->warehouses();
+        // Filter warehouses based on employee's assigned warehouse
+        $this->db->select('warehouse');
+        $this->db->from('pos_employees');
+        $this->db->where('id', $this->aauth->get_user()->id);
+        $query = $this->db->get();
+        $employee = $query->row_array();
+        if ($employee && $employee['warehouse'] > 0) {
+            $data['warehouse'] = array_filter($data['warehouse'], function($w) use ($employee) {
+                return $w['id'] == $employee['warehouse'];
+            });
+            $data['warehouse_filtered'] = true;
+        }
         $data['terms'] = $this->invocies->billingterms();
         $data['currency'] = $this->invocies->currencies();
         $head['title'] = "New Invoice";
@@ -74,11 +86,18 @@ class Pos_invoices extends CI_Controller
         $data['cat'] = $this->categories_model->category_list();
         $data['taxdetails'] = $this->common->taxdetail();
         $data['acc_list'] = $this->invocies->accountslist();
+        
+        // Load payment methods with account balances
+        $this->load->model('Paymentmethods_model', 'paymentmethods');
+        $data['payment_methods'] = $this->paymentmethods->get_with_balance();
 
         $data['emp'] = $this->plugins->universal_api(69);
         if ($data['emp']['key1']) {
             $this->load->model('employee_model', 'employee');
-            $data['employee'] = $this->employee->list_employee();
+            $current_user = $this->aauth->get_user();
+            $data['employee'] = array(
+                array('id' => $current_user->id, 'name' => $current_user->username)
+            );
         }
 
 
@@ -111,6 +130,18 @@ class Pos_invoices extends CI_Controller
         $head['title'] = "Edit Invoice #$tid";
         $head['usernm'] = $this->aauth->get_user()->username;
         $data['warehouse'] = $this->invocies->warehouses();
+        // Filter warehouses based on employee's assigned warehouse
+        $this->db->select('warehouse');
+        $this->db->from('pos_employees');
+        $this->db->where('id', $this->aauth->get_user()->id);
+        $query = $this->db->get();
+        $employee = $query->row_array();
+        if ($employee && $employee['warehouse'] > 0) {
+            $data['warehouse'] = array_filter($data['warehouse'], function($w) use ($employee) {
+                return $w['id'] == $employee['warehouse'];
+            });
+            $data['warehouse_filtered'] = true;
+        }
         $this->load->model('plugins_model', 'plugins');
         $data['exchange'] = $this->plugins->universal_api(5);
         $data['cat'] = $this->categories_model->category_list();
@@ -118,11 +149,18 @@ class Pos_invoices extends CI_Controller
         $data['taxdetails'] = $this->common->taxdetail();
         $data['taxlist'] = $this->common->taxlist($this->config->item('tax'));
 		$data['acc_list'] = $this->invocies->accountslist();
+        
+        // Load payment methods with account balances
+        $this->load->model('Paymentmethods_model', 'paymentmethods');
+        $data['payment_methods'] = $this->paymentmethods->get_with_balance();
 
         $data['emp'] = $this->plugins->universal_api(69);
         if ($data['emp']['key1']) {
             $this->load->model('employee_model', 'employee');
-            $data['employee'] = $this->employee->list_employee();
+            $current_user = $this->aauth->get_user();
+            $data['employee'] = array(
+                array('id' => $current_user->id, 'name' => $current_user->username)
+            );
         }
 
         if ($this->input->get('v2') or POSV == 2) {
@@ -162,11 +200,28 @@ class Pos_invoices extends CI_Controller
         $head['title'] = "Edit Invoice #$tid";
         $head['usernm'] = $this->aauth->get_user()->username;
         $data['warehouse'] = $this->invocies->warehouses();
+        // Filter warehouses based on employee's assigned warehouse
+        $this->db->select('warehouse');
+        $this->db->from('pos_employees');
+        $this->db->where('id', $this->aauth->get_user()->id);
+        $query = $this->db->get();
+        $employee = $query->row_array();
+        if ($employee && $employee['warehouse'] > 0) {
+            $data['warehouse'] = array_filter($data['warehouse'], function($w) use ($employee) {
+                return $w['id'] == $employee['warehouse'];
+            });
+            $data['warehouse_filtered'] = true;
+        }
         $this->load->model('plugins_model', 'plugins');
         $data['exchange'] = $this->plugins->universal_api(5);
         $data['cat'] = $this->categories_model->category_list();
         $this->load->library("Common");
         $data['taxlist'] = $this->common->taxlist_edit($data['invoice']['taxstatus']);
+        
+        // Load payment methods with account balances
+        $this->load->model('Paymentmethods_model', 'paymentmethods');
+        $data['payment_methods'] = $this->paymentmethods->get_with_balance();
+        
         $this->load->view('fixed/header-pos', $head);
         if ($data['invoice']['id']) $this->load->view('pos/edit', $data);
         $this->load->view('fixed/footer-pos');
@@ -193,13 +248,18 @@ class Pos_invoices extends CI_Controller
         $this->load->view('fixed/footer');
     }
 
+    
+
     //action
     public function action()
     {
+        
+
 
 
         $v2 = $this->input->get('v2');
         $ptype = $this->input->post('type');
+         $warehouse = $this->input->post('warehouse');
         $coupon = $this->input->post('coupon');
         $notes = $this->input->post('notes', true);
         $draft_id = $this->input->post('draft_id');
@@ -218,6 +278,7 @@ class Pos_invoices extends CI_Controller
         $currency = $this->input->post('mcurrency');
         $total_discount = rev_amountExchange_s($this->input->post('after_disc'), $currency, $this->aauth->get_user()->loc);
         $disc_val = numberClean($this->input->post('disc_val'));
+        $extra_discount_type = $this->input->post('extra_discount_type');
         $ship_taxtype = $this->input->post('ship_taxtype');
         $subtotal = rev_amountExchange_s($this->input->post('subtotal'), $currency, $this->aauth->get_user()->loc);
         $shipping = rev_amountExchange_s($this->input->post('shipping'), $currency, $this->aauth->get_user()->loc);
@@ -238,6 +299,9 @@ class Pos_invoices extends CI_Controller
         if ($ptype == 4) {
             $p_amount = rev_amountExchange_s($this->input->post('p_amount'), $currency, $this->aauth->get_user()->loc);
             $pmethod = $this->input->post('p_method');
+            if ($p_amount == 0 && in_array($pmethod, ['e-sewa', 'khalti', 'courier'])) {
+                $p_amount = $total;
+            }
 
             $c_amt = $p_amount - $total;
             if ($c_amt == 0.00) {
@@ -304,7 +368,7 @@ class Pos_invoices extends CI_Controller
                 $invocieno=$query->row()->tid+1;
             }
 
-            $data = array('tid' => $invocieno, 'invoicedate' => $bill_date, 'invoiceduedate' => $bill_due_date, 'subtotal' => $subtotal, 'shipping' => $shipping, 'ship_tax' => $shipping_tax, 'ship_tax_type' => $ship_taxtype, 'discount_rate' => $disc_val, 'total' => $total, 'pmethod' => $pmethod, 'notes' => $notes, 'status' => $status, 'csd' => $customer_id, 'eid' => $emp, 'pamnt' => 0, 'taxstatus' => $tax, 'discstatus' => $discstatus, 'format_discount' => $discountFormat, 'refer' => $refer, 'term' => $pterms, 'multi' => $currency, 'i_class' => 1, 'loc' => $this->aauth->get_user()->loc);
+           $data = array('tid' => $invocieno, 'invoicedate' => $bill_date, 'invoiceduedate' => $bill_due_date, 'subtotal' => $subtotal, 'shipping' => $shipping, 'ship_tax' => $shipping_tax, 'ship_tax_type' => $ship_taxtype, 'discount_rate' => $disc_val, 'total' => $total, 'pmethod' => $pmethod, 'notes' => $notes, 'status' => $status, 'csd' => $customer_id, 'eid' => $emp, 'pamnt' => 0, 'taxstatus' => $tax, 'discstatus' => $discstatus, 'format_discount' => $discountFormat, 'refer' => $refer, 'term' => $pterms, 'multi' => $currency, 'i_class' => 1, 'loc' => $warehouse ? $warehouse : $this->aauth->get_user()->loc, 'warehouse' => $warehouse ? $warehouse : $this->aauth->get_user()->loc);
 
 
             if ($this->db->insert('pos_invoices', $data)) {
@@ -312,6 +376,9 @@ class Pos_invoices extends CI_Controller
                 $invocieno_n = $invocieno;
                 $invocieno2 = $invocieno;
                 $invocieno = $this->db->insert_id();
+
+                // Store extra discount type in metadata
+                $this->db->insert('pos_metadata', array('type' => 10, 'rid' => $invocieno, 'col1' => $extra_discount_type));
 
 
                 $pid = $this->input->post('pid');
@@ -332,7 +399,9 @@ class Pos_invoices extends CI_Controller
                 $product_hsn = $this->input->post('hsn', true);
                 $product_alert = $this->input->post('alert');
                 $product_serial = $this->input->post('serial');
+                $batchids = $this->input->post('batchid'); // <-- get batchid
                 if (is_array($pid)) {
+                    $debug_msgs = [];
                     foreach ($pid as $key => $value) {
 
 
@@ -363,7 +432,9 @@ class Pos_invoices extends CI_Controller
                         $prodindex++;
 
                         $amt = numberClean($product_qty[$key]);
-
+                        $debug_batchid = isset($batchids[$key]) ? $batchids[$key] : null;
+                        $debug_msgs[] = "Product #$key: pid={$product_id[$key]}, qty=$amt, batchid=" . ($debug_batchid ? $debug_batchid : 'NONE');
+                        // === DEBUG: Output batchid, product_id, qty for this product ===
                         if ($ptype AND $product_id[$key] > 0 and $this->common->zero_stock()) {
 
                             if ((numberClean($product_alert[$key]) - $amt) < 0 and $st_c == 0) {
@@ -371,9 +442,42 @@ class Pos_invoices extends CI_Controller
                                 $transok = false;
                                 $st_c = 1;
                             } else {
-                                $this->db->set('qty', "qty-$amt", FALSE);
+                                // $this->db->set('qty', "qty-$amt", FALSE);
+                                // $this->db->where('pid', $product_id[$key]);
+                                // $this->db->update('pos_products');
+                                // echo 'Reached batch deduction block';
+
+
+                                // === BATCH DEDUCTION LOGIC ===
+                                if ($debug_batchid) {
+                                    // Deduct from specific batch only
+                                    $this->db->set('qty', "qty-$amt", FALSE);
+                                    $this->db->where('id', $debug_batchid);
+                                    $this->db->where('product_id', $product_id[$key]);
+                                    $this->db->where('qty >=', $amt);
+                                    $update = $this->db->update('pos_product_batches');
+                                    $debug_msgs[] = "UPDATE pos_product_batches SET qty=qty-$amt WHERE id=$debug_batchid AND product_id={$product_id[$key]} => " . ($update ? 'SUCCESS' : 'FAIL');
+                                    // Also deduct from main product stock
+                                    $this->db->set('qty', "qty-$amt", FALSE);
+                                    $this->db->where('pid', $product_id[$key]);
+                                    $this->db->update('pos_products');
+                                } else {
+                                    $this->db->set('qty', "qty-$amt", FALSE);
+                                    $this->db->where('pid', $product_id[$key]);
+                                    $this->db->update('pos_products');
+                                }
+                                // === END BATCH DEDUCTION LOGIC ===
+
+                                // Update parent stock if this is a variation
+                                $this->db->select('merge, sub');
+                                $this->db->from('pos_products');
                                 $this->db->where('pid', $product_id[$key]);
-                                $this->db->update('pos_products');
+                                $query = $this->db->get();
+                                $product_info = $query->row_array();
+                                if ($product_info && $product_info['merge'] == 1) {
+                                    $this->load->model('Products_model');
+                                    $this->Products_model->update_parent_total_stock($product_info['sub']);
+                                }
                             }
                         }
 
@@ -411,28 +515,33 @@ class Pos_invoices extends CI_Controller
                     $p_tid = 'thermal_p';
                     if (@$printer['val2'] == 'server') $p_tid = 'thermal_server';
 
-                    echo json_encode(array('status' => 'Success', 'message' =>
-                        $this->lang->line('Invoice Success') . " <a target='_blank' href='thermal_pdf?id=$invocieno' class='btn btn-blue btn-lg'><span class='fa fa-ticket' aria-hidden='true'></span> PDF  </a> &nbsp; &nbsp;   <a id='$p_tid' data-ptid='$invocieno' data-url='" . @$printer['val3'] . "'  class='btn btn-info btn-lg white'><span class='fa fa-ticket' aria-hidden='true'></span> " . $this->lang->line('Thermal Printer') . "  </a> &nbsp; &nbsp;<a href='#' class='btn btn-reddit btn-lg print_image' id='print_image' data-inid='$invocieno'><span class='fa fa-window-restore' aria-hidden='true'></span></a> &nbsp; &nbsp; <a target='_blank' href='printinvoice?id=$invocieno' class='btn btn-blue btn-lg'><span class='fa fa-print' aria-hidden='true'></span> A4  </a> &nbsp; &nbsp; <a href='view?id=$invocieno' class='btn btn-purple btn-lg'><span class='fa fa-eye' aria-hidden='true'></span> " . $this->lang->line('View') . "  </a> &nbsp; &nbsp; <a href='$link' class='btn btn-blue-grey btn-lg'><span class='fa fa-globe' aria-hidden='true'></span> " . $this->lang->line('Public View') . " </a> &nbsp;<a href='create?v2=$v2' class='btn btn-flickr btn-lg'><span class='fa fa-plus-circle' aria-hidden='true'></span> " . $this->lang->line('Create') . "  </a>"));
+                    // Check if printnow=1 (from "Paynow + Print" button)
+                    if ($print_now == '1') {
+                        // Redirect to thermal PDF page
+                        $thermal_pdf_url = base_url("pos_invoices/thermal_pdf?id=$invocieno");
+                        echo json_encode(array('status' => 'Success', 'message' => 
+                            $this->lang->line('Invoice Success') . " - Redirecting to print...",
+                            'redirect_url' => $thermal_pdf_url,
+                            'debug' => $debug_msgs));
+                    } else {
+                        // Normal response with all print buttons
+                        echo json_encode(array('status' => 'Success', 'message' =>
+                            $this->lang->line('Invoice Success') . " <a target='_blank' href='thermal_pdf?id=$invocieno' class='btn btn-blue btn-lg'><span class='fa fa-ticket' aria-hidden='true'></span> PDF  </a> &nbsp; &nbsp;   <a id='$p_tid' data-ptid='$invocieno' data-url='" . @$printer['val3'] . "'  class='btn btn-info btn-lg white'><span class='fa fa-ticket' aria-hidden='true'></span> " . $this->lang->line('Thermal Printer') . "  </a> &nbsp; &nbsp;<a href='#' class='btn btn-reddit btn-lg print_image' id='print_image' data-inid='$invocieno'><span class='fa fa-window-restore' aria-hidden='true'></span></a> &nbsp; &nbsp; <a target='_blank' href='printinvoice?id=$invocieno' class='btn btn-blue btn-lg'><span class='fa fa-print' aria-hidden='true'></span> A4  </a> &nbsp; &nbsp; <a href='view?id=$invocieno' class='btn btn-purple btn-lg'><span class='fa fa-eye' aria-hidden='true'></span> " . $this->lang->line('View') . "  </a> &nbsp; &nbsp; <a href='$link' class='btn btn-blue-grey btn-lg'><span class='fa fa-globe' aria-hidden='true'></span> " . $this->lang->line('Public View') . " </a> &nbsp;<a href='create?v2=$v2' class='btn btn-flickr btn-lg'><span class='fa fa-plus-circle' aria-hidden='true'></span> " . $this->lang->line('Create') . "  </a>",
+                            'debug' => $debug_msgs));
+                    }
                 }
                 $this->load->model('billing_model', 'billing');
+                $this->load->model('Paymentmethods_model', 'paymentmethods');
                 $tnote = '#' . $invocieno_n . '-' . $pmethod;
-                switch ($pmethod) {
-                    case 'Cash' :
-                        $r_amt1 = $pamnt;
-                        $r_amt2 = 0;
-                        $r_amt3 = 0;
-                        break;
-                    case 'Card Swipe' :
-                        $r_amt1 = 0;
-                        $r_amt2 = $pamnt;
-                        $r_amt3 = 0;
-                        break;
-                    case 'Bank' :
-                        $r_amt1 = 0;
-                        $r_amt2 = 0;
-                        $r_amt3 = $pamnt;
-                        break;
-                }
+                
+                // Get payment method details
+                $payment_method = $this->paymentmethods->get_by_name($pmethod);
+                $account_id = $payment_method ? $payment_method['account_id'] : null;
+                
+                // Set register amounts (legacy compatibility - all non-cash goes to bank)
+                $r_amt1 = ($pmethod == 'Cash') ? $pamnt : 0; // Cash
+                $r_amt2 = 0; // Card (not used)
+                $r_amt3 = ($pmethod != 'Cash') ? $pamnt : 0; // Bank/Other
                 $d_trans = $this->plugins->universal_api(69);
         if ($d_trans['key2']) {
             $t_data = array(
@@ -466,7 +575,7 @@ class Pos_invoices extends CI_Controller
             $this->db->update('pos_accounts');
 
         }
-                if ($pamnt > 0) $this->billing->paynow($invocieno, $pamnt, $tnote, $pmethod, $this->aauth->get_user()->loc, $bill_date, $account);
+                if ($pamnt > 0) $this->billing->paynow($invocieno, $pamnt, $tnote, $pmethod, $this->aauth->get_user()->loc, $bill_date, $account_id);
                 $this->registerlog->update($this->aauth->get_user()->id, $r_amt1, $r_amt2, $r_amt3, 0, $c_amt);
                 if ($promo_flag) {
                     $cqty = $result_c['available'] - 1;
@@ -574,6 +683,7 @@ class Pos_invoices extends CI_Controller
                 $product_hsn = $this->input->post('hsn');
                 $product_alert = $this->input->post('alert');
                 $product_serial = $this->input->post('serial');
+                $batchids = $this->input->post('batchid'); // <-- get batchid
                 foreach ($pid as $key => $value) {
                     $total_discount += numberClean(@$ptotal_disc[$key]);
                     $total_tax += numberClean($ptotal_tax[$key]);
@@ -598,21 +708,56 @@ class Pos_invoices extends CI_Controller
                     $i++;
                     $prodindex++;
                     $amt = numberClean($product_qty[$key]);
+                    $debug_batchid = isset($batchids[$key]) ? $batchids[$key] : null;
+                    $debug_msgs[] = "Product #$key: pid={$product_id[$key]}, qty=$amt, batchid=" . ($debug_batchid ? $debug_batchid : 'NONE');
+                    // === DEBUG: Output batchid, product_id, qty for this product ===
                     if ($product_id[$key] > 0 and $this->common->zero_stock()) {
 
                     	if($draft_id){
 							$this->db->set('qty', "qty-$amt", FALSE);
 							$this->db->where('pid', $product_id[$key]);
 							$this->db->update('pos_products');
+                            
 						} elseif ((numberClean($product_alert[$key]) - $amt) < 0 and $st_c == 0) {
                             echo json_encode(array('status' => 'Error', 'message' => 'Product - <strong>' . $product_name1[$key] . "</strong> - Low quantity. Available stock is  " . $product_alert[$key]));
                             $transok = false;
                             $st_c = 1;
                         } else {
-                            $this->db->set('qty', "qty-$amt", FALSE);
+                            // $this->db->set('qty', "qty-$amt", FALSE);
+                            // $this->db->where('pid', $product_id[$key]);
+                            // $this->db->update('pos_products');
+                            // echo 'Reached batch deduction block';
+
+
+                            // === BATCH DEDUCTION LOGIC ===
+                            if ($debug_batchid) {
+                                // Deduct from specific batch only - DO NOT deduct from main product stock
+                                $this->db->set('qty', "qty-$amt", FALSE);
+                                $this->db->where('id', $debug_batchid);
+                                $this->db->where('product_id', $product_id[$key]);
+                                $this->db->where('qty >=', $amt);
+                                $update = $this->db->update('pos_product_batches');
+                                $debug_msgs[] = "UPDATE pos_product_batches SET qty=qty-$amt WHERE id=$debug_batchid AND product_id={$product_id[$key]} => " . ($update ? 'SUCCESS' : 'FAIL');
+                                // Note: Main product stock is NOT deducted for batch products
+                            } else {
+                                $this->db->set('qty', "qty-$amt", FALSE);
+                                $this->db->where('pid', $product_id[$key]);
+                                $this->db->update('pos_products');
+                            }
+                            // === END BATCH DEDUCTION LOGIC ===
+
+                            // Update parent stock if this is a variation
+                            $this->db->select('merge, sub');
+                            $this->db->from('pos_products');
                             $this->db->where('pid', $product_id[$key]);
-                            $this->db->update('pos_products');
+                            $query = $this->db->get();
+                            $product_info = $query->row_array();
+                            if ($product_info && $product_info['merge'] == 1) {
+                                $this->load->model('Products_model');
+                                $this->Products_model->update_parent_total_stock($product_info['sub']);
+                            }
                         }
+                        
                     }
                     $itc += $amt;
                 }
@@ -680,7 +825,19 @@ class Pos_invoices extends CI_Controller
                 $validtoken = hash_hmac('ripemd160', $invocieno, $this->config->item('encryption_key'));
                 $quckpay = base_url() . "billing/card?id=$invocieno&itype=inv&token=$validtoken&gid=$gateway";
 
-                if ($transok) echo json_encode(array('status' => 'Success', 'message' => $this->lang->line('Invoice Success') . " <script type='text/javascript' >window.location.replace('$quckpay');</script><a target='_blank' href='$quckpay' class='btn btn-blue btn-lg'><span class='icon-printer' aria-hidden='true'></span> " . $this->lang->line('Pay') . "  </a> &nbsp; &nbsp;    <a target='_blank' href='thermal_pdf?id=$invocieno' class='btn btn-blue btn-lg'><span class='icon-printer' aria-hidden='true'></span> " . $this->lang->line('Print') . "  </a> &nbsp; &nbsp;    &nbsp; &nbsp; <a href='view?id=$invocieno' class='btn btn-purple btn-lg'><span class='icon-file-text2' aria-hidden='true'></span> " . $this->lang->line('View') . "  </a> &nbsp; &nbsp; <a href='$link' class='btn btn-blue-grey btn-lg'><span class='icon-earth' aria-hidden='true'></span> " . $this->lang->line('Public View') . " </a> <a href='create?v2=$v2' class='btn btn-amber btn-lg'><span class='fa fa-plus-circle' aria-hidden='true'></span> " . $this->lang->line('Create') . "  </a>"));
+                if ($transok) {
+                    // Check if printnow=1 (from "Paynow + Print" button) for card payments too
+                    if ($print_now == '1') {
+                        // Redirect to thermal PDF page for card payments
+                        $thermal_pdf_url = base_url("pos_invoices/thermal_pdf?id=$invocieno");
+                        echo json_encode(array('status' => 'Success', 'message' => 
+                            $this->lang->line('Invoice Success') . " - Redirecting to print...",
+                            'redirect_url' => $thermal_pdf_url));
+                    } else {
+                        // Normal card payment response
+                        echo json_encode(array('status' => 'Success', 'message' => $this->lang->line('Invoice Success') . " <script type='text/javascript' >window.location.replace('$quckpay');</script><a target='_blank' href='$quckpay' class='btn btn-blue btn-lg'><span class='icon-printer' aria-hidden='true'></span> " . $this->lang->line('Pay') . "  </a> &nbsp; &nbsp;    <a target='_blank' href='thermal_pdf?id=$invocieno' class='btn btn-blue btn-lg'><span class='icon-printer' aria-hidden='true'></span> " . $this->lang->line('Print') . "  </a> &nbsp; &nbsp;    &nbsp; &nbsp; <a href='view?id=$invocieno' class='btn btn-purple btn-lg'><span class='icon-file-text2' aria-hidden='true'></span> " . $this->lang->line('View') . "  </a> &nbsp; &nbsp; <a href='$link' class='btn btn-blue-grey btn-lg'><span class='icon-earth' aria-hidden='true'></span> " . $this->lang->line('Public View') . " </a> <a href='create?v2=$v2' class='btn btn-amber btn-lg'><span class='fa fa-plus-circle' aria-hidden='true'></span> " . $this->lang->line('Create') . "  </a>"));
+                    }
+                }
             }
 
             if ($transok) {
@@ -735,7 +892,6 @@ class Pos_invoices extends CI_Controller
                 $productlist = array();
                 $prodindex = 0;
                 $itc = 0;
-
                 $product_id = $this->input->post('pid');
                 $product_name1 = $this->input->post('product_name', true);
                 $product_qty = $this->input->post('product_qty');
@@ -748,14 +904,12 @@ class Pos_invoices extends CI_Controller
                 $product_des = $this->input->post('product_description', true);
                 $product_unit = $this->input->post('unit');
                 $product_hsn = $this->input->post('hsn');
-
-
+                $product_alert = $this->input->post('alert');
+                $product_serial = $this->input->post('serial');
+                $batchids = $this->input->post('batchid'); // <-- get batchid
                 foreach ($pid as $key => $value) {
-
-
                     $total_discount += numberClean(@$ptotal_disc[$key]);
                     $total_tax += numberClean($ptotal_tax[$key]);
-
                     $data = array(
                         'tid' => $invocieno,
                         'pid' => $product_id[$key],
@@ -768,112 +922,154 @@ class Pos_invoices extends CI_Controller
                         'subtotal' => rev_amountExchange_s($product_subtotal[$key], $currency, $this->aauth->get_user()->loc),
                         'totaltax' => rev_amountExchange_s($ptotal_tax[$key], $currency, $this->aauth->get_user()->loc),
                         'totaldiscount' => rev_amountExchange_s($ptotal_disc[$key], $currency, $this->aauth->get_user()->loc),
-                        'product_des' => $product_des[$key] ?? null,
+                        'product_des' => $product_des[$key],
                         'i_class' => 1,
-                        'unit' => $product_unit[$key]
+                        'unit' => $product_unit[$key],
+                        'serial' => $product_serial[$key]
                     );
-
-                    $flag = true;
                     $productlist[$prodindex] = $data;
                     $i++;
                     $prodindex++;
                     $amt = numberClean($product_qty[$key]);
+                    $debug_batchid = isset($batchids[$key]) ? $batchids[$key] : null;
+                    $debug_msgs[] = "Product #$key: pid={$product_id[$key]}, qty=$amt, batchid=" . ($debug_batchid ? $debug_batchid : 'NONE');
+                    // === DEBUG: Output batchid, product_id, qty for this product ===
+                    if ($product_id[$key] > 0 and $this->common->zero_stock()) {
+
+                    	if($draft_id){
+							$this->db->set('qty', "qty-$amt", FALSE);
+							$this->db->where('pid', $product_id[$key]);
+							$this->db->update('pos_products');
+                            
+						} elseif ((numberClean($product_alert[$key]) - $amt) < 0 and $st_c == 0) {
+                            echo json_encode(array('status' => 'Error', 'message' => 'Product - <strong>' . $product_name1[$key] . "</strong> - Low quantity. Available stock is  " . $product_alert[$key]));
+                            $transok = false;
+                            $st_c = 1;
+                        } else {
+                            // $this->db->set('qty', "qty-$amt", FALSE);
+                            // $this->db->where('pid', $product_id[$key]);
+                            // $this->db->update('pos_products');
+                            // echo 'Reached batch deduction block';
+
+
+                            // === BATCH DEDUCTION LOGIC ===
+                            if ($debug_batchid) {
+                                // Deduct from specific batch only - DO NOT deduct from main product stock
+                                $this->db->set('qty', "qty-$amt", FALSE);
+                                $this->db->where('id', $debug_batchid);
+                                $this->db->where('product_id', $product_id[$key]);
+                                $this->db->where('qty >=', $amt);
+                                $update = $this->db->update('pos_product_batches');
+                                $debug_msgs[] = "UPDATE pos_product_batches SET qty=qty-$amt WHERE id=$debug_batchid AND product_id={$product_id[$key]} => " . ($update ? 'SUCCESS' : 'FAIL');
+                                // Note: Main product stock is NOT deducted for batch products
+                            } else {
+                                $this->db->set('qty', "qty-$amt", FALSE);
+                                $this->db->where('pid', $product_id[$key]);
+                                $this->db->update('pos_products');
+                            }
+                            // === END BATCH DEDUCTION LOGIC ===
+
+                            // Update parent stock if this is a variation
+                            $this->db->select('merge, sub');
+                            $this->db->from('pos_products');
+                            $this->db->where('pid', $product_id[$key]);
+                            $query = $this->db->get();
+                            $product_info = $query->row_array();
+                            if ($product_info && $product_info['merge'] == 1) {
+                                $this->load->model('Products_model');
+                                $this->Products_model->update_parent_total_stock($product_info['sub']);
+                            }
+                        }
+                    }
                     $itc += $amt;
                 }
-
                 if ($prodindex > 0) {
-                    $this->db->insert_batch('pos_draft_items', $productlist);
-                    $this->db->set(array('discount' => rev_amountExchange_s(amountFormat_general($total_discount), $currency, $this->aauth->get_user()->loc), 'tax' => rev_amountExchange_s(amountFormat_general($total_tax), $currency, $this->aauth->get_user()->loc), 'items' => $itc));
-                    $this->db->where('id', $invocieno);
-                    $this->db->update('pos_draft');
-
+                    $this->db->insert_batch('pos_invoice_items', $productlist);
+                    if (count($product_serial) > 0) {
+                        $this->db->set('status', 1);
+                        $this->db->where_in('serial', $product_serial);
+                        $this->db->update('pos_product_serials');
+                    }
                 } else {
                     echo json_encode(array('status' => 'Error', 'message' =>
                         "Please choose product from product list. Go to Item manager section if you have not added the products."));
                     $transok = false;
                 }
-
                 $validtoken = hash_hmac('ripemd160', $invocieno, $this->config->item('encryption_key'));
                 $link = base_url('billing/view?id=' . $invocieno . '&token=' . $validtoken);
-                if ($transok) echo json_encode(array('status' => 'Success', 'message' =>
-                    $this->lang->line('Draft Success') . " <a href='create' class='btn btn-info btn-lg'><span class='fa fa-plus-circle' aria-hidden='true'></span> " . $this->lang->line('New') . "  </a>"));
+                if ($promo_flag) {
+                    $cqty = $result_c['available'] - 1;
+                    if ($cqty > 0) {
+                        $data = array('available' => $cqty);
+                    } else {
+                        $data = array('active' => 1, 'available' => $cqty);
+                    }
+
+                    $this->db->set($data);
+                    $this->db->where('id', $result_c['id']);
+                    $this->db->update('pos_promo');
+
+                    if ($result_c['reflect'] > 0) {
+                        $data = array(
+                            'payerid' => 0,
+                            'payer' => $this->lang->line('Coupon') . '-' . $result_c['code'],
+                            'acid' => $result_c['reflect'],
+                            'account' => 'Promo',
+                            'date' => date('Y-m-d'),
+                            'debit' => 0,
+                            'credit' => $amount,
+                            'type' => 'Income',
+                            'cat' => $this->lang->line('Coupon'),
+                            'method' => 'Transfer',
+                            'eid' => $this->aauth->get_user()->id,
+                            'note' => $this->lang->line('Coupon') . ' ' . $this->lang->line('Delete') . ' ' . $this->lang->line('Qty') . '-' . $result_c['available'],
+                            'loc' => $this->aauth->get_user()->loc
+                        );
+                        $this->db->set('lastbal', "lastbal+$amount", FALSE);
+                        $this->db->where('id', $result_c['reflect']);
+                        $this->db->update('pos_accounts');
+                        $this->db->insert('pos_transactions', $data);
+                    }
+                }
 
             } else {
                 echo json_encode(array('status' => 'Error', 'message' =>
                     "Invalid Entry!"));
                 $transok = false;
             }
+
+
             if ($transok) {
                 $this->db->trans_complete();
             } else {
                 $this->db->trans_rollback();
             }
+
         }
-        if ($transok) {
-            $this->db->from('univarsal_api');
-            $this->db->where('univarsal_api.id', 56);
-            $query = $this->db->get();
-            $auto = $query->row_array();
-            if ($auto['key1'] == 1) {
-                $this->db->select('name,email');
-                $this->db->from('pos_customers');
-                $this->db->where('id', $customer_id);
-                $query = $this->db->get();
-                $customer = $query->row_array();
 
-                $this->load->model('communication_model');
-                $invoice_mail = $this->send_invoice_auto($invocieno, $invocieno2, $bill_date, $total, $currency);
-                $attachmenttrue = false;
-                $attachment = '';
-                $this->communication_model->send_corn_email($customer['email'], $customer['name'], $invoice_mail['subject'], $invoice_mail['message'], $attachmenttrue, $attachment);
-
-            }
-
-            if ($auto['key2'] == 1) {
-                $this->db->select('name,phone');
-                $this->db->from('pos_customers');
-                $this->db->where('id', $customer_id);
-                $query = $this->db->get();
-                $customer = $query->row_array();
-
-                $this->load->model('plugins_model', 'plugins');
-                $invoice_sms = $this->send_sms_auto($invocieno, $invocieno2, $bill_date, $total, $currency);
-
-                $mobile = $customer['phone'];
-                $text_message = $invoice_sms['message'];
-                $this->load->model('sms_model', 'sms');
-                $this->sms->send_sms($mobile, $text_message, false);
-
-
-            }
-            if($draft_id>0){
-                 $this->db->delete('pos_draft', array('id' => $draft_id));
-                $this->db->delete('pos_draft_items', array('tid' => $draft_id));
-            }
-        }
-        //profit calculation
+       //profit calculation - Revenue minus Cost of Goods Sold
         $t_profit = 0;
-        $this->db->select('pos_invoice_items.pid, pos_invoice_items.price, pos_invoice_items.qty, pos_products.fproduct_price');
+        // Get total cost of goods
+        $this->db->select('SUM(pos_products.fproduct_price * pos_invoice_items.qty) as total_cost');
         $this->db->from('pos_invoice_items');
         $this->db->join('pos_products', 'pos_products.pid = pos_invoice_items.pid', 'left');
         $this->db->where('pos_invoice_items.tid', $invocieno);
-        $query = $this->db->get();
-        $pids = $query->result_array();
-        foreach ($pids as $profit) {
-            $t_cost = $profit['fproduct_price'] * $profit['qty'];
-            $s_cost = $profit['price'] * $profit['qty'];
+        $cost_query = $this->db->get();
+        $total_cost = $cost_query->row()->total_cost;
 
-            $t_profit += $s_cost - $t_cost;
-        }
-        $data = array('type' => 9, 'rid' => $invocieno, 'col1' => $t_profit, 'd_date' => $bill_date);
+        // Get invoice revenue (total amount customer paid)
+        $this->db->select('total');
+        $this->db->from('pos_invoices');
+        $this->db->where('id', $invocieno);
+        $revenue_query = $this->db->get();
+        $revenue = $revenue_query->row()->total;
 
-        $this->db->insert('pos_metadata', $data);
+        // Profit = Revenue - Cost of Goods Sold
+        $t_profit = $revenue - $total_cost;
 
-        if ($print_now) {
-            $print = $this->thermal_print($invocieno, false, false);
-        }
+        $this->db->query("INSERT INTO pos_metadata (col1, type, rid, d_date) VALUES (?, 9, ?, ?) ON DUPLICATE KEY UPDATE col1 = VALUES(col1)", array($t_profit, $invocieno, date('Y-m-d')));
+
     }
-
 
     public function ajax_list()
     {
@@ -896,8 +1092,9 @@ class Pos_invoices extends CI_Controller
             // $row[] = '<a href="' . base_url("pos_invoices/view?id=$invoices->id") . '" class="btn btn-success btn-sm" title="View"><i class="fa fa-eye"></i></a>&nbsp;<a href="' . base_url("pos_invoices/thermal_pdf?id=$invoices->id") . '&d=1" class="btn btn-info btn-sm"  title="Download"><span class="fa fa-download"></span></a>&nbsp;<a href="#" data-object-id="' . $invoices->id . '" class="btn btn-danger btn-sm delete-object"><span class="fa fa-trash"></span></a>';
 //cancel--------button-------added-------
 $row[] = '<a href="' . base_url("pos_invoices/view?id=$invoices->id") . '" class="btn btn-success btn-sm" title="View"><i class="fa fa-eye"></i></a>&nbsp;
-<a href="' . base_url("pos_invoices/thermal_pdf?id=$invoices->id") . '&d=1" class="btn btn-info btn-sm" title="Download"><span class="fa fa-download"></span></a>&nbsp;
-<a href="#" data-id="' . $invoices->id . '" class="btn btn-danger btn-sm cancel-bill" title="Cancel"><i class="fa fa-minus-circle"></i> ' . $this->lang->line('Cancel') . '</a>';
+<a href="' . base_url("pos_invoices/thermal_pdf?id=$invoices->id") . '&d=1" class="btn btn-info btn-sm" title="Download"><span class="fa fa-download"></span></a>&nbsp;';
+// <a href="#" data-id="' . $invoices->id . '" class="btn btn-danger btn-sm cancel-bill" title="Cancel"><i class="fa fa-minus-circle"></i> ' . $this->lang->line('Cancel') . '</a>';
+
 
             $data[] = $row;
         }
@@ -938,11 +1135,25 @@ $row[] = '<a href="' . base_url("pos_invoices/view?id=$invoices->id") . '" class
             $row[] = '<a href="' . base_url("pos_invoices/view?id=$invoices->id") . '">&nbsp; ' . $invoices->tid . '</a>';
             $row[] = $invoices->name;
             $row[] = dateformat($invoices->invoicedate);
-             $row[] = $invoices->product;
+            $row[] = $invoices->product;
             $row[] = amountFormat_general($invoices->qty);
-            $row[] = amountExchange($invoices->subtotal, 0, $this->aauth->get_user()->loc);
-            $row[] = amountExchange($invoices->discount, 0, $this->aauth->get_user()->loc);
-            $row[] = amountExchange($invoices->tax, 0, $this->aauth->get_user()->loc);
+             $row[] = amountExchange($invoices->subtotal, 0, $this->aauth->get_user()->loc);
+            
+            // Calculate proportional discount for this line item
+            $line_discount = 0;
+            if ($invoices->invoice_discount > 0 && $invoices->invoice_subtotal > 0) {
+                // Calculate the proportion of this line item relative to invoice subtotal
+                $line_proportion = $invoices->subtotal / $invoices->invoice_subtotal;
+                // Apply the same proportion of the total invoice discount
+                $line_discount = $invoices->invoice_discount * $line_proportion;
+            }
+            // If line item has its own discount, use that instead
+            if ($invoices->totaldiscount > 0) {
+                $line_discount = $invoices->totaldiscount;
+            }
+            
+            $row[] = amountExchange($line_discount, 0, $this->aauth->get_user()->loc);
+            $row[] = amountExchange($invoices->totaltax, 0, $this->aauth->get_user()->loc);
 
          //   $row[] = '<a href="' . base_url("pos_invoices/view?id=$invoices->id") . '" class="btn btn-success btn-sm" title="View"><i class="fa fa-eye"></i></a>&nbsp;<a href="' . base_url("pos_invoices/thermal_pdf?id=$invoices->id") . '&d=1" class="btn btn-info btn-sm"  title="Download"><span class="fa fa-download"></span></a>&nbsp;<a href="#" data-object-id="' . $invoices->id . '" class="btn btn-danger btn-sm delete-object"><span class="fa fa-trash"></span></a>';
 
@@ -961,8 +1172,7 @@ $row[] = '<a href="' . base_url("pos_invoices/view?id=$invoices->id") . '" class
         echo json_encode($output);
 
     }
-
-    public function view()
+      public function view()
     {
         $this->load->model('accounts_model');
         $data['acclist'] = $this->accounts_model->accountslist((integer)$this->aauth->get_user()->loc);
@@ -979,6 +1189,15 @@ $row[] = '<a href="' . base_url("pos_invoices/view?id=$invoices->id") . '" class
         $data['printer'] = $this->printer->check($data['invoice']['loc']);
 
         $data['employee'] = $this->invocies->employee($data['invoice']['eid']);
+        $this->load->model('locations_model');
+        $warehouses = $this->locations_model->locations_list();
+        $data['warehouse_name'] = '';
+        foreach ($warehouses as $w) {
+            if ($w['id'] == $data['invoice']['loc']) {
+                $data['warehouse_name'] = $w['cname'];
+                break;
+            }
+        }
         $head['title'] = "Invoice " . $data['invoice']['tid'];
         $head['usernm'] = $this->aauth->get_user()->username;
         $this->load->view('fixed/header', $head);
@@ -986,9 +1205,7 @@ $row[] = '<a href="' . base_url("pos_invoices/view?id=$invoices->id") . '" class
         $this->load->view('fixed/footer');
 
     }
-
-
-    public function printinvoice()
+     public function printinvoice()
     {
         $tid = $this->input->get('id');
         $data['id'] = $tid;
@@ -1039,8 +1256,7 @@ $row[] = '<a href="' . base_url("pos_invoices/view?id=$invoices->id") . '" class
             $pdf->Output('Invoice_pos' . $data['invoice']['tid'] . '.pdf', 'I');
         }
     }
-
-    public function delete_i()
+ public function delete_i()
     {
         $id = $this->input->post('deleteid');
         if ($this->aauth->premission(11)) {
@@ -1078,6 +1294,9 @@ $row[] = '<a href="' . base_url("pos_invoices/view?id=$invoices->id") . '" class
         if ($ptype == 4) {
             $p_amount = rev_amountExchange_s($this->input->post('p_amount'), $currency, $this->aauth->get_user()->loc);
             $pmethod = $this->input->post('p_method');
+            if ($p_amount == 0 && in_array($pmethod, ['e-sewa', 'khalti', 'courier'])) {
+                $p_amount = $diff;
+            }
             $notes = $this->input->post('notes');
             $tax = $this->input->post('tax_handle');
             $subtotal = rev_amountExchange_s($this->input->post('subtotal'), $currency, $this->aauth->get_user()->loc);
@@ -1196,7 +1415,7 @@ $row[] = '<a href="' . base_url("pos_invoices/view?id=$invoices->id") . '" class
                     $this->db->where('id', $invocieno);
                     $this->db->update('pos_invoices');
                     if ($product_serial AND count($product_serial) > 0) {
-                        $this->db->set('status', 1);
+                        $this->db->set('status',  1);
                         $this->db->where_in('serial', $product_serial);
                         $this->db->update('pos_product_serials');
                     }
@@ -1221,6 +1440,13 @@ $row[] = '<a href="' . base_url("pos_invoices/view?id=$invoices->id") . '" class
                         $r_amt3 = 0;
                         break;
                     case 'Bank' :
+                        $r_amt1 = 0;
+                        $r_amt2 = 0;
+                        $r_amt3 = $diff;
+                        break;
+                    case 'e-sewa' :
+                    case 'khalti' :
+                    case 'courier' :
                         $r_amt1 = 0;
                         $r_amt2 = 0;
                         $r_amt3 = $diff;
@@ -1296,27 +1522,33 @@ $row[] = '<a href="' . base_url("pos_invoices/view?id=$invoices->id") . '" class
 
         }
 
-        //profit calculation
+         //profit calculation - Revenue minus Cost of Goods Sold
         $t_profit = 0;
-		//$mega_discount=rev_amountExchange_s(amountFormat_general($total_discount));
-        $this->db->select('pos_invoice_items.pid, pos_invoice_items.price, pos_invoice_items.qty, pos_products.fproduct_price');
+        // Get total cost of goods
+        $this->db->select('SUM(pos_products.fproduct_price * pos_invoice_items.qty) as total_cost');
         $this->db->from('pos_invoice_items');
         $this->db->join('pos_products', 'pos_products.pid = pos_invoice_items.pid', 'left');
         $this->db->where('pos_invoice_items.tid', $invocieno);
-        $query = $this->db->get();
-        $pids = $query->result_array();
-        foreach ($pids as $profit) {
-            $t_cost = $profit['fproduct_price'] * $profit['qty'];
-            $s_cost = $profit['price'] * $profit['qty'];
+        $cost_query = $this->db->get();
+        $total_cost = $cost_query->row()->total_cost;
 
-            $t_profit += $s_cost - $t_cost;
-        }
-        $this->db->set('col1', $t_profit);
-        $this->db->where('type', 9);
-        $this->db->where('rid', $invocieno);
-        $this->db->update('pos_metadata');
+        // Get invoice revenue (total amount customer paid)
+        $this->db->select('total');
+        $this->db->from('pos_invoices');
+        $this->db->where('id', $invocieno);
+        $revenue_query = $this->db->get();
+        $revenue = $revenue_query->row()->total;
+
+        // Profit = Revenue - Cost of Goods Sold
+        $t_profit = $revenue - $total_cost;
+
+        $this->db->query("INSERT INTO pos_metadata (col1, type, rid, d_date) VALUES (?, 9, ?, ?) ON DUPLICATE KEY UPDATE col1 = VALUES(col1)", array($t_profit, $invocieno, date('Y-m-d')));
 
     }
+
+
+
+
 
     public function update_status()
     {
@@ -1682,10 +1914,6 @@ echo 6;
             $writer = new PngWriter();
             $result = $writer->write($qrCode);
             $result->saveToFile(FCPATH . 'userfiles/pos_temp/' . $data['qrc']);
-           // $qrCode = new QrCode(base_url('billing/view?id=' . $tid . '&itype=inv&token=' . $token));
-//header('Content-Type: '.$qrCode->getContentType());
-//echo $qrCode->writeString();
-           // $qrCode->writeFile(FCPATH . 'userfiles/pos_temp/' . $data['qrc']);
         }
         // boost the memory limit if it's low ;)
         ini_set('memory_limit', '64M');
@@ -1700,102 +1928,24 @@ echo 6;
         $pdf->charset_in = 'UTF-8';
         //   $pdf->SetDirectionality('rtl'); // Set lang direction for rtl lang
         $pdf->autoLangToFont = true;
+        $data['round_off'] = $this->custom->api_config(4);
         $html = $this->load->view('print_files/pos_pdf_compact', $data, true);
+        // render the view into HTML
+
         $h = 160 + $this->pheight;
-        //  $pdf->_setPageSize(array(70, $h), $this->orientation);
         $pdf->_setPageSize(array(70, $h), $pdf->DefOrientation);
         $pdf->WriteHTML($html);
         // render the view into HTML
         // write the HTML into the PDF
         $file_name = preg_replace('/[^A-Za-z0-9]+/', '-', 'PosInvoice_' . $data['invoice']['name'] . '_' . $data['invoice']['tid']);
         if ($this->input->get('d')) {
+
             $pdf->Output($file_name . '.pdf', 'D');
         } else {
             $pdf->Output($file_name . '.pdf', 'I');
         }
 
         unlink('userfiles/pos_temp/' . $data['qrc']);
-    }
-
-
-    public function set_coupon()
-    {
-        $id = $this->input->post('coupon');
-        if ($id) {
-            $this->db->select('*');
-            $this->db->from('pos_promo');
-            $this->db->where('code', $id);
-            $query = $this->db->get();
-            $promo = $query->row_array();
-            if (($promo['active'] == 0) && ($promo['available'] > 0) && (strtotime($promo['valid']) >= strtotime(date('Y-m-d')))) {
-                echo json_encode(array('status' => 'Success', 'message' => $promo['code'] . ' ' . $this->lang->line('Coupon Applied') . ' ' . $this->lang->line('Amount') . ' ' . amountFormat_general($promo['amount']), 'amount' => amountFormat_general($promo['amount'])));
-            } elseif (($promo['active'] == 0) && ($promo['available'] > 0) && (strtotime($promo['valid']) < strtotime(date('Y-m-d')))) {
-                echo json_encode(array('status' => 'Error', 'message' => $this->lang->line('Coupon Expired'), 'amount' => 0));
-            } elseif ($promo['active'] > 0) {
-                echo json_encode(array('status' => 'Error', 'message' => $this->lang->line('Usages Exceed'), 'amount' => 0));
-            } else {
-                echo json_encode(array('status' => 'Error', 'message' => $this->lang->line('Invalid Coupon'), 'amount' => 0));
-            }
-        } else {
-            echo json_encode(array('status' => 'Error', 'message' => '', 'amount' => 0));
-        }
-
-
-    }
-
-    public function send_invoice_auto($invocieno, $invocieno2, $idate, $total, $multi)
-    {
-        $this->load->library('parser');
-        $this->load->model('templates_model', 'templates');
-        $template = $this->templates->template_info(6);
-
-        $data = array(
-            'Company' => $this->config->item('ctitle'),
-            'BillNumber' => $invocieno2
-        );
-        $subject = $this->parser->parse_string($template['key1'], $data, TRUE);
-        $validtoken = hash_hmac('ripemd160', $invocieno, $this->config->item('encryption_key'));
-        $link = base_url('billing/view?id=' . $invocieno . '&token=' . $validtoken);
-
-
-        $data = array(
-            'Company' => $this->config->item('ctitle'),
-            'BillNumber' => $invocieno2,
-            'URL' => "<a href='$link'>$link</a>",
-            'CompanyDetails' => '<h6><strong>' . $this->config->item('ctitle') . ',</strong></h6>
-<address>' . $this->config->item('address') . '<br>' . $this->config->item('address2') . '</address>
-             ' . $this->lang->line('Phone') . ' : ' . $this->config->item('phone') . '<br>  ' . $this->lang->line('Email') . ' : ' . $this->config->item('email'),
-            'DueDate' => dateformat($idate),
-            'Amount' => amountExchange($total, $multi)
-        );
-        $message = $this->parser->parse_string($template['other'], $data, TRUE);
-
-
-        return array('subject' => $subject, 'message' => $message);
-    }
-
-    public function send_sms_auto($invocieno, $invocieno2, $idate, $total, $multi)
-    {
-        $this->load->library('parser');
-        $this->load->model('templates_model', 'templates');
-        $template = $this->templates->template_info(30);
-        $validtoken = hash_hmac('ripemd160', $invocieno, $this->config->item('encryption_key'));
-        $link = base_url('billing/view?id=' . $invocieno . '&token=' . $validtoken);
-        $this->load->model('plugins_model', 'plugins');
-        $sms_service = $this->plugins->universal_api(1);
-        if ($sms_service['active']) {
-            $this->load->library("Shortenurl");
-            $this->shortenurl->setkey($sms_service['key1']);
-            $link = $this->shortenurl->shorten($link);
-        }
-        $data = array(
-            'BillNumber' => $invocieno2,
-            'URL' => $link,
-            'DueDate' => dateformat($idate),
-            'Amount' => amountExchange($total, $multi)
-        );
-        $message = $this->parser->parse_string($template['other'], $data, TRUE);
-        return array('message' => $message);
     }
 
 
@@ -1821,7 +1971,7 @@ echo 6;
         // Usually a model is to be used for this.
 
         $tid = $id;
-        $data['qrc'] = 'pos_' . date('Y_m_d_H_i_s') . '_.png';
+        $data['qrc'] = $file_name. '.png';
         $data['id'] = $tid;
         $data['title'] = "Invoice $tid";
         $data['invoice'] = $this->invocies->invoice_details($tid);
@@ -1833,7 +1983,7 @@ echo 6;
         $online_pay = $this->billing->online_pay_settings();
         if ($online_pay['enable'] == 1) {
             $token = hash_hmac('ripemd160', $tid, $this->config->item('encryption_key'));
-            $data['qrc'] = 'pos_' . date('Y_m_d_H_i_s') . '_.png';
+            $data['qrc'] = $file_name. '.png';
 
             $qrCode = new QrCode(base_url('billing/card?id=' . $tid . '&itype=inv&token=' . $token));
 
@@ -1989,6 +2139,97 @@ echo 6;
         unlink(FCPATH . 'userfiles' . DIRECTORY_SEPARATOR . 'pos_temp' . DIRECTORY_SEPARATOR . $file_id . '.png');
         unlink(FCPATH . 'userfiles' . DIRECTORY_SEPARATOR . 'pos_temp' . DIRECTORY_SEPARATOR . $file_id . '.pdf');
 
+    }
+
+    public function set_coupon()
+    {
+        $coupon = $this->input->post('coupon');
+        if ($coupon) {
+            $this->db->select('*');
+            $this->db->from('pos_promo');
+            $this->db->where('code', $coupon);
+            $query = $this->db->get();
+            $result_c = $query->row_array();
+            if ($result_c && $result_c['active'] == 0 && $result_c['available'] > 0) {
+                $amount = $result_c['amount'];
+                echo json_encode(array('status' => 'Success', 'message' => $this->lang->line('Coupon Applied'), 'amount' => $amount));
+            } else {
+                echo json_encode(array('status' => 'Error', 'message' => $this->lang->line('Invalid Coupon')));
+            }
+        } else {
+            echo json_encode(array('status' => 'Error', 'message' => $this->lang->line('Please enter a coupon code')));
+        }
+    }
+
+    public function day_end_report()
+    {
+        // Get filter parameters
+        $payment_method = $this->input->get('payment_method');
+        $start_date = $this->input->get('start_date');
+        $end_date = $this->input->get('end_date');
+        $warehouse = $this->input->get('warehouse_id');
+
+        // Set default dates if not provided
+        if (!$start_date) {
+            $start_date = date('Y-m-d');
+        }
+        if (!$end_date) {
+            $end_date = date('Y-m-d');
+        }
+
+        // Pagination setup
+        $limit = $this->input->get('limit') ? $this->input->get('limit') : 10;
+        $page = $this->input->get('page') ? $this->input->get('page') : 1;
+        $offset = ($page - 1) * $limit;
+
+        // Get total count for pagination
+        $total_records = $this->invocies->count_day_end_report($payment_method, $start_date, $end_date, $warehouse);
+
+        // Get paginated data
+        $data['report_data'] = $this->invocies->get_day_end_report($payment_method, $start_date, $end_date, $warehouse, $limit, $offset);
+        
+        // Load payment methods dynamically from database
+        $this->load->model('Paymentmethods_model', 'paymentmethods');
+        $payment_methods_data = $this->paymentmethods->get_with_balance();
+        $data['payment_methods'] = array_column($payment_methods_data, 'name');
+        
+        $data['selected_payment_method'] = $payment_method;
+        $data['start_date'] = $start_date;
+        $data['end_date'] = $end_date;
+        $data['warehouses'] = $this->invocies->warehouses(true);
+        $data['selected_warehouse'] = $warehouse;
+
+        // Pagination data
+        $data['total_records'] = $total_records;
+        $data['limit'] = $limit;
+        $data['current_page'] = $page;
+        $data['total_pages'] = ceil($total_records / $limit);
+
+        // Calculate totals dynamically based on payment methods
+        $data['totals'] = array('grand_total' => 0);
+        
+        // Initialize totals for each payment method
+        foreach ($payment_methods_data as $pm) {
+            $key = strtolower($pm['name']);
+            $data['totals'][$key] = 0;
+        }
+
+        // Get all data for totals calculation (without pagination)
+        $all_data = $this->invocies->get_day_end_report($payment_method, $start_date, $end_date, $warehouse);
+
+        foreach ($all_data as $row) {
+            $pmethod = strtolower($row['pmethod']);
+            if (isset($data['totals'][$pmethod])) {
+                $data['totals'][$pmethod] += $row['total'];
+            }
+            $data['totals']['grand_total'] += $row['total'];
+        }
+
+        $head['title'] = "Day End Report";
+        $head['usernm'] = $this->aauth->get_user()->username;
+        $this->load->view('fixed/header', $head);
+        $this->load->view('pos/day_end_report', $data);
+        $this->load->view('fixed/footer');
     }
 
 }

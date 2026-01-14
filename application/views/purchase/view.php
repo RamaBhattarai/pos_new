@@ -101,7 +101,7 @@
                         <p class="ml-2"><?= $loc['cname'] ?></p>
                     </div>
                     <div class="col-md-6 col-sm-12 text-xs-center text-md-right">
-                        <h2><?php echo $this->lang->line('Purchase Order') ?></h2>
+                        <h2><?php echo $this->lang->line('Purchase Order') ?></h2>  
                         <p class="pb-1"> <?php echo prefix(2) . $invoice['tid'] . '</p>
                             <p class="pb-1">' . $this->lang->line('Reference') . ':' . $invoice['refer'] . '</p>'; ?>
                         <ul class="px-0 list-unstyled">
@@ -111,9 +111,9 @@
                     </div>
                 </div>
                 <!--/ Invoice Company Details -->
-                <p><strong>VAT Registration No:101010</strong></p>
+                <!-- <p><strong>VAT Registration No:101010</strong></p>
         <p><strong>Seller’s PAN
-        : 1010101</strong></p>  
+        : 1010101</strong></p>   -->
                 <!-- Invoice Customer Details -->
                 <div id="invoice-customer-details" class="row pt-2">
                     <div class="col-sm-12 text-xs-center text-md-left">
@@ -131,9 +131,28 @@
 
                     </div>
                     <div class="offset-md-3 col-md-3 col-sm-12 text-xs-center text-md-left">
-                        <?php echo '<p><span class="text-muted">' . $this->lang->line('Order Date') . ' :</span> ' . dateformat($invoice['invoicedate']) . '</p> <p><span class="text-muted">' . $this->lang->line('Due Date') . ' :</span> ' . dateformat($invoice['invoiceduedate']) . '</p>  <p><span class="text-muted">' . $this->lang->line('Terms') . ' :</span> ' . $invoice['termtit'] . '</p>';
-                        ?>
-                    </div>
+    <p>
+        <span class="text-muted"><?php echo $this->lang->line('Order Date'); ?> :</span> 
+        <span class="nepali-date" data-raw="<?php echo $invoice['invoicedate']; ?>">
+            <?php echo dateformat($invoice['invoicedate']); ?>
+        </span> 
+        (<span class="english-date" style="display:none;"></span>)
+    </p>
+
+    <p>
+        <span class="text-muted"><?php echo $this->lang->line('Due Date'); ?> :</span> 
+        <span class="nepali-date" data-raw="<?php echo $invoice['invoiceduedate']; ?>">
+            <?php echo dateformat($invoice['invoiceduedate']); ?>
+        </span> 
+        (<span class="english-date" style="display:none;"></span>)
+    </p>
+
+    <p>
+        <span class="text-muted"><?php echo $this->lang->line('Terms'); ?> :</span> 
+        <?php echo $invoice['termtit']; ?>
+    </p>
+</div>  
+
                 </div>
                 <!--/ Invoice Customer Details -->
 
@@ -151,6 +170,11 @@
                                     <th class="text-xs-left"><?php echo $this->lang->line('HSN') ?></th>
                                     <th class="text-xs-left"><?php echo $this->lang->line('Rate') ?></th>
                                     <th class="text-xs-left"><?php echo $this->lang->line('Qty') ?></th>
+                                    <th class="text-xs-left">Batch No</th>
+                                    <th class="text-xs-left">Expiry Date</th>
+                                    <th class="text-xs-left">Purchase Price</th>
+                                    <th class="text-xs-left">Selling Price</th>
+                                    <th class="text-xs-left">Profit Margin %</th>
                                     <th class="text-xs-left"><?php echo $this->lang->line('Discount') ?></th>
                                     <th class="text-xs-left"><?php echo $this->lang->line('CGST') ?></th>
                                     <th class="text-xs-left"><?php echo $this->lang->line('SGST') ?></th>
@@ -171,13 +195,18 @@
                             <td>' . $row['code'] . '</td>                          
                             <td>' . amountExchange($row['price'], 0, $this->aauth->get_user()->loc) . '</td>
                              <td>' . amountFormat_general($row['qty']) . $row['unit'] . '</td>
+                            <td>' . ($row['batch_no'] ?? 'N/A') . '</td>
+                            <td>' . ($row['expiry_date'] ? dateformat($row['expiry_date']) : 'N/A') . '</td>
+                            <td>' . amountExchange($row['price'], 0, $this->aauth->get_user()->loc) . '</td>
+                            <td>' . amountExchange(($row['selling_price'] ?? 0), 0, $this->aauth->get_user()->loc) . '</td>
+                            <td>' . number_format(($row['profit_margin'] ?? 0), 2) . '%</td>
                               <td>' . amountExchange($row['totaldiscount'], 0, $this->aauth->get_user()->loc) . ' (' . amountFormat_s($row['discount']) . $this->lang->line($invoice['format_discount']) . ')</td>
                             <td>' . amountExchange($gst, 0, $this->aauth->get_user()->loc) . ' (' . amountFormat_s($rate) . '%)</td>
                              <td>' . amountExchange($gst, 0, $this->aauth->get_user()->loc) . ' (' . amountFormat_s($rate) . '%)</td>                           
                             <td>' . amountExchange($row['subtotal'], 0, $this->aauth->get_user()->loc) . '</td>
                         </tr>';
 
-                                    echo '<tr><td colspan=5>' . $row['product_des'] . '</td></tr>';
+                                    echo '<tr><td colspan=14>' . $row['product_des'] . '</td></tr>';
                                     $c++;
                                 } ?>
 
@@ -192,9 +221,13 @@
                                         <th class="text-xs-left"><?php echo $this->lang->line('HSN') ?></th>
                                         <th class="text-xs-left"><?php echo $this->lang->line('Rate') ?></th>
                                         <th class="text-xs-left"><?php echo $this->lang->line('Qty') ?></th>
+                                        <th class="text-xs-left">Batch No</th>
+                                        <th class="text-xs-left">Expiry Date</th>
+                                        <th class="text-xs-left">Purchase Price</th>
+                                        <th class="text-xs-left">Selling Price</th>
+                                        <th class="text-xs-left">Profit Margin %</th>
                                         <th class="text-xs-left"><?php echo $this->lang->line('Discount') ?></th>
                                         <th class="text-xs-left"><?php echo $this->lang->line('IGST') ?></th>
-
                                         <th class="text-xs-left"><?php echo $this->lang->line('Amount') ?></th>
                                     </tr>
                                     </thead>
@@ -211,13 +244,18 @@
                             <td>' . $row['code'] . '</td>                          
                             <td>' . amountExchange($row['price'], 0, $this->aauth->get_user()->loc) . '</td>
                              <td>' . amountFormat_general($row['qty']) . $row['unit'] . '</td>
+                            <td>' . ($row['batch_no'] ?? 'N/A') . '</td>
+                            <td>' . ($row['expiry_date'] ? dateformat($row['expiry_date']) : 'N/A') . '</td>
+                            <td>' . amountExchange($row['price'], 0, $this->aauth->get_user()->loc) . '</td>
+                            <td>' . amountExchange(($row['selling_price'] ?? 0), 0, $this->aauth->get_user()->loc) . '</td>
+                            <td>' . number_format(($row['profit_margin'] ?? 0), 2) . '%</td>
                               <td>' . amountExchange($row['totaldiscount'], 0, $this->aauth->get_user()->loc) . ' (' . amountFormat_s($row['discount']) . $this->lang->line($invoice['format_discount']) . ')</td>
                             <td>' . amountExchange($row['totaltax'], 0, $this->aauth->get_user()->loc) . ' (' . amountFormat_s($row['tax']) . '%)</td>
                                             
                             <td>' . amountExchange($row['subtotal'], 0, $this->aauth->get_user()->loc) . '</td>
                         </tr>';
 
-                                        echo '<tr><td colspan=5>' . $row['product_des'] . '</td></tr>';
+                                        echo '<tr><td colspan=13>' . $row['product_des'] . '</td></tr>';
                                         $c++;
                                     } ?>
 
@@ -230,6 +268,11 @@
                                         <th><?php echo $this->lang->line('Description') ?></th>
                                         <th class="text-xs-left"><?php echo $this->lang->line('Rate') ?></th>
                                         <th class="text-xs-left"><?php echo $this->lang->line('Qty') ?></th>
+                                        <th class="text-xs-left">Batch No</th>
+                                        <th class="text-xs-left">Expiry Date</th>
+                                        <th class="text-xs-left">Purchase Price</th>
+                                        <th class="text-xs-left">Selling Price</th>
+                                        <th class="text-xs-left">Profit Margin %</th>
                                         <th class="text-xs-left"><?php echo $this->lang->line('Tax') ?></th>
                                         <th class="text-xs-left"><?php echo $this->lang->line('Discount') ?></th>
                                         <th class="text-xs-left"><?php echo $this->lang->line('Amount') ?></th>
@@ -246,12 +289,17 @@
                             <td>' . $row['product'] . '</td>                           
                             <td>' . amountExchange($row['price'], 0, $this->aauth->get_user()->loc) . '</td>
                              <td>' . amountFormat_general($row['qty']) . $row['unit'] . '</td>
+                            <td>' . ($row['batch_no'] ?? 'N/A') . '</td>
+                            <td>' . ($row['expiry_date'] ? dateformat($row['expiry_date']) : 'N/A') . '</td>
+                            <td>' . amountExchange($row['price'], 0, $this->aauth->get_user()->loc) . '</td>
+                            <td>' . amountExchange(($row['selling_price'] ?? 0), 0, $this->aauth->get_user()->loc) . '</td>
+                            <td>' . number_format(($row['profit_margin'] ?? 0), 2) . '%</td>
                             <td>' . amountExchange($row['totaltax'], 0, $this->aauth->get_user()->loc) . ' (' . amountFormat_s($row['tax']) . '%)</td>
                             <td>' . amountExchange($row['totaldiscount'], 0, $this->aauth->get_user()->loc) . ' (' . amountFormat_s($row['discount']) . $this->lang->line($invoice['format_discount']) . ')</td>
                             <td>' . amountExchange($row['subtotal'], 0, $this->aauth->get_user()->loc) . '</td>
                         </tr>';
 
-                                        echo '<tr><td colspan=5>' . $row['product_des'] . '</td></tr>';
+                                        echo '<tr><td colspan=12>' . $row['product_des'] . '</td></tr>';
                                         $c++;
                                     } ?>
 

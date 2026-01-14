@@ -40,7 +40,97 @@
     <link rel="stylesheet" type="text/css" href="<?= assets_url() ?>assets/css/style.css<?= APPVER ?>">
     <?php if (LTR == 'rtl') echo '<link rel="stylesheet" type="text/css" href="' . assets_url() . 'assets/css/style-rtl.css' . APPVER . '">'; ?>
     <link rel="stylesheet" href="<?php echo assets_url('assets/custom/datepicker.min.css') . APPVER ?>">
+
+    <!-- Nepali Datepicker CSS -->
+<!-- <link href="https://nepalidatepicker.sajanmaharjan.com.np/v5/nepali.datepicker/css/nepali.datepicker.v5.0.4.min.css" rel="stylesheet" type="text/css"/> -->
     <!-- END Custom CSS-->
+
+     <!-- Modern Date Toggle Styles -->
+    <style>
+        /* Essential layout for EN/NP date toggle */
+        /* Hide default calendar icon for date inputs with EN/NP toggle */
+        .date-toggle-input::-webkit-calendar-picker-indicator {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .date-toggle-input::-ms-input-placeholder {
+            color: transparent;
+        }
+        .date-toggle-input::-moz-placeholder {
+            color: transparent;
+        }
+        .date-toggle-input::-o-placeholder {
+            color: transparent;
+        }
+        .date-toggle-input::-webkit-input-placeholder {
+            color: transparent;
+        }
+        .date-toggle-input::-webkit-clear-button,
+        .date-toggle-input::-webkit-inner-spin-button,
+        .date-toggle-input::-webkit-outer-spin-button {
+            display: none;
+            -webkit-appearance: none;
+        }
+        .date-toggle-input[type="date"]::-ms-expand {
+            display: none;
+        }
+        .date-toggle-input[type="date"]::-webkit-calendar-picker-indicator {
+            display: none;
+        }
+        .date-toggle-input[type="date"]::-moz-calendar-picker-indicator {
+            display: none;
+        }
+        .date-toggle-container {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        .date-toggle-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: #f1f1f1;
+            color: #888;
+            font-size: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            z-index: 10;
+            min-width: 32px;
+            height: 24px;
+            padding: 0 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .date-toggle-input {
+            padding-right: 40px !important;
+        }
+        @media (max-width: 768px) {
+            .date-toggle-btn {
+                right: 5px;
+                min-width: 28px;
+                height: 22px;
+                font-size: 11px;
+                padding: 0 6px;
+            }
+            .date-toggle-input {
+                padding-right: 36px !important;
+            }
+        }
+        .form-control-sm + .date-toggle-btn {
+            height: 20px;
+            min-width: 24px;
+            font-size: 10px;
+            right: 6px;
+            padding: 0 5px;
+        }
+        .form-control-sm.date-toggle-input {
+            padding-right: 32px !important;
+        }
+    </style>
+    
     <script src="<?= assets_url() ?>app-assets/vendors/js/vendors.min.js"></script>
     <script type="text/javascript" src="<?= assets_url() ?>app-assets/vendors/js/ui/jquery.sticky.js"></script>
     <script type="text/javascript"
@@ -54,6 +144,14 @@
     </script>
     <script src="<?php echo assets_url('assets/myjs/mousetrap.min.js') . APPVER; ?>"></script>
     <script src="<?php echo assets_url('assets/myjs/datepicker.min.js') . APPVER; ?>"></script>
+    <!-- Nepali Datepicker JS -->
+<!-- <script src="https://nepalidatepicker.sajanmaharjan.com.np/v5/nepali.datepicker/js/nepali.datepicker.v5.0.4.min.js"></script> -->
+<script>
+$(document).ready(function () {
+    // Force date format to YYYY-MM-DD for Nepali Datepicker
+    $.fn.nepaliDatePicker.defaults.dateFormat = 'YYYY-MM-DD';
+});
+</script>
     <script src="<?php echo assets_url(); ?>assets/portjs/accounting.min.js" type="text/javascript"></script>
       <script src="<?php echo assets_url(); ?>assets/portjs/printThis.js" type="text/javascript"></script>
     <?php accounting() ?>
@@ -105,6 +203,17 @@
                                                                         title="Close Register"> <i
                                     class="icon-close"></i></a>
                     </li>
+                    <li class="nav-item d-none d-md-block nav-link "><a href="<?= base_url() ?>pos_invoices/create"
+                                                                        class="btn btn-success btn-md t_tooltip"
+                                                                        title="New POS Sale"><i
+                                    class="icon-basket-loaded"></i> POS</a>
+                    </li>
+<li class="nav-item d-none d-md-block nav-link">
+    <a href="<?= base_url('fiscalyear') ?>" class="btn btn-purple btn-md t_tooltip" title="Fiscal Years">
+        <i class="icon-calendar"></i> Fiscal Years
+    </a>
+</li>
+
 
                 </ul>
 

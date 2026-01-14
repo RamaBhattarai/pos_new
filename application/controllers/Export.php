@@ -789,5 +789,174 @@ xml_print($dom);
 
     }
 
+    function day_end_report_excel()
+    {
+        $this->load->model('pos_invoices_model', 'invocies');
+        $this->load->model('Paymentmethods_model', 'paymentmethods');
+
+        // Get filter parameters
+        $payment_method = $this->input->get('payment_method');
+        $start_date = $this->input->get('start_date');
+        $end_date = $this->input->get('end_date');
+        $warehouse = $this->input->get('warehouse_id');
+
+        // Set default dates if not provided
+        if (!$start_date) {
+            $start_date = date('Y-m-d');
+        }
+        if (!$end_date) {
+            $end_date = date('Y-m-d');
+        }
+
+        // Get all data for export (without pagination)
+        $report_data = $this->invocies->get_day_end_report($payment_method, $start_date, $end_date, $warehouse);
+
+        // Load payment methods dynamically from database
+        $payment_methods_data = $this->paymentmethods->get_with_balance();
+
+        // Calculate totals dynamically based on payment methods
+        $totals = array('grand_total' => 0);
+
+        // Initialize totals for each payment method
+        foreach ($payment_methods_data as $pm) {
+            $key = strtolower($pm['name']);
+            $totals[$key] = 0;
+        }
+
+        foreach ($report_data as $row) {
+            $pmethod = strtolower($row['pmethod']);
+            if (isset($totals[$pmethod])) {
+                $totals[$pmethod] += $row['total'];
+            }
+            $totals['grand_total'] += $row['total'];
+        }
+
+        $this->load->dbutil();
+        $this->load->helper('file');
+        $this->load->helper('download');
+
+        // Prepare CSV data
+        $csv_data = array();
+        $csv_data[] = array('Day End Report - ' . date('M d, Y', strtotime($start_date)) . ' to ' . date('M d, Y', strtotime($end_date)));
+        $csv_data[] = array('');
+        $csv_data[] = array('Summary:');
+
+        // Add dynamic payment method totals
+        foreach ($payment_methods_data as $pm) {
+            $key = strtolower($pm['name']);
+            $csv_data[] = array($pm['name'] . ':', amountFormat($totals[$key]));
+        }
+
+        $csv_data[] = array('Grand Total:', amountFormat($totals['grand_total']));
+        $csv_data[] = array('');
+        $csv_data[] = array('Transaction Details:');
+        $csv_data[] = array('#', 'Invoice', 'Customer', 'Date', 'Payment Method', 'Amount');
+
+        $counter = 1;
+        foreach ($report_data as $row) {
+            $csv_data[] = array(
+                $counter++,
+                $row['tid'],
+                $row['customer_name'] ?: 'Walk-in Customer',
+                date('M d, Y', strtotime($row['invoicedate'])),
+                $row['pmethod'],
+                amountFormat($row['total'])
+            );
+        }
+
+        // Convert to CSV
+        $csv_string = '';
+        foreach ($csv_data as $row) {
+            $csv_string .= implode(',', array_map(function($field) {
+                return '"' . str_replace('"', '""', $field) . '"';
+            }, $row)) . "\n";
+        }
+
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename=day_end_report_' . date('Y-m-d') . '.csv');
+        header('Content-Transfer-Encoding: binary');
+
+        echo "\xEF\xBB\xBF"; // Byte Order Mark for UTF-8
+        echo $csv_string;
+    }
+    
+    function day_end_report_pdf()
+    {
+        $this->load->model('pos_invoices_model', 'invocies');
+        $this->load->model('Paymentmethods_model', 'paymentmethods');
+
+        // Get filter parameters
+        $payment_method = $this->input->get('payment_method');
+        $start_date = $this->input->get('start_date');
+        $end_date = $this->input->get('end_date');
+        $warehouse = $this->input->get('warehouse_id');
+
+        // Set default dates if not provided
+        if (!$start_date) {
+            $start_date = date('Y-m-d');
+        }
+        if (!$end_date) {
+            $end_date = date('Y-m-d');
+        }
+
+        // Get all data for export (without pagination)
+        $report_data = $this->invocies->get_day_end_report($payment_method, $start_date, $end_date, $warehouse);
+
+        // Load payment methods dynamically from database
+        $payment_methods_data = $this->paymentmethods->get_with_balance();
+
+        // Calculate totals dynamically based on payment methods
+        $totals = array('grand_total' => 0);
+
+        // Initialize totals for each payment method
+        foreach ($payment_methods_data as $pm) {
+            $key = strtolower($pm['name']);
+            $totals[$key] = 0;
+        }
+
+        foreach ($report_data as $row) {
+            $pmethod = strtolower($row['pmethod']);
+            if (isset($totals[$pmethod])) {
+                $totals[$pmethod] += $row['total'];
+            }
+            $totals['grand_total'] += $row['total'];
+        }
+
+        // Get warehouse name if warehouse is selected
+        $warehouse_name = '';
+        if ($warehouse) {
+            $warehouses = $this->invocies->warehouses(true);
+            foreach ($warehouses as $wh) {
+                if ($wh['id'] == $warehouse) {
+                    $warehouse_name = $wh['title'];
+                    break;
+                }
+            }
+        }
+
+        // Prepare data for PDF view
+        $data['report_data'] = $report_data;
+        $data['payment_methods_data'] = $payment_methods_data;
+        $data['totals'] = $totals;
+        $data['start_date'] = $start_date;
+        $data['end_date'] = $end_date;
+        $data['selected_payment_method'] = $payment_method;
+        $data['selected_warehouse'] = $warehouse;
+        $data['warehouse_name'] = $warehouse_name;
+
+        // Load PDF view
+        $html = $this->load->view('pos/day_end_report_pdf', $data, true);
+
+        ini_set('memory_limit', '64M');
+
+        // PDF Rendering
+        $this->load->library('pdf');
+        $pdf = $this->pdf->load();
+        $pdf->WriteHTML($html);
+        $pdf->Output('day_end_report_' . date('Y-m-d') . '.pdf', 'D');
+    }
+
 
 }
+

@@ -329,6 +329,7 @@
                     <input type="hidden" value="stockreturn/action" id="action-url">
                     <input type="hidden" value="2" name="person_type">
                     <input type="hidden" value="puchase_search" id="billtype">
+                    <input type="hidden" value="stock_return" id="page-type">
                     <input type="hidden" value="0" name="counter" id="ganak">
                     <input type="hidden" value="<?php echo $this->config->item('currency'); ?>" name="currency">
                     <input type="hidden" value="<?= $taxdetails['handle']; ?>" name="taxformat" id="tax_format">

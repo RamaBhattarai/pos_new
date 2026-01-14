@@ -27,7 +27,8 @@ class Settings_model extends CI_Model
             'country' => $country,
             'postbox' => $postbox,
             'taxid' => $taxid,
-              'foundation' => $foundation
+            'foundation' => $foundation,
+           
         );
         $this->db->set($data);
         $this->db->where('id', $id);
